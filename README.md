@@ -15,6 +15,12 @@ cd my-project-name-backend
 npm install
 ```
 
+You also need to install a local dynamodb:
+
+```
+npx sls dynamodb install
+```
+
 Then, you can run locally in development mode with live reload:
 
 ```
@@ -79,6 +85,22 @@ npm run deploy-prod
 ### DynamoDB seed
 
 By default, your backend application starts with empty data in DynamoDB. You can change this behavior by modifying the JSON file located at `db/seed.json`. Each time you run your backend application, your Dynamodb will be initialized by the seed data you have provided.
+
+## Install dynamodb-admin (optional)
+
+For better developer experience, you can install `dynamodb-admin`:
+
+```
+npm install -g dynamodb-admin
+```
+
+Then, you can run:
+
+```
+dynamodb-admin
+```
+
+Open http://localhost:8001 with your favorite browser and you can visually browse your data stored in your local DynamoDB.
 
 ### Things to know
 
