@@ -1,0 +1,82 @@
+### Create get or create profile
+GET http://localhost:4000/user/profile HTTP/1.1
+content-type: application/json
+
+### Not found page
+GET http://localhost:4000/not-found HTTP/1.1
+content-type: application/json
+
+### Get settings
+GET http://localhost:4000/user/settings HTTP/1.1
+content-type: application/json
+
+### Create Todo
+# @name todoCreation
+POST http://localhost:4000/todo/create HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Hello world"
+}
+
+### Create Todo with error, `title` shouldn't be empty
+POST http://localhost:4000/todo/create HTTP/1.1
+content-type: application/json
+
+{
+  "title": ""
+}
+
+### Get domain with invalid ID
+GET http://localhost:4000/todo/123 HTTP/1.1
+
+### Get domain
+@id = {{todoCreation.response.body.$.id}}
+GET http://localhost:4000/todo/{{id}} HTTP/1.1
+
+### Update domain with invalid ID
+PUT http://localhost:4000/todo/123 HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Hello world 1000"
+}
+
+### Update domain
+@id = {{todoCreation.response.body.$.id}}
+PUT http://localhost:4000/todo/{{id}} HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Hello world 1000"
+}
+
+### Delete domain with invalid ID
+DELETE http://localhost:4000/todo/123 HTTP/1.1
+
+### Delete domain
+@id = {{todoCreation.response.body.$.id}}
+DELETE http://localhost:4000/todo/{{id}} HTTP/1.1
+
+### List domain
+GET http://localhost:4000/todo/list HTTP/1.1
+
+### Stripe create session
+POST http://localhost:4000/billing/create-checkout-session HTTP/1.1
+content-type: application/json
+
+{
+  "priceId": "price_1JSmUjGrcfaiexgslH41e88g"
+}
+
+### Stripe create session with invalid price
+POST http://localhost:4000/billing/create-checkout-session HTTP/1.1
+content-type: application/json
+
+{
+  "priceId": "price_1In575EK74ldPEzAusBLAt"
+}
+
+### Create Stripe customer portal link
+POST http://localhost:4000/billing/customer-portal HTTP/1.1
+content-type: application/json

@@ -1,0 +1,95 @@
+service: nextless # FIXME: Replace service name and use an alphanumeric name
+
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or falls back to what we have set in the provider section.
+  stage: ${opt:stage, 'offline'}
+  region: ${opt:region, 'us-east-1'}
+  # Name of the SST app that's deploying our infrastructure
+  sstApp: ${self:custom.stage}-${self:service}-infra
+  tableName:
+    offline: ${self:service}
+    staging: !ImportValue '${self:custom.sstApp}-TableName'
+    prod: !ImportValue '${self:custom.sstApp}-TableName'
+  nodeEnv:
+    offline: 'development'
+    staging: 'production'
+    prod: 'production'
+  noAuth:
+    offline: true
+    staging: false
+    prod: false
+
+  dynamodb:
+    stages:
+      - offline
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      domain:
+        sources:
+          - table: ${self:custom.tableName.offline}
+  bundle:
+    linting: false
+  serverless-offline:
+    httpPort: 4000
+    noPrependStageInUrl: true
+    noAuth: ${self:custom.noAuth.${self:custom.stage}}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 512
+  timeout: 10
+  logRetentionInDays: 90
+  lambdaHashingVersion: 20201221 # https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+  logs:
+    httpApi: true
+  httpApi:
+    # metrics: true # Enable if you need
+    cors: true
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - !ImportValue '${self:custom.sstApp}-TableArn'
+
+  environment:
+    TABLE_NAME: ${self:custom.tableName.${self:custom.stage}}
+    STAGE: ${self:custom.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_ENV: ${self:custom.nodeEnv.${self:custom.stage}}
+
+functions:
+  app:
+    handler: src/handler.handler
+    reservedConcurrency: 30
+    events:
+      - httpApi:
+          path: '/{proxy+}'
+          method: '*'
+          authorizer:
+            type: aws_iam
+
+resources:
+  - ${file(./aws-resources/dynamodb.${opt:stage, 'offline'}.yml), ''}
+
+package:
+  individually: true
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-bundle
+  - serverless-dynamodb-local
+  - serverless-offline
