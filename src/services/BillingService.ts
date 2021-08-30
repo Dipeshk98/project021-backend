@@ -62,7 +62,7 @@ export class BillingService {
         )}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${Env.getValue('WEB_DOMAIN')}/dashboard/upgrade`,
       });
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('Impossible to create Stripe checkout session', ex);
     }
   }

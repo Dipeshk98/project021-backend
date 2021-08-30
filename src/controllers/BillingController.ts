@@ -47,7 +47,7 @@ export class BillingController {
         sig,
         Env.getValue('STRIPE_WEBHOOK_SECRET', true)
       );
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('Incorrect Stripe webhook signature', ex);
     }
 

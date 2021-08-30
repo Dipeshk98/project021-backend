@@ -26,7 +26,7 @@ export class UserService {
             'attribute_not_exists(PK) AND attribute_not_exists(SK)',
         })
         .promise();
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('UserService: impossible to create', ex);
     }
 
@@ -49,7 +49,7 @@ export class UserService {
       }
 
       user.fromItem(DynamoDB.Converter.unmarshall(result.Item));
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('UserService: get operation impossible', ex);
     }
 
@@ -77,7 +77,7 @@ export class UserService {
         .promise();
 
       return true;
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'ConditionalCheckFailedException') {
         return false;
       }
@@ -104,7 +104,7 @@ export class UserService {
         .promise();
 
       return true;
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'ConditionalCheckFailedException') {
         return false;
       }

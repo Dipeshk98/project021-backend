@@ -24,7 +24,7 @@ export class TodoService {
             'attribute_not_exists(PK) AND attribute_not_exists(SK)',
         })
         .promise();
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('TodoService: impossible to create', ex);
     }
   }
@@ -45,7 +45,7 @@ export class TodoService {
       }
 
       todo.fromItem(DynamoDB.Converter.unmarshall(result.Item));
-    } catch (ex) {
+    } catch (ex: any) {
       throw new ApiError('TodoService: get operation impossible', ex);
     }
 
@@ -67,7 +67,7 @@ export class TodoService {
       return !!result.Attributes;
       // Return true when we successfully delete the item
       // Otherwise, it return false, it happens the item doesn't exists
-    } catch (e) {
+    } catch (e: any) {
       throw new ApiError('DBClient error: "delete" operation impossible', e);
     }
   }
@@ -83,7 +83,7 @@ export class TodoService {
         .promise();
 
       return true;
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'ConditionalCheckFailedException') {
         return false;
       }
@@ -115,7 +115,7 @@ export class TodoService {
         todo.fromItem(item);
         return todo;
       });
-    } catch (e) {
+    } catch (e: any) {
       throw new ApiError('DBClient error: "list" operation impossible', e);
     }
   }
