@@ -82,6 +82,8 @@ You can deploy to production with the following command:
 npm run deploy-prod
 ```
 
+(optional) You can try Seed.run for an automatic backend deployment integrated to your GitHub workflow.
+
 ### DynamoDB seed
 
 By default, your backend application starts with empty data in DynamoDB. You can change this behavior by modifying the JSON file located at `db/seed.json`. Each time you run your backend application, your Dynamodb will be initialized by the seed data you have provided.
@@ -117,6 +119,12 @@ The debug configuration is also provided for VSCode. 1 debug configurations is p
 | Name | Description |
 | --- | ----------- |
 | `Severless debug` | Launch Serverless in debug mode |
+
+### Going further with third party tool (optional)
+
+- Add Seed.run for automatic deployment integrated to your GitHub workflow.
+- Add a better serverless monitoring and debugging tool with Lumigo. Or, any equivalent Dashbird, Epsagon, Tundra.
+- Using Sentry isn't recommended for backend, there are a lot of overhead (written on Tuesday 31th August 2021).
 
 ### Contributions
 
