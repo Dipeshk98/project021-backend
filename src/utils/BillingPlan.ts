@@ -19,7 +19,7 @@ export const BillingPlan: IBillingPlanEnv = {
       id: 'FREE',
       name: 'Free',
     },
-    // FIXME: Add your pricing id for dev environment
+    // FIXME: Add your product id for dev environment
     prod_K70Vg9JW6WW97Q: {
       id: 'PRO',
       name: 'Pro',
@@ -30,6 +30,6 @@ export const BillingPlan: IBillingPlanEnv = {
       id: 'FREE',
       name: 'Free',
     },
-    // FIXME: Add your pricing id for prod environment
+    // FIXME: Add your product id for prod environment
   },
 };
