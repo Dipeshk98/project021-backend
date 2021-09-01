@@ -27,7 +27,7 @@ Then, you can run locally in development mode with live reload:
 npm run dev
 ```
 
-Open http://localhost:4000 with your favorite browser to see your project. You should get a `{"errors":"not_found"}`.
+Open http://localhost:4000 with your favorite browser to see your project. You should get a `{"errors":"not_found"}`. It's genius error because the `index` isn't defined and it's normal.
 
 If you want to test the backend without the front, you can use `Postman` but what I suggest instead is to use `humao.rest-client` VSCode extension. It helps to run HTTP request in your VSCode.
 
