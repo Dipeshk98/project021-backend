@@ -123,7 +123,7 @@ The debug configuration is also provided for VSCode. 1 debug configurations is p
 ### Going further with third party tool (optional)
 
 - Add Seed.run for automatic deployment integrated to your GitHub workflow.
-- Add a better serverless monitoring and debugging tool with Lumigo. Or, any equivalent Dashbird, Epsagon, Tundra.
+- Add a better serverless monitoring and debugging tool like Lumigo. Or, any equivalent Dashbird, Epsagon, Tundra.
 - Using Sentry isn't recommended for backend, there are a lot of overhead (written on Tuesday 31th August 2021).
 
 ### Contributions
