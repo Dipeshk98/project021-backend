@@ -72,9 +72,28 @@ You have access to the whole code source if you need further customization. The 
 
 ### Deploy to production
 
-Before deploying to production, you need to generate `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from your AWS account by following this tutorial: https://www.serverless.com/framework/docs/providers/aws/guide/credentials/#creating-aws-access-keys.
+Before deploying to production, you need to generate `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from your AWS account by following this step:
 
-After generating your **API key** and **Secret**, you need to set up in your local machine with aws-cli: https://www.serverless.com/framework/docs/providers/aws/guide/credentials/#setup-with-the-aws-cli. You don't need to set up a `profile` if you have only one account or one AWS IAM user.
+- Login to your AWS account and go to the Identity & Access Management (IAM) page.
+- Click on Users and then Add user. Enter a name in the first field to remind you this User is related to the Serverless Framework, like serverless-admin (you can customize the name). Enable Programmatic access by clicking the checkbox. Click Next to go through to the Permissions page. Click on Attach existing policies directly. Search for and select AdministratorAccess then click Next: Review. Check to make sure everything looks good and click Create user.
+- View and copy the API Key & Secret to a temporary place. You'll need it in the next step.
+
+(quote from https://www.serverless.com/framework/docs/providers/aws/guide/credentials/#creating-aws-access-keys)
+
+After generating your **API key** and **Secret**, you need to set up in your local machine with aws-cli:
+
+- Install `aws-cli` command line by following this article https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html
+- Then, run the following command:
+
+```
+$ aws configure
+AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+Default region name [None]: us-west-2
+Default output format [None]: ENTER
+```
+
+(quote from https://www.serverless.com/framework/docs/providers/aws/guide/credentials/#setup-with-the-aws-cli). You don't need to set up a `profile` if you have only one account or one AWS IAM user.
 
 You can deploy to production with the following command:
 
