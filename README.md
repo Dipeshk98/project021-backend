@@ -87,9 +87,9 @@ After generating your **API key** and **Secret**, you need to set up in your loc
 
 ```
 $ aws configure
-AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-Default region name [None]: us-west-2
+AWS Access Key ID [None]: AKIAIOSXXXXXXXEXAMPLE
+AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYXXXXXXXXXEXAMPLEKEY
+Default region name [None]: us-east-1
 Default output format [None]: ENTER
 ```
 
