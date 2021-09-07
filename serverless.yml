@@ -12,10 +12,6 @@ custom:
     offline: ${self:service}
     staging: !ImportValue '${self:custom.sstApp}-TableName'
     prod: !ImportValue '${self:custom.sstApp}-TableName'
-  corsAllowedOrigins:
-    offline: 'http://localhost:3000'
-    staging: 'https://example.com' # FIXME: Replace by your frontend domain, used by cors
-    prod: 'https://example.com' # FIXME: Replace by your frontend domain, used by cors
   nodeEnv:
     offline: 'development'
     staging: 'production'
@@ -57,7 +53,7 @@ provider:
     # metrics: true # Enable if you need
     cors:
       allowedOrigins:
-        - ${self:custom.corsAllowedOrigins.${self:custom.stage}}
+        - ${env:CORS_ORIGINS}
 
   iamRoleStatements:
     - Effect: Allow
@@ -77,7 +73,6 @@ provider:
     STAGE: ${self:custom.stage}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     NODE_ENV: ${self:custom.nodeEnv.${self:custom.stage}}
-    CORS_ORIGINS: ${self:custom.corsAllowedOrigins.${self:custom.stage}}
 
 functions:
   app:
@@ -119,6 +114,10 @@ resources:
 
 package:
   individually: true
+
+# Needed by dotenv to work correctly
+disabledDeprecations:
+  - NEW_VARIABLES_RESOLVER
 
 plugins:
   - serverless-dotenv-plugin
