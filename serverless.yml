@@ -53,7 +53,7 @@ provider:
     # metrics: true # Enable if you need
     cors:
       allowedOrigins:
-        - ${env:CORS_ORIGINS}
+        - ${env:FRONTEND_DOMAIN_URL}
 
   iamRoleStatements:
     - Effect: Allow

@@ -84,7 +84,7 @@ export class BillingController {
 
     const portalSession = await getStripe().billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: `${Env.getValue('WEB_DOMAIN')}/dashboard/settings`,
+      return_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/settings`,
     });
 
     res.send({

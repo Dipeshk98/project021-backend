@@ -21,7 +21,7 @@ app.use(json());
 app.use(helmet());
 app.use(
   cors({
-    origin: Env.getValue('CORS_ORIGINS'),
+    origin: Env.getValue('FRONTEND_DOMAIN_URL'),
   })
 );
 

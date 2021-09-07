@@ -58,9 +58,9 @@ export class BillingService {
         // the actual Session ID is returned in the query parameter when your customer
         // is redirected to the success page.
         success_url: `${Env.getValue(
-          'WEB_DOMAIN'
+          'FRONTEND_DOMAIN_URL'
         )}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${Env.getValue('WEB_DOMAIN')}/dashboard/upgrade`,
+        cancel_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/upgrade`,
       });
     } catch (ex: any) {
       throw new ApiError('Impossible to create Stripe checkout session', ex);
