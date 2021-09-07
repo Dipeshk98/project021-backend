@@ -127,6 +127,8 @@ Open http://localhost:8001 with your favorite browser and you can visually brows
 
 `serverless-offline-plugin` display a red warning in the console `offline: [object Object]`. It's just a warning from [Serverless Offline Plugin](https://github.com/dherault/serverless-offline/blob/b39e8cf23592ad8bca568566e10c3db3469a951b/src/utils/getHttpApiCorsConfig.js). Hope it'll solve in the next release of `serverless-offline-plugin`.
 
+Don't update webpack to the latest version due to some error with serverless-webpack: https://github.com/serverless-heaven/serverless-webpack/issues/950 and https://github.com/AnomalyInnovations/serverless-bundle/issues/262
+
 ### VSCode information (optional)
 
 If you are VSCode users, you can have a better integration with VSCode by installing the suggested extension in `.vscode/extension.json`. The starter code comes up with Settings for a seamless integration with VSCode. The Debug configuration is also provided for frontend and backend debugging experience.

@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
+import cors from 'cors';
 import express, { json, Request } from 'express';
 import 'express-async-errors';
 import helmet from 'helmet';
@@ -18,6 +19,11 @@ app.use('/billing/webhook', express.raw({ type: 'application/json' }));
 // Load Express middlewares
 app.use(json());
 app.use(helmet());
+app.use(
+  cors({
+    origin: Env.getValue('CORS_ORIGINS'),
+  })
+);
 
 // Load Express routers
 app.use(userRouter);
@@ -35,7 +41,7 @@ export const handler = serverlessHttp(app, {
     let authProvider =
       context.requestContext.authorizer?.iam?.cognitoIdentity?.amr?.[2];
 
-    if (Env.getValue('IS_OFFLINE')) {
+    if (Env.getValue('IS_OFFLINE', false)) {
       // In local environment, we set manually an authProvider value
       authProvider = Env.getValue('COGNITO_USER_ID_LOCAL', true);
     }

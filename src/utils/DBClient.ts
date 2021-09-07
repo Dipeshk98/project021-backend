@@ -8,7 +8,7 @@ export const getDbClient = () => {
   if (!dbClient) {
     let offlineOptions = {};
 
-    if (Env.getValue('IS_OFFLINE')) {
+    if (Env.getValue('IS_OFFLINE', false)) {
       offlineOptions = {
         region: 'localhost',
         endpoint: 'http://localhost:8000',

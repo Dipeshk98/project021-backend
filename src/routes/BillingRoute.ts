@@ -14,6 +14,7 @@ billingRouter.post(
 // If you changes the route, please don't forget to update the route in the head of the `handler.ts` file.
 // It keep the raw body for stripe signature
 // reference to `app.use('....', express.raw({ type: '*/*' }));`
+// You also need to update the path in `serverless.yml`
 billingRouter.post('/billing/webhook', billingController.webhook);
 
 billingRouter.post(

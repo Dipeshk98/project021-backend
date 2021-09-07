@@ -12,6 +12,10 @@ custom:
     offline: ${self:service}
     staging: !ImportValue '${self:custom.sstApp}-TableName'
     prod: !ImportValue '${self:custom.sstApp}-TableName'
+  corsAllowedOrigins:
+    offline: 'http://localhost:3000'
+    staging: 'https://example.com' # FIXME: Replace by your frontend domain, used by cors
+    prod: 'https://example.com' # FIXME: Replace by your frontend domain, used by cors
   nodeEnv:
     offline: 'development'
     staging: 'production'
@@ -51,7 +55,9 @@ provider:
     httpApi: true
   httpApi:
     # metrics: true # Enable if you need
-    cors: true
+    cors:
+      allowedOrigins:
+        - ${self:custom.corsAllowedOrigins.${self:custom.stage}}
 
   iamRoleStatements:
     - Effect: Allow
@@ -71,6 +77,7 @@ provider:
     STAGE: ${self:custom.stage}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     NODE_ENV: ${self:custom.nodeEnv.${self:custom.stage}}
+    CORS_ORIGINS: ${self:custom.corsAllowedOrigins.${self:custom.stage}}
 
 functions:
   app:
@@ -78,12 +85,36 @@ functions:
     reservedConcurrency: 30
     events:
       - httpApi:
+          path: '/billing/webhook'
+          method: 'POST'
+
+      - httpApi:
           path: '/{proxy+}'
-          method: '*'
+          method: 'GET'
+          authorizer:
+            type: aws_iam
+
+      - httpApi:
+          path: '/{proxy+}'
+          method: 'POST'
+          authorizer:
+            type: aws_iam
+
+      - httpApi:
+          path: '/{proxy+}'
+          method: 'PUT'
+          authorizer:
+            type: aws_iam
+
+      - httpApi:
+          path: '/{proxy+}'
+          method: 'DELETE'
           authorizer:
             type: aws_iam
 
 resources:
+  # Cognito Identity Pool Policy
+  - ${file(./aws-resources/cognito-policy.yml)}
   - ${file(./aws-resources/dynamodb.${opt:stage, 'offline'}.yml), ''}
 
 package:
