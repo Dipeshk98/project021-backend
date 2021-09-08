@@ -54,6 +54,13 @@ provider:
     cors:
       allowedOrigins:
         - ${env:FRONTEND_DOMAIN_URL}
+      allowedHeaders: # Set the default value from Serverless framework, this workaround is needed by serverless-offline
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+        - X-Amz-User-Agent
 
   iamRoleStatements:
     - Effect: Allow
@@ -115,7 +122,7 @@ resources:
 package:
   individually: true
 
-# Needed by dotenv to work correctly
+# Needed by `serverless-dotenv-plugin` to work correctly
 disabledDeprecations:
   - NEW_VARIABLES_RESOLVER
 
