@@ -15,6 +15,12 @@ cd my-project-name-backend
 npm install
 ```
 
+Before installing local dynamoDB, make sure you have Java Runtime Engine (JRE) version 6.x or newer:
+
+```
+brew cask install java # Or, you can install it manually on the official website
+```
+
 You also need to install a local dynamodb:
 
 ```

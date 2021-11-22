@@ -1,4 +1,4 @@
-import { RequestHandler, Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Todo } from 'src/models/Todo';
@@ -16,7 +16,7 @@ export class TodoController {
     this.todoService = todoService;
   }
 
-  public list: RequestHandler = async (req: Request, res: Response) => {
+  public list: RequestHandler = async (req, res) => {
     const list = await this.todoService.findAllByUserId(req.currentUserId);
 
     res.json({
