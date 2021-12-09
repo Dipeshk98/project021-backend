@@ -20,7 +20,7 @@ Before installing local dynamoDB, make sure you have Java Runtime Engine (JRE) v
 ```
 brew install java # Brew is only valid on Mac. Or, you can install it manually on the official Java website.
 
-# brew indicates some instruction to install Java, please follow them
+# At the end of installation, Brew indicates some instruction to install Java correctly, please follow them
 ```
 
 You also need to install a local dynamodb:
