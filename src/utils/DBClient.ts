@@ -12,6 +12,8 @@ export const getDbClient = () => {
       offlineOptions = {
         region: 'localhost',
         endpoint: 'http://localhost:8000',
+        accessKeyId: 'RANDOM_LOCAL_VALUE', // Needed for local environment in case AWS credentials isn't defined
+        secretAccessKey: 'RANDOM_LOCAL_VALUE',
       };
     }
 
