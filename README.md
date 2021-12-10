@@ -15,7 +15,9 @@ cd my-project-name-backend
 npm install
 ```
 
-Before installing local dynamoDB, make sure you have Java Runtime Engine (JRE) version 6.x or newer:
+Before installing local dynamoDB, make sure you have openjdk 17.x.x or newer:
+
+> :warning: Even if you have already Java installed on your computer, please make sure your Java isn't too old. Java is only used by the local and offline AWS dynamoDB. So, if your old Java version isn't compatible with the local DynamoDB, your all backend won't start correctly and you don't get any warning 😥
 
 ```
 brew install java # Brew is only valid on Mac. Or, you can install it manually on the official Java website.
