@@ -1,8 +1,8 @@
-# You don't need to change the following value for one project.
+# You don't need to change the following `service` value for one project.
 # But, when you have multiple projects, it'll have name collision.
 # So, you can replace service name and use an alphanumeric name
 # Please also update the name in https://github.com/Nextlessjs/nextless-infra/blob/main/sst.json
-# Don't forget to append the '-infra' in the name
+# Don't forget to append the '-infra' in the name in Nextless Infra
 service: nextless
 
 custom:

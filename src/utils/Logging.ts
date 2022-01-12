@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
-
 import { ApiError } from 'src/error/ApiError';
 
-// Tried several node logging system. None are work very well with Serverless.
-// Either create a lot of overhead on Lambda or either doesn't integrate well in Cloudwatch.
+// Tried several node logging system, none of them are working very well with Serverless.
+// Either create a lot of overhead on Lambda or either doesn't integrate well with Cloudwatch.
 // The best one for logging is still the default `console`.
 
 export const log = (message: string) => {

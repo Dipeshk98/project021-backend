@@ -27,14 +27,14 @@ content-type: application/json
   "title": ""
 }
 
-### Get domain with invalid ID
+### Get Todo with invalid ID
 GET http://localhost:4000/todo/123 HTTP/1.1
 
-### Get domain
+### Get Todo
 @id = {{todoCreation.response.body.$.id}}
 GET http://localhost:4000/todo/{{id}} HTTP/1.1
 
-### Update domain with invalid ID
+### Update Todo with invalid ID
 PUT http://localhost:4000/todo/123 HTTP/1.1
 content-type: application/json
 
@@ -42,7 +42,7 @@ content-type: application/json
   "title": "Hello world 1000"
 }
 
-### Update domain
+### Update Todo
 @id = {{todoCreation.response.body.$.id}}
 PUT http://localhost:4000/todo/{{id}} HTTP/1.1
 content-type: application/json
@@ -51,14 +51,14 @@ content-type: application/json
   "title": "Hello world 1000"
 }
 
-### Delete domain with invalid ID
+### Delete Todo with invalid ID
 DELETE http://localhost:4000/todo/123 HTTP/1.1
 
-### Delete domain
+### Delete Todo
 @id = {{todoCreation.response.body.$.id}}
 DELETE http://localhost:4000/todo/{{id}} HTTP/1.1
 
-### List domain
+### List Todo
 GET http://localhost:4000/todo/list HTTP/1.1
 
 ### Stripe create session

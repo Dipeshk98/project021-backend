@@ -68,7 +68,7 @@ export class BillingService {
   }
 
   async processSubscriptionEvent(event: Stripe.Event) {
-    // customer.subscription.updated can be called before customer.subscription.created
+    // `customer.subscription.updated` can be called `before customer.subscription.created`
     // what is why we need to retrieve subscription to get the latest version
     let subscription = StripeSubscriptionEvent.parse(event.data.object);
     const subscriptionRetrieved = await getStripe().subscriptions.retrieve(
