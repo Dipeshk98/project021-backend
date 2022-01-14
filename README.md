@@ -133,6 +133,9 @@ The debug configuration is also provided for VSCode. 1 debug configurations is p
 ### Going further with third party tool (optional)
 
 - Add Seed.run for automatic deployment integrated to your GitHub workflow.
+
+For you information, Seed.run doesn't load `.env` files. You need to indicate the environment variable manually in Seed.run user interface, here how to do it: https://seed.run/docs/storing-secrets.html
+
 - Add a better serverless monitoring and debugging tool like Lumigo. Or, any equivalent Dashbird, Epsagon, Tundra.
 - Using Sentry isn't recommended for backend, there are a lot of overhead (written on Tuesday 31th August 2021).
 
