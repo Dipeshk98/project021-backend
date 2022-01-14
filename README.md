@@ -80,6 +80,8 @@ You can easily configure Nextless by making a search in the whole project with `
 
 You have access to the whole code source if you need further customization. The provided code is only example for you to start your SaaS products. The sky is the limit 🚀.
 
+For your information, you don't need to customize the service name in `serverless.yml` file for one project. But, when you have multiple projects, it'll have name collision. So, you need to update the service name in `serverless.yml` file by choosing a new name instead `nextless`. And, don't forget to update `sst.json` file in Nextless Infra repository.
+
 ### Deploy to production
 
 If you deploy for the first time, please checkout [this guide](https://github.com/Nextlessjs/Quick-Start/blob/main/PRODUCTION_DEPLOYMENT.md).
