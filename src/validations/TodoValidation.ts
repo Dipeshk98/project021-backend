@@ -10,6 +10,9 @@ export const paramsTodoValidate = validateRequest({
 export type ParamsTodoHandler = typeof paramsTodoValidate;
 
 export const bodyTodoValidate = validateRequest({
+  params: z.object({
+    teamId: z.string(),
+  }),
   body: z.object({
     title: z.string().nonempty(),
   }),

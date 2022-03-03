@@ -3,6 +3,7 @@ import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Todo } from 'src/models/Todo';
 import { TodoService } from 'src/services/TodoService';
+import { UserService } from 'src/services/UserService';
 import {
   ParamsTodoHandler,
   BodyTodoHandler,
@@ -12,8 +13,11 @@ import {
 export class TodoController {
   private todoService: TodoService;
 
-  constructor(todoService: TodoService) {
+  private userService: UserService;
+
+  constructor(todoService: TodoService, userService: UserService) {
     this.todoService = todoService;
+    this.userService = userService;
   }
 
   public list: RequestHandler = async (req, res) => {
@@ -28,7 +32,17 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    const todo = new Todo(req.currentUserId);
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist");
+    }
+
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError("User isn't a team member");
+    }
+
+    const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
     await this.todoService.save(todo);
 

@@ -10,7 +10,11 @@ const todoRouter = Router();
 
 todoRouter.get('/todo/list', todoController.list);
 
-todoRouter.post('/todo/create', bodyTodoValidate, todoController.create);
+todoRouter.post(
+  '/:teamId/todo/create',
+  bodyTodoValidate,
+  todoController.create
+);
 
 todoRouter.get('/todo/:id', paramsTodoValidate, todoController.read);
 

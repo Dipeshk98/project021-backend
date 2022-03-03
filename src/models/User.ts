@@ -13,10 +13,13 @@ export class User extends AbstractItem {
 
   private subscription?: ISubscription;
 
+  private teamList: string[];
+
   constructor(id: string) {
     super();
     this.id = id;
     this.firstSignIn = new Date();
+    this.teamList = [];
   }
 
   get pk() {
@@ -51,12 +54,25 @@ export class User extends AbstractItem {
     return this.subscription;
   }
 
+  getTeamList() {
+    return this.teamList;
+  }
+
+  isTeamMember(teamId: string) {
+    return this.teamList.includes(teamId);
+  }
+
+  addTeam(teamId: string) {
+    this.teamList.push(teamId);
+  }
+
   toItem() {
     return {
       ...this.keys(),
       firstSignIn: this.firstSignIn.toISOString(),
       stripeCustomerId: this.stripeCustomerId,
       subscription: this.subscription,
+      teamList: this.teamList,
     };
   }
 
@@ -64,5 +80,6 @@ export class User extends AbstractItem {
     this.firstSignIn = new Date(item.firstSignIn);
     this.stripeCustomerId = item.stripeCustomerId;
     this.subscription = item.subscription;
+    this.teamList = item.teamList;
   }
 }

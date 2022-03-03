@@ -43,8 +43,10 @@
     "serverless": "^2.72.2",
     "serverless-bundle": "^5.2.0",
     "serverless-dotenv-plugin": "^3.12.2",
+    "serverless-dynalite-local": "^0.3.0",
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^8.4.0",
+    "serverless-offline-ses": "^0.0.7",
     "typescript": "^4.5.5"
   },
   "author": "Ixartz (https://github.com/ixartz)"
