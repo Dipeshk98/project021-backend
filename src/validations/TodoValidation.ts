@@ -1,8 +1,17 @@
 import { validateRequest } from 'src/middlewares/Validation';
 import { z } from 'zod';
 
+export const paramsTeamIdValidate = validateRequest({
+  params: z.object({
+    teamId: z.string(),
+  }),
+});
+
+export type ParamsTeamIdHandler = typeof paramsTeamIdValidate;
+
 export const paramsTodoValidate = validateRequest({
   params: z.object({
+    teamId: z.string(),
     id: z.string(),
   }),
 });
@@ -22,6 +31,7 @@ export type BodyTodoHandler = typeof bodyTodoValidate;
 
 export const fullTodoValidate = validateRequest({
   params: z.object({
+    teamId: z.string(),
     id: z.string(),
   }),
   body: z.object({

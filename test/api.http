@@ -19,6 +19,14 @@ content-type: application/json
   "title": "new Hello world"
 }
 
+### Create Todo with error, incorrect team ID
+POST http://localhost:4000/01FX8KVHG514G6MZV87167G0Q02/todo/create HTTP/1.1
+content-type: application/json
+
+{
+  "title": "new Hello world"
+}
+
 ### Create Todo with error, `title` shouldn't be empty
 POST http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/create HTTP/1.1
 content-type: application/json
@@ -28,14 +36,14 @@ content-type: application/json
 }
 
 ### Get Todo with invalid ID
-GET http://localhost:4000/todo/123 HTTP/1.1
+GET http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/123 HTTP/1.1
 
 ### Get Todo
 @id = {{todoCreation.response.body.$.id}}
-GET http://localhost:4000/todo/{{id}} HTTP/1.1
+GET http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/{{id}} HTTP/1.1
 
 ### Update Todo with invalid ID
-PUT http://localhost:4000/todo/123 HTTP/1.1
+PUT http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/123 HTTP/1.1
 content-type: application/json
 
 {
@@ -44,7 +52,7 @@ content-type: application/json
 
 ### Update Todo
 @id = {{todoCreation.response.body.$.id}}
-PUT http://localhost:4000/todo/{{id}} HTTP/1.1
+PUT http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/{{id}} HTTP/1.1
 content-type: application/json
 
 {
@@ -52,14 +60,14 @@ content-type: application/json
 }
 
 ### Delete Todo with invalid ID
-DELETE http://localhost:4000/todo/123 HTTP/1.1
+DELETE http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/123 HTTP/1.1
 
 ### Delete Todo
 @id = {{todoCreation.response.body.$.id}}
-DELETE http://localhost:4000/todo/{{id}} HTTP/1.1
+DELETE http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/{{id}} HTTP/1.1
 
 ### List Todo
-GET http://localhost:4000/todo/list HTTP/1.1
+GET http://localhost:4000/01FX8KVHG514G6MZV87167G0Q0/todo/list HTTP/1.1
 
 ### Stripe create session
 POST http://localhost:4000/billing/create-checkout-session HTTP/1.1

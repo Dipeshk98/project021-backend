@@ -4,11 +4,12 @@ import {
   paramsTodoValidate,
   bodyTodoValidate,
   fullTodoValidate,
+  paramsTeamIdValidate,
 } from 'src/validations/TodoValidation';
 
 const todoRouter = Router();
 
-todoRouter.get('/todo/list', todoController.list);
+todoRouter.get('/:teamId/todo/list', paramsTeamIdValidate, todoController.list);
 
 todoRouter.post(
   '/:teamId/todo/create',
@@ -16,10 +17,14 @@ todoRouter.post(
   todoController.create
 );
 
-todoRouter.get('/todo/:id', paramsTodoValidate, todoController.read);
+todoRouter.get('/:teamId/todo/:id', paramsTodoValidate, todoController.read);
 
-todoRouter.delete('/todo/:id', paramsTodoValidate, todoController.delete);
+todoRouter.delete(
+  '/:teamId/todo/:id',
+  paramsTodoValidate,
+  todoController.delete
+);
 
-todoRouter.put('/todo/:id', fullTodoValidate, todoController.update);
+todoRouter.put('/:teamId/todo/:id', fullTodoValidate, todoController.update);
 
 export { todoRouter };
