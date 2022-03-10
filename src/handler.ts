@@ -8,6 +8,7 @@ import serverlessHttp from 'serverless-http';
 import { errorHandler, handler404 } from './controllers/ErrorController';
 import { ApiError } from './error/ApiError';
 import { billingRouter } from './routes/BillingRoute';
+import { teamRouter } from './routes/TeamRoute';
 import { todoRouter } from './routes/TodoRoute';
 import { userRouter } from './routes/UserRoute';
 import { Env } from './utils/Env';
@@ -29,6 +30,7 @@ app.use(
 app.use(userRouter);
 app.use(todoRouter);
 app.use(billingRouter);
+app.use(teamRouter);
 
 // Error handler
 app.use(handler404);

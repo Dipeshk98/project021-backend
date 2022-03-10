@@ -31,7 +31,7 @@ export class UserController {
 
     if (user.getTeamList().length === 0) {
       const team = new Team();
-      team.setName('Team name');
+      team.setDisplayName('Team name');
       team.addMember(user.getId());
       this.teamService.save(team);
 

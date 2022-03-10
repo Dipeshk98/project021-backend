@@ -7,7 +7,7 @@ export class Team extends AbstractItem {
 
   public readonly id: string;
 
-  private name?: string;
+  private displayName?: string;
 
   private memberList: string[];
 
@@ -36,12 +36,12 @@ export class Team extends AbstractItem {
     return `${Team.BEGINS_KEYS}${this.id}`;
   }
 
-  setName(name: string) {
-    this.name = name;
+  setDisplayName(name: string) {
+    this.displayName = name;
   }
 
-  getName() {
-    return this.name;
+  getDisplayName() {
+    return this.displayName;
   }
 
   addMember(userId: string) {
@@ -51,13 +51,13 @@ export class Team extends AbstractItem {
   toItem() {
     return {
       ...this.keys(),
-      name: this.name,
+      displayName: this.displayName,
       memberList: this.memberList,
     };
   }
 
   fromItem(item: IDynamodbItem) {
-    this.name = item.name;
+    this.displayName = item.name;
     this.memberList = item.memberList;
   }
 }

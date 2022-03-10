@@ -27,4 +27,31 @@ export class TeamService {
       throw new ApiError('TodoService: impossible to create', ex);
     }
   }
+
+  public async updateDisplayName(teamId: string, displayName: string) {
+    try {
+      await this.dbClient
+        .updateItem({
+          TableName: this.tableName,
+          Key: DynamoDB.Converter.marshall({
+            PK: `${Team.BEGINS_KEYS}${teamId}`,
+            SK: `${Team.BEGINS_KEYS}${teamId}`,
+          }),
+          UpdateExpression: 'SET displayName = :displayName',
+          ExpressionAttributeValues: DynamoDB.Converter.marshall({
+            ':displayName': displayName,
+          }),
+          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
+        })
+        .promise();
+
+      return true;
+    } catch (e: any) {
+      if (e.code === 'ConditionalCheckFailedException') {
+        return false;
+      }
+
+      throw new ApiError('DBClient error: "update" operation impossible', e);
+    }
+  }
 }

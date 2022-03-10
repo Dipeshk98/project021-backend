@@ -6,6 +6,7 @@ import {
 } from 'src/services';
 
 import { BillingController } from './BillingController';
+import { TeamController } from './TeamController';
 import { TodoController } from './TodoController';
 import { UserController } from './UserController';
 
@@ -19,5 +20,6 @@ const userController = new UserController(
 );
 const todoController = new TodoController(todoService, userService);
 const billingController = new BillingController(billingService, userService);
+const teamController = new TeamController(teamService, userService);
 
-export { userController, todoController, billingController };
+export { userController, todoController, billingController, teamController };
