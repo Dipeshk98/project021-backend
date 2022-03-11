@@ -1,9 +1,13 @@
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
+import { Member } from 'src/models/Member';
+import { Team } from 'src/models/Team';
 import { MemberService } from 'src/services/MemberService';
 import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
+import { MemberStatus } from 'src/types/MemberStatus';
 import {
+  BodyCreateTeamHandler,
   BodyTeamNameHandler,
   ParamsTeamIdHandler,
 } from 'src/validations/TeamValidation';
@@ -24,6 +28,31 @@ export class TeamController {
     this.userService = userService;
     this.memberService = memberService;
   }
+
+  public create: BodyCreateTeamHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    const team = new Team();
+    team.setDisplayName(req.body.displayName);
+    this.teamService.save(team);
+
+    user.addTeam(team.id);
+    this.userService.update(user);
+
+    const member = new Member(team.getId(), user.getId());
+    member.setStatus(MemberStatus.ACTIVE);
+    member.setEmail(req.body.email);
+    this.memberService.save(member);
+
+    res.json({
+      id: team.getId(),
+      displayName: team.getDisplayName(),
+    });
+  };
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
     const user = await this.userService.findByUserId(req.currentUserId);
