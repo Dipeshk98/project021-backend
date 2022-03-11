@@ -14,9 +14,20 @@ export class Team extends AbstractItem {
    * @constructor
    * @param id - The ID of the team.
    */
-  constructor(id?: string) {
+  constructor(id?: string, removeBegins?: boolean) {
     super();
-    this.id = id ?? ulid();
+
+    if (id) {
+      let tmpId = id;
+
+      if (removeBegins) {
+        tmpId = tmpId.replace(Team.BEGINS_KEYS, '');
+      }
+
+      this.id = tmpId;
+    } else {
+      this.id = ulid();
+    }
   }
 
   get pk() {
@@ -47,6 +58,6 @@ export class Team extends AbstractItem {
   }
 
   fromItem(item: IDynamodbItem) {
-    this.displayName = item.name;
+    this.displayName = item.displayName;
   }
 }

@@ -28,6 +28,45 @@ export class TeamService {
     }
   }
 
+  public async findAllByTeamIdList(teamIdList: string[]) {
+    try {
+      const result = await this.dbClient
+        .batchGetItem({
+          RequestItems: {
+            [this.tableName]: {
+              Keys: teamIdList.map((elt) =>
+                DynamoDB.Converter.marshall({
+                  PK: `${Team.BEGINS_KEYS}${elt}`,
+                  SK: `${Team.BEGINS_KEYS}${elt}`,
+                })
+              ),
+            },
+          },
+        })
+        .promise();
+
+      const response = result.Responses && result.Responses[this.tableName];
+
+      if (!response) {
+        return [];
+      }
+
+      return response
+        .map((elt) => {
+          const item = DynamoDB.Converter.unmarshall(elt);
+          const team = new Team(item.PK, true);
+          team.fromItem(item);
+          return team;
+        })
+        .sort((team1, team2) => team1.id.localeCompare(team2.id));
+    } catch (e: any) {
+      throw new ApiError(
+        'DBClient error: "findAllByTeamIdList" operation impossible',
+        e
+      );
+    }
+  }
+
   public async updateDisplayName(teamId: string, displayName: string) {
     try {
       await this.dbClient

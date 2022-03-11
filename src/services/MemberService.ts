@@ -47,9 +47,9 @@ export class MemberService {
 
       return list.Items.map((elt) => {
         const item = DynamoDB.Converter.unmarshall(elt);
-        const todo = new Member(teamId, item.SK, true);
-        todo.fromItem(item);
-        return todo;
+        const member = new Member(teamId, item.SK, true);
+        member.fromItem(item);
+        return member;
       });
     } catch (e: any) {
       throw new ApiError('DBClient error: "list" operation impossible', e);

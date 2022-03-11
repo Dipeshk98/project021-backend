@@ -51,10 +51,14 @@ export class UserController {
       this.memberService.save(member);
     }
 
+    const teamList = await this.teamService.findAllByTeamIdList(
+      user.getTeamList()
+    );
+
     res.json({
       id: user.getId(),
       firstSignIn: user.getFirstSignIn().toISOString(),
-      teamList: user.getTeamList(),
+      teamList,
     });
   };
 
