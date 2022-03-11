@@ -27,4 +27,32 @@ export class MemberService {
       throw new ApiError('TodoService: impossible to create', ex);
     }
   }
+
+  public async findAllByTeamId(teamId: string) {
+    try {
+      const list = await this.dbClient
+        .query({
+          TableName: this.tableName,
+          KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skBegins)',
+          ExpressionAttributeValues: DynamoDB.Converter.marshall({
+            ':pk': `${Member.BEGINS_KEYS}${teamId}`,
+            ':skBegins': Member.BEGINS_KEYS,
+          }),
+        })
+        .promise();
+
+      if (!list.Items) {
+        return [];
+      }
+
+      return list.Items.map((elt) => {
+        const item = DynamoDB.Converter.unmarshall(elt);
+        const todo = new Member(teamId, item.SK, true);
+        todo.fromItem(item);
+        return todo;
+      });
+    } catch (e: any) {
+      throw new ApiError('DBClient error: "list" operation impossible', e);
+    }
+  }
 }

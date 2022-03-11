@@ -22,6 +22,10 @@ const userController = new UserController(
 );
 const todoController = new TodoController(todoService, userService);
 const billingController = new BillingController(billingService, userService);
-const teamController = new TeamController(teamService, userService);
+const teamController = new TeamController(
+  teamService,
+  userService,
+  memberService
+);
 
 export { userController, todoController, billingController, teamController };

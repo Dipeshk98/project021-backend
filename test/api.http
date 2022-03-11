@@ -40,6 +40,13 @@ content-type: application/json
   "displayName": "team one"
 }
 
+### List members not team member
+GET http://localhost:4000/team/01FXWZM30QRBS8K0DA55VVVREF/list-members HTTP/1.1
+
+### List members in team
+@teamId = {{profile.response.body.$.teamList[0]}}
+GET http://localhost:4000/team/{{teamId}}/list-members HTTP/1.1
+
 ### Create Todo not team member
 POST http://localhost:4000/01FXWZM30QRBS8K0DA55VVVREF/todo/create HTTP/1.1
 content-type: application/json

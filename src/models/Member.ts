@@ -13,10 +13,17 @@ export class Member extends AbstractItem {
 
   private email?: string;
 
-  constructor(teamId: string, userId: string) {
+  constructor(teamId: string, userId: string, removeBegins?: boolean) {
     super();
     this.teamId = teamId;
-    this.userId = userId;
+
+    let tmpUserId = userId;
+
+    if (removeBegins) {
+      tmpUserId = tmpUserId.replace(Member.BEGINS_KEYS, '');
+    }
+
+    this.userId = tmpUserId;
   }
 
   get pk() {
@@ -27,12 +34,24 @@ export class Member extends AbstractItem {
     return `${Member.BEGINS_KEYS}${this.userId}`;
   }
 
+  getUserId() {
+    return this.userId;
+  }
+
   setStatus(status: MemberStatus) {
     this.status = status;
   }
 
+  getStatus() {
+    return this.status;
+  }
+
   setEmail(email: string) {
     this.email = email;
+  }
+
+  getEmail() {
+    return this.email;
   }
 
   toItem() {

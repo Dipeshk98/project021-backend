@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { todoController } from 'src/controllers';
+import { paramsTeamIdValidate } from 'src/validations/TeamValidation';
 import {
   paramsTodoValidate,
   bodyTodoValidate,
   fullTodoValidate,
-  paramsTeamIdValidate,
 } from 'src/validations/TodoValidation';
 
 const todoRouter = Router();
