@@ -28,7 +28,11 @@ export class TodoController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     const list = await this.todoService.findAllByUserId(req.params.teamId);
@@ -49,7 +53,11 @@ export class TodoController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     const todo = new Todo(req.params.teamId);
@@ -70,7 +78,11 @@ export class TodoController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     const todo = await this.todoService.findByKeys(
@@ -96,7 +108,11 @@ export class TodoController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     const success = await this.todoService.delete(
@@ -121,7 +137,11 @@ export class TodoController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     const todo = new Todo(req.params.teamId, req.params.id);

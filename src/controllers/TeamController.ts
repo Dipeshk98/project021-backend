@@ -1,4 +1,5 @@
 import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
 import { BodyTeamNameHandler } from 'src/validations/TeamValidation';
@@ -21,7 +22,11 @@ export class TeamController {
     }
 
     if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError("User isn't a team member");
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     await this.teamService.updateDisplayName(

@@ -1,5 +1,6 @@
 import {
   billingService,
+  memberService,
   teamService,
   todoService,
   userService,
@@ -16,7 +17,8 @@ import { UserController } from './UserController';
 const userController = new UserController(
   userService,
   billingService,
-  teamService
+  teamService,
+  memberService
 );
 const todoController = new TodoController(todoService, userService);
 const billingController = new BillingController(billingService, userService);

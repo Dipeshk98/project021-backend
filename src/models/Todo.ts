@@ -1,7 +1,6 @@
 import { ulid } from 'ulid';
 
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
-import { Team } from './Team';
 
 export class Todo extends AbstractItem {
   static BEGINS_KEYS = 'TODO#';
@@ -38,7 +37,7 @@ export class Todo extends AbstractItem {
   }
 
   get pk() {
-    return `${Team.BEGINS_KEYS}${this.ownerId}`;
+    return `${Todo.BEGINS_KEYS}${this.ownerId}`;
   }
 
   get sk() {

@@ -1,6 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
-import { Team } from 'src/models/Team';
 import { Todo } from 'src/models/Todo';
 import { Env } from 'src/utils/Env';
 
@@ -99,7 +98,7 @@ export class TodoService {
           TableName: this.tableName,
           KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skBegins)',
           ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':pk': `${Team.BEGINS_KEYS}${userId}`,
+            ':pk': `${Todo.BEGINS_KEYS}${userId}`,
             ':skBegins': Todo.BEGINS_KEYS,
           }),
         })

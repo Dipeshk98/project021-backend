@@ -9,8 +9,6 @@ export class Team extends AbstractItem {
 
   private displayName?: string;
 
-  private memberList: string[];
-
   /**
    * Constructor for Team class.
    * @constructor
@@ -18,14 +16,7 @@ export class Team extends AbstractItem {
    */
   constructor(id?: string) {
     super();
-
-    if (id) {
-      this.id = id;
-    } else {
-      this.id = ulid();
-    }
-
-    this.memberList = [];
+    this.id = id ?? ulid();
   }
 
   get pk() {
@@ -36,6 +27,10 @@ export class Team extends AbstractItem {
     return `${Team.BEGINS_KEYS}${this.id}`;
   }
 
+  getId() {
+    return this.id;
+  }
+
   setDisplayName(name: string) {
     this.displayName = name;
   }
@@ -44,20 +39,14 @@ export class Team extends AbstractItem {
     return this.displayName;
   }
 
-  addMember(userId: string) {
-    this.memberList.push(userId);
-  }
-
   toItem() {
     return {
       ...this.keys(),
       displayName: this.displayName,
-      memberList: this.memberList,
     };
   }
 
   fromItem(item: IDynamodbItem) {
     this.displayName = item.name;
-    this.memberList = item.memberList;
   }
 }
