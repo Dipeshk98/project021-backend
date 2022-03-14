@@ -155,3 +155,11 @@ content-type: application/json
 @teamId = {{profile.response.body.$.teamList[0].id}}
 POST http://localhost:4000/{{teamId}}/billing/customer-portal HTTP/1.1
 content-type: application/json
+
+### Update user email
+PUT http://localhost:4000/user/email-update HTTP/1.1
+content-type: application/json
+
+{
+  "email": "test@gmail.com"
+}

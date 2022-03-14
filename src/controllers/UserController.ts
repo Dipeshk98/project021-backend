@@ -1,10 +1,15 @@
+import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
 import { Team } from 'src/models/Team';
 import { MemberService } from 'src/services/MemberService';
 import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
 import { MemberStatus } from 'src/types/MemberStatus';
-import { ParamsEmailHandler } from 'src/validations/UserValidation';
+import {
+  BodyEmailHandler,
+  ParamsEmailHandler,
+} from 'src/validations/UserValidation';
 
 export class UserController {
   private userService: UserService;
@@ -51,6 +56,25 @@ export class UserController {
       id: user.getId(),
       firstSignIn: user.getFirstSignIn().toISOString(),
       teamList,
+    });
+  };
+
+  public updateEmail: BodyEmailHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    await this.memberService.updateEmail(
+      user.getId(),
+      user.getTeamList(),
+      req.body.email
+    );
+
+    res.json({
+      id: user.getId(),
+      email: req.body.email,
     });
   };
 }

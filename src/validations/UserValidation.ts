@@ -8,3 +8,11 @@ export const paramsEmailValidate = validateRequest({
 });
 
 export type ParamsEmailHandler = typeof paramsEmailValidate;
+
+export const bodyEmailValidate = validateRequest({
+  body: z.object({
+    email: z.string(),
+  }),
+});
+
+export type BodyEmailHandler = typeof bodyEmailValidate;

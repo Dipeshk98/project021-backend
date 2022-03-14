@@ -55,4 +55,34 @@ export class MemberService {
       throw new ApiError('DBClient error: "list" operation impossible', e);
     }
   }
+
+  public async updateEmail(
+    userId: string,
+    teamIdList: string[],
+    email: string
+  ) {
+    try {
+      // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
+      for (let i = 0; i < teamIdList.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.dbClient
+          .updateItem({
+            TableName: this.tableName,
+            Key: DynamoDB.Converter.marshall({
+              PK: `${Member.BEGINS_KEYS}${teamIdList[i]}`,
+              SK: `${Member.BEGINS_KEYS}${userId}`,
+            }),
+            UpdateExpression: 'SET email = :email',
+            ExpressionAttributeValues: DynamoDB.Converter.marshall({
+              ':email': email,
+            }),
+            ConditionExpression:
+              'attribute_exists(PK) AND attribute_exists(SK)',
+          })
+          .promise();
+      }
+    } catch (ex: any) {
+      throw new ApiError('TeamService: impossible to update email', ex);
+    }
+  }
 }
