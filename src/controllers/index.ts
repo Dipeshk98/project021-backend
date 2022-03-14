@@ -16,16 +16,20 @@ import { UserController } from './UserController';
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
 const userController = new UserController(
   userService,
-  billingService,
   teamService,
   memberService
 );
 const todoController = new TodoController(todoService, userService);
-const billingController = new BillingController(billingService, userService);
+const billingController = new BillingController(
+  billingService,
+  userService,
+  teamService
+);
 const teamController = new TeamController(
   teamService,
   userService,
-  memberService
+  memberService,
+  billingService
 );
 
 export { userController, todoController, billingController, teamController };

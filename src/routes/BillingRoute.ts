@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { billingController } from 'src/controllers';
+import { paramsTeamIdValidate } from 'src/validations/TeamValidation';
 
 import { bodyPriceValidate } from '../validations/BillingValidation';
 
 const billingRouter = Router();
 
 billingRouter.post(
-  '/billing/create-checkout-session',
+  '/:teamId/billing/create-checkout-session',
   bodyPriceValidate,
   billingController.createCheckoutSession
 );
@@ -18,7 +19,8 @@ billingRouter.post(
 billingRouter.post('/billing/webhook', billingController.webhook);
 
 billingRouter.post(
-  '/billing/customer-portal',
+  '/:teamId/billing/customer-portal',
+  paramsTeamIdValidate,
   billingController.createCustomerPortalLink
 );
 

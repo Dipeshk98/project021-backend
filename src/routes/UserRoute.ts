@@ -6,6 +6,7 @@ const userRouter = Router();
 
 userRouter.get('/user/profile', paramsEmailValidate, userController.getProfile);
 
-userRouter.get('/user/settings', userController.getSettings);
+// For illustration purpose, you can implement a `/user/settings` endpoint
+// userRouter.get('/user/settings');
 
 export { userRouter };

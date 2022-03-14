@@ -1,7 +1,6 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
 import { User } from 'src/models/User';
-import { ISubscription } from 'src/types/StripeTypes';
 import { Env } from 'src/utils/Env';
 
 export class UserService {
@@ -72,33 +71,6 @@ export class UserService {
         .putItem({
           TableName: this.tableName,
           Item: DynamoDB.Converter.marshall(user.toItem()),
-          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
-        })
-        .promise();
-
-      return true;
-    } catch (e: any) {
-      if (e.code === 'ConditionalCheckFailedException') {
-        return false;
-      }
-
-      throw new ApiError('DBClient error: "update" operation impossible', e);
-    }
-  }
-
-  public async updateSubscription(userId: string, subscription: ISubscription) {
-    try {
-      await this.dbClient
-        .updateItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall({
-            PK: `${User.BEGINS_KEYS}${userId}`,
-            SK: `${User.BEGINS_KEYS}${userId}`,
-          }),
-          UpdateExpression: 'SET subscription = :subscription',
-          ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':subscription': subscription,
-          }),
           ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
         })
         .promise();

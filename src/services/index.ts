@@ -16,7 +16,7 @@ const userService = new UserService(dbClient);
 const todoService = new TodoService(dbClient);
 const teamService = new TeamService(dbClient);
 const memberService = new MemberService(dbClient);
-const billingService = new BillingService(userService);
+const billingService = new BillingService(teamService);
 const emailService = new EmailService();
 
 export {

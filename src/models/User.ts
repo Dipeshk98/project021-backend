@@ -1,5 +1,3 @@
-import { ISubscription } from 'src/types/StripeTypes';
-
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
 
 export class User extends AbstractItem {
@@ -8,10 +6,6 @@ export class User extends AbstractItem {
   private id: string;
 
   private firstSignIn: Date;
-
-  private stripeCustomerId?: string;
-
-  private subscription?: ISubscription;
 
   private teamList: string[];
 
@@ -38,22 +32,6 @@ export class User extends AbstractItem {
     return this.firstSignIn;
   }
 
-  setStripeCustomerId(customerId: string) {
-    this.stripeCustomerId = customerId;
-  }
-
-  getStripeCustomerId() {
-    return this.stripeCustomerId;
-  }
-
-  hasStripeCustomerId() {
-    return !!this.stripeCustomerId;
-  }
-
-  getSubscription() {
-    return this.subscription;
-  }
-
   getTeamList() {
     return this.teamList;
   }
@@ -70,16 +48,12 @@ export class User extends AbstractItem {
     return {
       ...this.keys(),
       firstSignIn: this.firstSignIn.toISOString(),
-      stripeCustomerId: this.stripeCustomerId,
-      subscription: this.subscription,
       teamList: this.teamList,
     };
   }
 
   fromItem(item: IDynamodbItem) {
     this.firstSignIn = new Date(item.firstSignIn);
-    this.stripeCustomerId = item.stripeCustomerId;
-    this.subscription = item.subscription;
     this.teamList = item.teamList;
   }
 }

@@ -1,5 +1,4 @@
 import { ApiError } from 'src/error/ApiError';
-import { User } from 'src/models/User';
 import {
   ISubscription,
   StripeCheckoutEvent,
@@ -12,17 +11,23 @@ import { Env } from 'src/utils/Env';
 import { getStripe } from 'src/utils/Stripe';
 import Stripe from 'stripe';
 
-import { UserService } from './UserService';
+import { TeamService } from './TeamService';
 
 export class BillingService {
-  private userService: UserService;
+  private teamService: TeamService;
 
-  constructor(userService: UserService) {
-    this.userService = userService;
+  constructor(teamService: TeamService) {
+    this.teamService = teamService;
   }
 
-  async createOrRetrieveCustomerId(user: User) {
-    const customerId = user.getStripeCustomerId();
+  async createOrRetrieveCustomerId(teamId: string) {
+    const team = await this.teamService.findByTeamId(teamId);
+
+    if (!team) {
+      throw new ApiError("Team ID doesn't exist");
+    }
+
+    const customerId = team.getStripeCustomerId();
 
     if (customerId) {
       // Return the Stripe customer ID if the user has already one.
@@ -31,12 +36,12 @@ export class BillingService {
 
     const stripeCustomer = await getStripe().customers.create({
       metadata: {
-        userId: user.getId(),
+        teamId: team.getId(),
       },
     });
 
-    user.setStripeCustomerId(stripeCustomer.id);
-    await this.userService.update(user);
+    team.setStripeCustomerId(stripeCustomer.id);
+    await this.teamService.update(team);
 
     return stripeCustomer.id;
   }
@@ -81,7 +86,7 @@ export class BillingService {
     );
     const customer = StripeCustomer.parse(stripeCustomer);
 
-    await this.userService.updateSubscription(customer.metadata.userId, {
+    await this.teamService.updateSubscription(customer.metadata.teamId, {
       id: subscription.id,
       productId: subscription.plan.product,
       status: subscription.status,
@@ -100,7 +105,7 @@ export class BillingService {
     );
     const customer = StripeCustomer.parse(stripeCustomer);
 
-    await this.userService.updateSubscription(customer.metadata.userId, {
+    await this.teamService.updateSubscription(customer.metadata.teamId, {
       id: subscription.id,
       productId: subscription.plan.product,
       status: subscription.status,

@@ -3,16 +3,12 @@
 GET http://localhost:4000/user/profile?email=test@example.com HTTP/1.1
 content-type: application/json
 
-### Create get or create profile with error
+### Create get or create profile with invalid email
 GET http://localhost:4000/user/profile HTTP/1.1
 content-type: application/json
 
 ### Not found page
 GET http://localhost:4000/not-found HTTP/1.1
-content-type: application/json
-
-### Get settings
-GET http://localhost:4000/user/settings HTTP/1.1
 content-type: application/json
 
 ### Create new team
@@ -24,7 +20,7 @@ content-type: application/json
   "displayName": "team 1002"
 }
 
-### Change team name with error
+### Change team name with no displayName
 PUT http://localhost:4000/team/01FXWZM30QRBS8K0DA55VVVREF/name HTTP/1.1
 content-type: application/json
 
@@ -32,7 +28,7 @@ content-type: application/json
   "title": "new Hello world"
 }
 
-### Change team name wrong teamid
+### Change team name with wrong teamId
 PUT http://localhost:4000/team/01FXWZM30QRBS8K0DA55VVVREF/name HTTP/1.1
 content-type: application/json
 
@@ -49,14 +45,14 @@ content-type: application/json
   "displayName": "team one"
 }
 
-### List members not team member
+### List members with error, not team member
 GET http://localhost:4000/team/01FXWZM30QRBS8K0DA55VVVREF/list-members HTTP/1.1
 
 ### List members in team
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/team/{{teamId}}/list-members HTTP/1.1
 
-### Create Todo not team member
+### Create Todo with error, not team member
 POST http://localhost:4000/01FXWZM30QRBS8K0DA55VVVREF/todo/create HTTP/1.1
 content-type: application/json
 
@@ -91,7 +87,7 @@ content-type: application/json
   "title": ""
 }
 
-### Get Todo with invalid ID
+### Get Todo with error, with invalid ID
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/{{teamId}}/todo/123 HTTP/1.1
 
@@ -100,7 +96,7 @@ GET http://localhost:4000/{{teamId}}/todo/123 HTTP/1.1
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/{{teamId}}/todo/{{id}} HTTP/1.1
 
-### Update Todo with invalid ID
+### Update Todo with error, invalid ID
 @teamId = {{profile.response.body.$.teamList[0].id}}
 PUT http://localhost:4000/{{teamId}}/todo/123 HTTP/1.1
 content-type: application/json
@@ -132,16 +128,23 @@ DELETE http://localhost:4000/{{teamId}}/todo/{{id}} HTTP/1.1
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/{{teamId}}/todo/list HTTP/1.1
 
+### Get settings
+@teamId = {{profile.response.body.$.teamList[0].id}}
+GET http://localhost:4000/team/{{teamId}}/settings HTTP/1.1
+content-type: application/json
+
 ### Stripe create session
-POST http://localhost:4000/billing/create-checkout-session HTTP/1.1
+@teamId = {{profile.response.body.$.teamList[0].id}}
+POST http://localhost:4000/{{teamId}}/billing/create-checkout-session HTTP/1.1
 content-type: application/json
 
 {
-  "priceId": "price_1JSmUjGrcfaiexgslH41e88g"
+  "priceId": "price_1KTXGwDxtHLZXYoxfKzwYezO"
 }
 
 ### Stripe create session with invalid price
-POST http://localhost:4000/billing/create-checkout-session HTTP/1.1
+@teamId = {{profile.response.body.$.teamList[0].id}}
+POST http://localhost:4000/{{teamId}}/billing/create-checkout-session HTTP/1.1
 content-type: application/json
 
 {
@@ -149,5 +152,6 @@ content-type: application/json
 }
 
 ### Create Stripe customer portal link
-POST http://localhost:4000/billing/customer-portal HTTP/1.1
+@teamId = {{profile.response.body.$.teamList[0].id}}
+POST http://localhost:4000/{{teamId}}/billing/customer-portal HTTP/1.1
 content-type: application/json

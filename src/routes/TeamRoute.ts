@@ -22,4 +22,10 @@ teamRouter.put(
   teamController.updateDisplayName
 );
 
+teamRouter.get(
+  '/team/:teamId/settings',
+  paramsTeamIdValidate,
+  teamController.getSettings
+);
+
 export { teamRouter };

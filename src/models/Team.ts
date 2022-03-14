@@ -1,3 +1,4 @@
+import { ISubscription } from 'src/types/StripeTypes';
 import { ulid } from 'ulid';
 
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
@@ -8,6 +9,10 @@ export class Team extends AbstractItem {
   public readonly id: string;
 
   private displayName?: string;
+
+  private stripeCustomerId?: string;
+
+  private subscription?: ISubscription;
 
   /**
    * Constructor for Team class.
@@ -50,14 +55,34 @@ export class Team extends AbstractItem {
     return this.displayName;
   }
 
+  setStripeCustomerId(customerId: string) {
+    this.stripeCustomerId = customerId;
+  }
+
+  getStripeCustomerId() {
+    return this.stripeCustomerId;
+  }
+
+  hasStripeCustomerId() {
+    return !!this.stripeCustomerId;
+  }
+
+  getSubscription() {
+    return this.subscription;
+  }
+
   toItem() {
     return {
       ...this.keys(),
       displayName: this.displayName,
+      stripeCustomerId: this.stripeCustomerId,
+      subscription: this.subscription,
     };
   }
 
   fromItem(item: IDynamodbItem) {
     this.displayName = item.displayName;
+    this.stripeCustomerId = item.stripeCustomerId;
+    this.subscription = item.subscription;
   }
 }

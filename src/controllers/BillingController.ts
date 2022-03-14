@@ -1,10 +1,13 @@
 import { RequestHandler } from 'express';
 import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { BillingService } from 'src/services/BillingService';
+import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
 import { Env } from 'src/utils/Env';
 import { getStripe } from 'src/utils/Stripe';
 import { BodyPriceHandler } from 'src/validations/BillingValidation';
+import { ParamsTeamIdHandler } from 'src/validations/TeamValidation';
 import Stripe from 'stripe';
 
 export class BillingController {
@@ -12,9 +15,16 @@ export class BillingController {
 
   private userService: UserService;
 
-  constructor(billingService: BillingService, userService: UserService) {
+  private teamService: TeamService;
+
+  constructor(
+    billingService: BillingService,
+    userService: UserService,
+    teamService: TeamService
+  ) {
     this.billingService = billingService;
     this.userService = userService;
+    this.teamService = teamService;
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
@@ -24,8 +34,16 @@ export class BillingController {
       throw new ApiError("User ID doesn't exist");
     }
 
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
     const customerId = await this.billingService.createOrRetrieveCustomerId(
-      user
+      req.params.teamId
     );
     const session = await this.billingService.createCheckoutSession(
       customerId,
@@ -66,14 +84,28 @@ export class BillingController {
     res.json({ received: true });
   };
 
-  public createCustomerPortalLink: RequestHandler = async (req, res) => {
+  public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
     const user = await this.userService.findByUserId(req.currentUserId);
 
     if (!user) {
       throw new ApiError("User ID doesn't exist");
     }
 
-    const stripeCustomerId = user.getStripeCustomerId();
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
+    const team = await this.teamService.findByTeamId(req.params.teamId);
+
+    if (!team) {
+      throw new ApiError("Team ID doesn't exist");
+    }
+
+    const stripeCustomerId = team.getStripeCustomerId();
 
     if (!stripeCustomerId) {
       // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink`
