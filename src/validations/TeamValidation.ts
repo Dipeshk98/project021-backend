@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const bodyCreateTeamValidate = validateRequest({
   body: z.object({
-    email: z.string(),
+    userEmail: z.string(),
     displayName: z.string(),
   }),
 });

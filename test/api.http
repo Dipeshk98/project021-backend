@@ -16,8 +16,8 @@ POST http://localhost:4000/team/create HTTP/1.1
 content-type: application/json
 
 {
-  "email": "test@example.com",
-  "displayName": "team 1009"
+  "userEmail": "test@example.com",
+  "displayName": "team 1010"
 }
 
 ### Delete team

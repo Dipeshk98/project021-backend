@@ -50,7 +50,7 @@ export class TeamController {
 
     const member = new Member(team.getId(), user.getId());
     member.setStatus(MemberStatus.ACTIVE);
-    member.setEmail(req.body.email);
+    member.setEmail(req.body.userEmail);
     await this.memberService.save(member);
 
     res.json({
