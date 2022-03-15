@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
 import { Member } from 'src/models/Member';
+import { User } from 'src/models/User';
 import { Env } from 'src/utils/Env';
 
 export class MemberService {
@@ -56,21 +57,19 @@ export class MemberService {
     }
   }
 
-  public async updateEmail(
-    userId: string,
-    teamIdList: string[],
-    email: string
-  ) {
+  public async updateEmail(user: User, email: string) {
+    const teamList = user.getTeamList();
+
     try {
       // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
-      for (let i = 0; i < teamIdList.length; i += 1) {
+      for (let i = 0; i < teamList.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await this.dbClient
           .updateItem({
             TableName: this.tableName,
             Key: DynamoDB.Converter.marshall({
-              PK: `${Member.BEGINS_KEYS}${teamIdList[i]}`,
-              SK: `${Member.BEGINS_KEYS}${userId}`,
+              PK: `${Member.BEGINS_KEYS}${teamList[i]}`,
+              SK: `${Member.BEGINS_KEYS}${user.getId()}`,
             }),
             UpdateExpression: 'SET email = :email',
             ExpressionAttributeValues: DynamoDB.Converter.marshall({

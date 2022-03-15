@@ -66,11 +66,7 @@ export class UserController {
       throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
     }
 
-    await this.memberService.updateEmail(
-      user.getId(),
-      user.getTeamList(),
-      req.body.email
-    );
+    await this.memberService.updateEmail(user, req.body.email);
 
     res.json({
       id: user.getId(),
