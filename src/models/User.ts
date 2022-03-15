@@ -44,6 +44,10 @@ export class User extends AbstractItem {
     this.teamList.push(teamId);
   }
 
+  removeTeam(teamId: string) {
+    this.teamList = this.teamList.filter((elt) => elt !== teamId);
+  }
+
   toItem() {
     return {
       ...this.keys(),

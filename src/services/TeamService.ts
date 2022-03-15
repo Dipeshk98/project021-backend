@@ -29,6 +29,26 @@ export class TeamService {
     }
   }
 
+  public async delete(teamId: string) {
+    const todo = new Team(teamId);
+
+    try {
+      const result = await this.dbClient
+        .deleteItem({
+          TableName: this.tableName,
+          Key: DynamoDB.Converter.marshall(todo.keys()),
+          ReturnValues: 'ALL_OLD',
+        })
+        .promise();
+
+      return !!result.Attributes;
+      // Return true when we successfully delete the item
+      // Otherwise, it return false, it happens the item doesn't exists
+    } catch (e: any) {
+      throw new ApiError('DBClient error: "delete" operation impossible', e);
+    }
+  }
+
   public async findByTeamId(teamId: string) {
     const team = new Team(teamId);
 

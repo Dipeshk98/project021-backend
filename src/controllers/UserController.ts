@@ -37,15 +37,15 @@ export class UserController {
     if (user.getTeamList().length === 0) {
       const team = new Team();
       team.setDisplayName('Team name');
-      this.teamService.save(team);
+      await this.teamService.save(team);
 
       user.addTeam(team.id);
-      this.userService.update(user);
+      await this.userService.update(user);
 
       const member = new Member(team.getId(), user.getId());
       member.setStatus(MemberStatus.ACTIVE);
       member.setEmail(req.query.email);
-      this.memberService.save(member);
+      await this.memberService.save(member);
     }
 
     const teamList = await this.teamService.findAllByTeamIdList(

@@ -17,8 +17,13 @@ content-type: application/json
 
 {
   "email": "test@example.com",
-  "displayName": "team 1002"
+  "displayName": "team 1009"
 }
+
+### Delete team
+@teamId = {{profile.response.body.$.teamList[0].id}}
+DELETE http://localhost:4000/team/{{teamId}} HTTP/1.1
+content-type: application/json
 
 ### Change team name with no displayName
 PUT http://localhost:4000/team/01FXWZM30QRBS8K0DA55VVVREF/name HTTP/1.1

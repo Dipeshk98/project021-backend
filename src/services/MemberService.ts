@@ -29,6 +29,38 @@ export class MemberService {
     }
   }
 
+  public async removeAllMembers(teamId: string) {
+    try {
+      const list = await this.findAllByTeamId(teamId);
+      let result = true;
+
+      // `deleteItem` can only delete one by one
+      for (let i = 0; i < list.length; i += 1) {
+        const elt = list[i];
+
+        if (!elt) {
+          throw new ApiError("It shouldn't happen");
+        }
+
+        // Just run it sequentially, less performant but don't use all the DynamoDB capacity
+        // eslint-disable-next-line no-await-in-loop
+        const tmpResult = await this.dbClient
+          .deleteItem({
+            TableName: this.tableName,
+            Key: DynamoDB.Converter.marshall(elt.keys()),
+            ReturnValues: 'ALL_OLD',
+          })
+          .promise();
+
+        result = result && !!tmpResult.Attributes;
+      }
+
+      return result;
+    } catch (e: any) {
+      throw new ApiError('DBClient error: "remove" operation impossible', e);
+    }
+  }
+
   public async findAllByTeamId(teamId: string) {
     try {
       const list = await this.dbClient

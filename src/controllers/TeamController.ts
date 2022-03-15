@@ -43,19 +43,54 @@ export class TeamController {
 
     const team = new Team();
     team.setDisplayName(req.body.displayName);
-    this.teamService.save(team);
+    await this.teamService.save(team);
 
     user.addTeam(team.id);
-    this.userService.update(user);
+    await this.userService.update(user);
 
     const member = new Member(team.getId(), user.getId());
     member.setStatus(MemberStatus.ACTIVE);
     member.setEmail(req.body.email);
-    this.memberService.save(member);
+    await this.memberService.save(member);
 
     res.json({
       id: team.getId(),
       displayName: team.getDisplayName(),
+    });
+  };
+
+  public delete: ParamsTeamIdHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
+    user.removeTeam(req.params.teamId);
+    await this.userService.update(user);
+
+    let success = await this.memberService.removeAllMembers(req.params.teamId);
+
+    if (!success) {
+      throw new ApiError('Not deleted');
+    }
+
+    success = await this.teamService.delete(req.params.teamId);
+
+    if (!success) {
+      throw new ApiError("Team ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    res.json({
+      success: true,
     });
   };
 

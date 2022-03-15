@@ -22,6 +22,8 @@ teamRouter.put(
   teamController.updateDisplayName
 );
 
+teamRouter.delete('/team/:teamId', paramsTeamIdValidate, teamController.delete);
+
 teamRouter.get(
   '/team/:teamId/settings',
   paramsTeamIdValidate,
