@@ -28,3 +28,14 @@ export const bodyTeamNameValidate = validateRequest({
 });
 
 export type BodyTeamNameHandler = typeof bodyTeamNameValidate;
+
+export const bodyInviteValidate = validateRequest({
+  params: z.object({
+    teamId: z.string(),
+  }),
+  body: z.object({
+    email: z.string(),
+  }),
+});
+
+export type BodyInviteHandler = typeof bodyInviteValidate;

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { teamController } from 'src/controllers';
 import {
   bodyCreateTeamValidate,
+  bodyInviteValidate,
   bodyTeamNameValidate,
   paramsTeamIdValidate,
 } from 'src/validations/TeamValidation';
@@ -23,6 +24,12 @@ teamRouter.put(
 );
 
 teamRouter.delete('/team/:teamId', paramsTeamIdValidate, teamController.delete);
+
+teamRouter.post(
+  '/team/:teamId/invite',
+  bodyInviteValidate,
+  teamController.invite
+);
 
 teamRouter.get(
   '/team/:teamId/settings',

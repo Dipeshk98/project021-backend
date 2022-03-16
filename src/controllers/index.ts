@@ -1,5 +1,6 @@
 import {
   billingService,
+  emailService,
   memberService,
   teamService,
   todoService,
@@ -29,7 +30,8 @@ const teamController = new TeamController(
   teamService,
   userService,
   memberService,
-  billingService
+  billingService,
+  emailService
 );
 
 export { userController, todoController, billingController, teamController };

@@ -29,7 +29,6 @@ custom:
     stages:
       - offline
     outputDir: "./ses-output"
-    clean: true
 
   dynamodb:
     stages:

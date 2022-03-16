@@ -13,11 +13,13 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@types/nodemailer": "^6.4.4",
     "aws-sdk": "^2.1072.0",
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "express-async-errors": "^3.1.1",
     "helmet": "^5.0.2",
+    "nodemailer": "^6.7.2",
     "serverless-http": "^2.7.0",
     "stripe": "^8.202.0",
     "ulid": "^2.3.0",

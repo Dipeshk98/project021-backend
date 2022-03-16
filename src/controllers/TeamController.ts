@@ -3,12 +3,14 @@ import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
 import { Team } from 'src/models/Team';
 import { BillingService } from 'src/services/BillingService';
+import { EmailService } from 'src/services/EmailService';
 import { MemberService } from 'src/services/MemberService';
 import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
 import { MemberStatus } from 'src/types/MemberStatus';
 import {
   BodyCreateTeamHandler,
+  BodyInviteHandler,
   BodyTeamNameHandler,
   ParamsTeamIdHandler,
 } from 'src/validations/TeamValidation';
@@ -22,16 +24,20 @@ export class TeamController {
 
   private billingService: BillingService;
 
+  private emailService: EmailService;
+
   constructor(
     teamService: TeamService,
     userService: UserService,
     memberService: MemberService,
-    billingService: BillingService
+    billingService: BillingService,
+    emailService: EmailService
   ) {
     this.teamService = teamService;
     this.userService = userService;
     this.memberService = memberService;
     this.billingService = billingService;
+    this.emailService = emailService;
   }
 
   public create: BodyCreateTeamHandler = async (req, res) => {
@@ -175,6 +181,14 @@ export class TeamController {
       planId: plan.id,
       planName: plan.name,
       hasStripeCustomerId: team.hasStripeCustomerId(),
+    });
+  };
+
+  public invite: BodyInviteHandler = async (_req, res) => {
+    await this.emailService.send();
+
+    res.json({
+      hello: 'world',
     });
   };
 }
