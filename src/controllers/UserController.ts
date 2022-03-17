@@ -1,5 +1,3 @@
-import { ApiError } from 'src/error/ApiError';
-import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
 import { Team } from 'src/models/Team';
 import { MemberService } from 'src/services/MemberService';
@@ -60,11 +58,7 @@ export class UserController {
   };
 
   public updateEmail: BodyEmailHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
-    }
+    const user = await this.userService.strictFindByUserId(req.currentUserId);
 
     await this.memberService.updateEmail(user, req.body.email);
 

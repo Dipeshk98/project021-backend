@@ -44,11 +44,7 @@ export class TeamController {
   }
 
   public create: BodyCreateTeamHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
-    }
+    const user = await this.userService.strictFindByUserId(req.currentUserId);
 
     const team = new Team();
     team.setDisplayName(req.body.displayName);
@@ -180,11 +176,7 @@ export class TeamController {
   };
 
   public join: FullJoinHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
-    }
+    const user = await this.userService.strictFindByUserId(req.currentUserId);
 
     if (user.isTeamMember(req.params.teamId)) {
       throw new ApiError(

@@ -66,7 +66,7 @@ export class UserService {
     return user;
   }
 
-  public async findAndVerifyTeam(userId: string, teamId: string) {
+  public async strictFindByUserId(userId: string) {
     const user = await this.findByUserId(userId);
 
     if (!user) {
@@ -76,6 +76,12 @@ export class UserService {
         ErrorCode.INCORRECT_USER_ID
       );
     }
+
+    return user;
+  }
+
+  public async findAndVerifyTeam(userId: string, teamId: string) {
+    const user = await this.strictFindByUserId(userId);
 
     if (!user.isTeamMember(teamId)) {
       throw new ApiError(
