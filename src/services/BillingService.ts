@@ -24,7 +24,7 @@ export class BillingService {
     const team = await this.teamService.findByTeamId(teamId);
 
     if (!team) {
-      throw new ApiError("Team ID doesn't exist");
+      throw new ApiError('Incorrect TeamID');
     }
 
     const customerId = team.getStripeCustomerId();

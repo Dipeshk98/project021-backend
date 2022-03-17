@@ -54,7 +54,7 @@ export class TeamService {
         })
         .promise();
     } catch (ex: any) {
-      throw new ApiError('TodoService: impossible to create', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
   }
 
@@ -74,7 +74,7 @@ export class TeamService {
       // Return true when we successfully delete the item
       // Otherwise, it return false, it happens the item doesn't exists
     } catch (e: any) {
-      throw new ApiError('DBClient error: "delete" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -95,7 +95,7 @@ export class TeamService {
 
       team.fromItem(DynamoDB.Converter.unmarshall(result.Item));
     } catch (ex: any) {
-      throw new ApiError('UserService: get operation impossible', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return team;
@@ -149,10 +149,7 @@ export class TeamService {
         })
         .sort((team1, team2) => team1.id.localeCompare(team2.id));
     } catch (e: any) {
-      throw new ApiError(
-        'DBClient error: "findAllByTeamIdList" operation impossible',
-        e
-      );
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -172,7 +169,7 @@ export class TeamService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -199,7 +196,7 @@ export class TeamService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -226,7 +223,7 @@ export class TeamService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 }

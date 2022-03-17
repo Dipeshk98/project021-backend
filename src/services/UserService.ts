@@ -27,7 +27,7 @@ export class UserService {
         })
         .promise();
     } catch (ex: any) {
-      throw new ApiError('UserService: impossible to create', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return user;
@@ -50,7 +50,7 @@ export class UserService {
 
       user.fromItem(DynamoDB.Converter.unmarshall(result.Item));
     } catch (ex: any) {
-      throw new ApiError('UserService: get operation impossible', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return user;
@@ -110,7 +110,7 @@ export class UserService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 }
