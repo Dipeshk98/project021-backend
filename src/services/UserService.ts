@@ -66,7 +66,7 @@ export class UserService {
     return user;
   }
 
-  public async findAndIsTeamMember(userId: string, teamId: string) {
+  public async findAndVerifyTeam(userId: string, teamId: string) {
     const user = await this.findByUserId(userId);
 
     if (!user) {

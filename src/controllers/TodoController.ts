@@ -21,7 +21,7 @@ export class TodoController {
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -37,7 +37,7 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -53,7 +53,7 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -74,7 +74,7 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -94,7 +94,7 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );

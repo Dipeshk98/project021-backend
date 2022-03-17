@@ -27,7 +27,7 @@ export class BillingController {
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -75,7 +75,7 @@ export class BillingController {
   };
 
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndIsTeamMember(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
