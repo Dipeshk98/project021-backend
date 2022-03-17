@@ -3,7 +3,7 @@ import { Env } from 'src/utils/Env';
 
 import { AbstractEmailTemplate } from './AbstractEmailTemplate';
 
-export class TeamInviteEmail extends AbstractEmailTemplate {
+export class TeamInviteEmailTemplate extends AbstractEmailTemplate {
   private team: Team;
 
   private verificationCode: string;

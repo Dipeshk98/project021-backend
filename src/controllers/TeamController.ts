@@ -1,4 +1,4 @@
-import { TeamInviteEmail } from 'src/emails/TeamInviteEmail';
+import { TeamInviteEmailTemplate } from 'src/emails/TeamInviteEmail';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
@@ -69,16 +69,18 @@ export class TeamController {
     user.removeTeam(req.params.teamId);
     await this.userService.update(user);
 
-    let success = await this.memberService.deleteAllMembers(req.params.teamId);
+    const deleteMembersRes = await this.memberService.deleteAllMembers(
+      req.params.teamId
+    );
 
-    if (!success) {
-      throw new ApiError('Not deleted');
+    if (!deleteMembersRes) {
+      throw new ApiError('Not all members has been deleted');
     }
 
-    success = await this.teamService.delete(req.params.teamId);
+    const deleteTeamRes = await this.teamService.delete(req.params.teamId);
 
-    if (!success) {
-      throw new ApiError("Team ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    if (!deleteTeamRes) {
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
     res.json({
@@ -148,7 +150,7 @@ export class TeamController {
     await this.memberService.save(member);
 
     await this.emailService.send(
-      new TeamInviteEmail(team, member.skId),
+      new TeamInviteEmailTemplate(team, member.skId),
       req.body.email
     );
 
