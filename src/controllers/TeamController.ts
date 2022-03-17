@@ -47,7 +47,7 @@ export class TeamController {
     const user = await this.userService.findByUserId(req.currentUserId);
 
     if (!user) {
-      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
     }
 
     const team = new Team();
@@ -183,7 +183,7 @@ export class TeamController {
     const user = await this.userService.findByUserId(req.currentUserId);
 
     if (!user) {
-      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
     }
 
     if (user.isTeamMember(req.params.teamId)) {
@@ -244,23 +244,10 @@ export class TeamController {
       );
     }
 
-    const removedUser = await this.userService.findByUserId(req.params.userId);
-
-    if (!removedUser) {
-      throw new ApiError(
-        "Removed User ID doesn't exist",
-        null,
-        ErrorCode.INCORRECT_ID
-      );
-    }
-
-    if (!removedUser.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "Removed User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    const removedUser = await this.userService.findAndVerifyTeam(
+      req.params.userId,
+      req.params.teamId
+    );
 
     removedUser.removeTeam(req.params.teamId);
     await this.userService.update(removedUser);

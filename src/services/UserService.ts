@@ -70,7 +70,11 @@ export class UserService {
     const user = await this.findByUserId(userId);
 
     if (!user) {
-      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
+      throw new ApiError(
+        `Incorrect UserID ${userId}`,
+        null,
+        ErrorCode.INCORRECT_USER_ID
+      );
     }
 
     if (!user.isTeamMember(teamId)) {
