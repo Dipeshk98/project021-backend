@@ -63,7 +63,7 @@ export class UserController {
     const user = await this.userService.findByUserId(req.currentUserId);
 
     if (!user) {
-      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect UserID', null, ErrorCode.INCORRECT_USER_ID);
     }
 
     await this.memberService.updateEmail(user, req.body.email);
