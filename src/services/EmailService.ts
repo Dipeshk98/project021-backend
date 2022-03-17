@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import nodemailer from 'nodemailer';
+import { AbstractEmailTemplate } from 'src/emails/AbstractEmailTemplate';
 import { Env } from 'src/utils/Env';
 
 export class EmailService {
@@ -19,12 +20,12 @@ export class EmailService {
     });
   }
 
-  send() {
+  send(template: AbstractEmailTemplate, email: string) {
     return this.transporter.sendMail({
-      from: 'sender@example.com',
-      to: 'recipient@example.com',
-      subject: 'Message',
-      text: 'I hope this message gets sent!',
+      from: Env.getValue('EMAIL_FROM'),
+      to: email,
+      subject: template.buildSubject(),
+      text: template.buildText(),
     });
   }
 }

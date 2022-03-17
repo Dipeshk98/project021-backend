@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { MemberStatus } from 'src/types/MemberStatus';
 
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
@@ -7,23 +8,33 @@ export class Member extends AbstractItem {
 
   private teamId: string;
 
-  private userId: string;
+  private skId: string;
 
   private status = MemberStatus.PENDING;
 
   private email?: string;
 
-  constructor(teamId: string, userId: string, removeBegins?: boolean) {
+  /**
+   * Constructor for Team class.
+   * @constructor
+   * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
+   */
+  constructor(teamId: string, userId?: string, removeBegins?: boolean) {
     super();
     this.teamId = teamId;
 
-    let tmpUserId = userId;
+    if (userId) {
+      let tmpUserId = userId;
 
-    if (removeBegins) {
-      tmpUserId = tmpUserId.replace(Member.BEGINS_KEYS, '');
+      if (removeBegins) {
+        tmpUserId = tmpUserId.replace(Member.BEGINS_KEYS, '');
+      }
+
+      this.skId = tmpUserId;
+    } else {
+      // In pending status, we use the skId for verification code
+      this.skId = nanoid();
     }
-
-    this.userId = tmpUserId;
   }
 
   get pk() {
@@ -31,11 +42,11 @@ export class Member extends AbstractItem {
   }
 
   get sk() {
-    return `${Member.BEGINS_KEYS}${this.userId}`;
+    return `${Member.BEGINS_KEYS}${this.skId}`;
   }
 
-  getUserId() {
-    return this.userId;
+  getSkId() {
+    return this.skId;
   }
 
   setStatus(status: MemberStatus) {

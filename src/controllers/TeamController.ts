@@ -1,3 +1,4 @@
+import { TeamInviteEmail } from 'src/emails/TeamInviteEmail';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
@@ -145,7 +146,7 @@ export class TeamController {
 
     res.json({
       list: list.map((elt) => ({
-        userId: elt.getUserId(),
+        userId: elt.getSkId(),
         email: elt.getEmail(),
         status: elt.getStatus(),
       })),
@@ -184,11 +185,40 @@ export class TeamController {
     });
   };
 
-  public invite: BodyInviteHandler = async (_req, res) => {
-    await this.emailService.send();
+  public invite: BodyInviteHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
+    const team = await this.teamService.findByTeamId(req.params.teamId);
+
+    if (!team) {
+      throw new ApiError("Team ID doesn't exist");
+    }
+
+    const member = new Member(req.params.teamId);
+    member.setEmail(req.body.email);
+    await this.memberService.save(member);
+
+    await this.emailService.send(
+      new TeamInviteEmail(team, member.getSkId()),
+      req.body.email
+    );
 
     res.json({
-      hello: 'world',
+      teamId: team.getId(),
+      status: member.getStatus(),
+      email: req.body.email,
     });
   };
 }
