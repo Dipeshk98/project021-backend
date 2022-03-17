@@ -36,7 +36,7 @@ export class BillingService {
 
     const stripeCustomer = await getStripe().customers.create({
       metadata: {
-        teamId: team.getId(),
+        teamId: team.id,
       },
     });
 

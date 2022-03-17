@@ -121,7 +121,7 @@ export class MemberService {
             TableName: this.tableName,
             Key: DynamoDB.Converter.marshall({
               PK: `${Member.BEGINS_KEYS}${teamList[i]}`,
-              SK: `${Member.BEGINS_KEYS}${user.getId()}`,
+              SK: `${Member.BEGINS_KEYS}${user.id}`,
             }),
             UpdateExpression: 'SET email = :email',
             ExpressionAttributeValues: DynamoDB.Converter.marshall({

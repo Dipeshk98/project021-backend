@@ -42,7 +42,7 @@ export class UserController {
       user.addTeam(team.id);
       await this.userService.update(user);
 
-      const member = new Member(team.getId(), user.getId());
+      const member = new Member(team.id, user.id);
       member.setStatus(MemberStatus.ACTIVE);
       member.setEmail(req.query.email);
       await this.memberService.save(member);
@@ -53,7 +53,7 @@ export class UserController {
     );
 
     res.json({
-      id: user.getId(),
+      id: user.id,
       firstSignIn: user.getFirstSignIn().toISOString(),
       teamList,
     });
@@ -69,7 +69,7 @@ export class UserController {
     await this.memberService.updateEmail(user, req.body.email);
 
     res.json({
-      id: user.getId(),
+      id: user.id,
       email: req.body.email,
     });
   };

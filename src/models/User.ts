@@ -3,7 +3,7 @@ import { AbstractItem, IDynamodbItem } from './AbstractItem';
 export class User extends AbstractItem {
   static BEGINS_KEYS = 'USER#';
 
-  private id: string;
+  public readonly id: string;
 
   private firstSignIn: Date;
 
@@ -22,10 +22,6 @@ export class User extends AbstractItem {
 
   get sk() {
     return `${User.BEGINS_KEYS}${this.id}`;
-  }
-
-  getId() {
-    return this.id;
   }
 
   getFirstSignIn() {

@@ -57,13 +57,13 @@ export class TeamController {
     user.addTeam(team.id);
     await this.userService.update(user);
 
-    const member = new Member(team.getId(), user.getId());
+    const member = new Member(team.id, user.id);
     member.setStatus(MemberStatus.ACTIVE);
     member.setEmail(req.body.userEmail);
     await this.memberService.save(member);
 
     res.json({
-      id: team.getId(),
+      id: team.id,
       displayName: team.getDisplayName(),
     });
   };
@@ -148,7 +148,7 @@ export class TeamController {
 
     res.json({
       list: list.map((elt) => ({
-        userId: elt.getSkId(),
+        userId: elt.skId,
         email: elt.getEmail(),
         status: elt.getStatus(),
       })),
@@ -213,12 +213,12 @@ export class TeamController {
     await this.memberService.save(member);
 
     await this.emailService.send(
-      new TeamInviteEmail(team, member.getSkId()),
+      new TeamInviteEmail(team, member.skId),
       req.body.email
     );
 
     res.json({
-      teamId: team.getId(),
+      teamId: team.id,
       status: member.getStatus(),
       email: req.body.email,
     });

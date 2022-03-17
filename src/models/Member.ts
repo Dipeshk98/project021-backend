@@ -6,9 +6,9 @@ import { AbstractItem, IDynamodbItem } from './AbstractItem';
 export class Member extends AbstractItem {
   static BEGINS_KEYS = 'MEMBER#';
 
-  private teamId: string;
+  public readonly teamId: string;
 
-  private skId: string;
+  public readonly skId: string;
 
   private status = MemberStatus.PENDING;
 
@@ -43,10 +43,6 @@ export class Member extends AbstractItem {
 
   get sk() {
     return `${Member.BEGINS_KEYS}${this.skId}`;
-  }
-
-  getSkId() {
-    return this.skId;
   }
 
   setStatus(status: MemberStatus) {

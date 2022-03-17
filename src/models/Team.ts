@@ -43,10 +43,6 @@ export class Team extends AbstractItem {
     return `${Team.BEGINS_KEYS}${this.id}`;
   }
 
-  getId() {
-    return this.id;
-  }
-
   setDisplayName(name: string) {
     this.displayName = name;
   }

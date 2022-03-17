@@ -21,7 +21,7 @@ export class TeamInviteEmail extends AbstractEmailTemplate {
   public buildText(): string {
     return `Hi there,\n\nClick to the following link to join ${this.team.getDisplayName()} as a team member:\n${Env.getValue(
       'FRONTEND_DOMAIN_URL'
-    )}/team/${this.team.getId()}/join/${
+    )}/team/${this.team.id}/join/${
       this.verificationCode
     }\n\nThanks for your time.`;
   }
