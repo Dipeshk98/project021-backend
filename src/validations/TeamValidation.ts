@@ -51,3 +51,12 @@ export const fullJoinValidate = validateRequest({
 });
 
 export type FullJoinHandler = typeof fullJoinValidate;
+
+export const paramsRemoveValidate = validateRequest({
+  params: z.object({
+    teamId: z.string(),
+    userId: z.string(),
+  }),
+});
+
+export type ParamsRemoveHandler = typeof paramsRemoveValidate;

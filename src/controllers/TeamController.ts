@@ -14,6 +14,7 @@ import {
   BodyInviteHandler,
   BodyTeamNameHandler,
   FullJoinHandler,
+  ParamsRemoveHandler,
   ParamsTeamIdHandler,
 } from 'src/validations/TeamValidation';
 
@@ -269,6 +270,70 @@ export class TeamController {
       teamId: req.params.teamId,
       status: newMember.getStatus(),
       email: req.body.email,
+    });
+  };
+
+  public remove: ParamsRemoveHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    if (!user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
+    const list = await this.memberService.findAllByTeamId(req.params.teamId);
+
+    if (list.length <= 1) {
+      throw new ApiError(
+        'Team member not able to remove',
+        null,
+        ErrorCode.MIN_ONE_TEAM_MEMBER
+      );
+    }
+
+    const removedUser = await this.userService.findByUserId(req.params.userId);
+
+    if (!removedUser) {
+      throw new ApiError(
+        "Removed User ID doesn't exist",
+        null,
+        ErrorCode.INCORRECT_ID
+      );
+    }
+
+    if (!removedUser.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        "Removed User isn't a team member",
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
+    }
+
+    removedUser.removeTeam(req.params.teamId);
+    await this.userService.update(removedUser);
+
+    const success = await this.memberService.delete(
+      req.params.teamId,
+      req.params.userId
+    );
+
+    if (!success) {
+      throw new ApiError(
+        "Member ID doesn't exist",
+        null,
+        ErrorCode.INCORRECT_ID
+      );
+    }
+
+    res.json({
+      success: true,
     });
   };
 }

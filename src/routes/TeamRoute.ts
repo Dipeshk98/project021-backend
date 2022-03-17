@@ -5,6 +5,7 @@ import {
   bodyInviteValidate,
   bodyTeamNameValidate,
   fullJoinValidate,
+  paramsRemoveValidate,
   paramsTeamIdValidate,
 } from 'src/validations/TeamValidation';
 
@@ -36,6 +37,12 @@ teamRouter.post(
   '/team/:teamId/join/:verificationCode',
   fullJoinValidate,
   teamController.join
+);
+
+teamRouter.delete(
+  '/team/:teamId/remove/:userId',
+  paramsRemoveValidate,
+  teamController.remove
 );
 
 teamRouter.get(
