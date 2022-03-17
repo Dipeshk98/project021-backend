@@ -75,16 +75,10 @@ export class BillingController {
   };
 
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
+    const team = await this.teamService.findOnlyIfTeamMember(
+      req.params.teamId,
+      req.currentUserId
     );
-
-    const team = await this.teamService.findByTeamId(req.params.teamId);
-
-    if (!team) {
-      throw new ApiError("Team ID doesn't exist");
-    }
 
     const stripeCustomerId = team.getStripeCustomerId();
 

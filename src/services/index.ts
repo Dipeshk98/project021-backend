@@ -14,7 +14,7 @@ const dbClient = getDbClient();
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
 const userService = new UserService(dbClient);
 const todoService = new TodoService(dbClient);
-const teamService = new TeamService(dbClient);
+const teamService = new TeamService(dbClient, userService);
 const memberService = new MemberService(dbClient);
 const billingService = new BillingService(teamService);
 const emailService = new EmailService();

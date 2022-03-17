@@ -1,17 +1,23 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { Team } from 'src/models/Team';
 import { ISubscription } from 'src/types/StripeTypes';
 import { Env } from 'src/utils/Env';
+
+import { UserService } from './UserService';
 
 export class TeamService {
   private dbClient: DynamoDB;
 
   private tableName: string;
 
-  constructor(dbClient: DynamoDB) {
+  private userService: UserService;
+
+  constructor(dbClient: DynamoDB, userService: UserService) {
     this.dbClient = dbClient;
     this.tableName = Env.getValue('TABLE_NAME');
+    this.userService = userService;
   }
 
   async save(team: Team) {
@@ -67,6 +73,22 @@ export class TeamService {
       team.fromItem(DynamoDB.Converter.unmarshall(result.Item));
     } catch (ex: any) {
       throw new ApiError('UserService: get operation impossible', ex);
+    }
+
+    return team;
+  }
+
+  public async findOnlyIfTeamMember(teamId: string, userId: string) {
+    await this.userService.findAndVerifyTeam(userId, teamId);
+
+    const team = await this.findByTeamId(teamId);
+
+    if (!team) {
+      throw new ApiError(
+        `Incorrect TeamID ${teamId}`,
+        null,
+        ErrorCode.INCORRECT_TEAM_ID
+      );
     }
 
     return team;

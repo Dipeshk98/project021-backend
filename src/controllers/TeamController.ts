@@ -125,16 +125,10 @@ export class TeamController {
   };
 
   public getSettings: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
+    const team = await this.teamService.findOnlyIfTeamMember(
+      req.params.teamId,
+      req.currentUserId
     );
-
-    const team = await this.teamService.findByTeamId(req.params.teamId);
-
-    if (!team) {
-      throw new ApiError("Team ID doesn't exist");
-    }
 
     const plan = this.billingService.getPlanFromSubscription(
       team.getSubscription()
@@ -148,16 +142,10 @@ export class TeamController {
   };
 
   public invite: BodyInviteHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
+    const team = await this.teamService.findOnlyIfTeamMember(
+      req.params.teamId,
+      req.currentUserId
     );
-
-    const team = await this.teamService.findByTeamId(req.params.teamId);
-
-    if (!team) {
-      throw new ApiError("Team ID doesn't exist");
-    }
 
     const member = new Member(req.params.teamId);
     member.setEmail(req.body.email);
