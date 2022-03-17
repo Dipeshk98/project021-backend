@@ -64,7 +64,7 @@ export class TodoController {
     );
 
     if (!todo) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({
@@ -85,7 +85,7 @@ export class TodoController {
     );
 
     if (!success) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({
@@ -104,7 +104,7 @@ export class TodoController {
     const success = await this.todoService.update(todo);
 
     if (!success) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({
