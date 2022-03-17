@@ -1,10 +1,13 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
+import { Member } from 'src/models/Member';
 import { Team } from 'src/models/Team';
+import { MemberStatus } from 'src/types/MemberStatus';
 import { ISubscription } from 'src/types/StripeTypes';
 import { Env } from 'src/utils/Env';
 
+import { MemberService } from './MemberService';
 import { UserService } from './UserService';
 
 export class TeamService {
@@ -14,10 +17,30 @@ export class TeamService {
 
   private userService: UserService;
 
-  constructor(dbClient: DynamoDB, userService: UserService) {
+  private memberService: MemberService;
+
+  constructor(
+    dbClient: DynamoDB,
+    userService: UserService,
+    memberService: MemberService
+  ) {
     this.dbClient = dbClient;
     this.tableName = Env.getValue('TABLE_NAME');
     this.userService = userService;
+    this.memberService = memberService;
+  }
+
+  async create(displayName: string, userId: string, userEmail: string) {
+    const team = new Team();
+    team.setDisplayName(displayName);
+    await this.save(team);
+
+    const member = new Member(team.id, userId);
+    member.setStatus(MemberStatus.ACTIVE);
+    member.setEmail(userEmail);
+    await this.memberService.save(member);
+
+    return team;
   }
 
   async save(team: Team) {

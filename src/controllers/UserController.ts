@@ -1,9 +1,6 @@
-import { Member } from 'src/models/Member';
-import { Team } from 'src/models/Team';
 import { MemberService } from 'src/services/MemberService';
 import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
-import { MemberStatus } from 'src/types/MemberStatus';
 import {
   BodyEmailHandler,
   ParamsEmailHandler,
@@ -33,17 +30,14 @@ export class UserController {
     const user = await this.userService.findOrCreate(req.currentUserId);
 
     if (user.getTeamList().length === 0) {
-      const team = new Team();
-      team.setDisplayName('Team name');
-      await this.teamService.save(team);
+      const team = await this.teamService.create(
+        'Team name',
+        user.id,
+        req.query.email
+      );
 
       user.addTeam(team.id);
       await this.userService.update(user);
-
-      const member = new Member(team.id, user.id);
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setEmail(req.query.email);
-      await this.memberService.save(member);
     }
 
     const teamList = await this.teamService.findAllByTeamIdList(

@@ -2,7 +2,6 @@ import { TeamInviteEmail } from 'src/emails/TeamInviteEmail';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Member } from 'src/models/Member';
-import { Team } from 'src/models/Team';
 import { BillingService } from 'src/services/BillingService';
 import { EmailService } from 'src/services/EmailService';
 import { MemberService } from 'src/services/MemberService';
@@ -46,17 +45,14 @@ export class TeamController {
   public create: BodyCreateTeamHandler = async (req, res) => {
     const user = await this.userService.strictFindByUserId(req.currentUserId);
 
-    const team = new Team();
-    team.setDisplayName(req.body.displayName);
-    await this.teamService.save(team);
+    const team = await this.teamService.create(
+      req.body.displayName,
+      user.id,
+      req.body.userEmail
+    );
 
     user.addTeam(team.id);
     await this.userService.update(user);
-
-    const member = new Member(team.id, user.id);
-    member.setStatus(MemberStatus.ACTIVE);
-    member.setEmail(req.body.userEmail);
-    await this.memberService.save(member);
 
     res.json({
       id: team.id,
