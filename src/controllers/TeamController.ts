@@ -13,6 +13,7 @@ import {
   BodyCreateTeamHandler,
   BodyInviteHandler,
   BodyTeamNameHandler,
+  FullJoinHandler,
   ParamsTeamIdHandler,
 } from 'src/validations/TeamValidation';
 
@@ -84,7 +85,7 @@ export class TeamController {
     user.removeTeam(req.params.teamId);
     await this.userService.update(user);
 
-    let success = await this.memberService.removeAllMembers(req.params.teamId);
+    let success = await this.memberService.deleteAllMembers(req.params.teamId);
 
     if (!success) {
       throw new ApiError('Not deleted');
@@ -218,6 +219,55 @@ export class TeamController {
     res.json({
       teamId: team.getId(),
       status: member.getStatus(),
+      email: req.body.email,
+    });
+  };
+
+  public join: FullJoinHandler = async (req, res) => {
+    const user = await this.userService.findByUserId(req.currentUserId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    if (user.isTeamMember(req.params.teamId)) {
+      throw new ApiError(
+        'User is already a team member',
+        null,
+        ErrorCode.ALREADY_TEAM_MEMBER
+      );
+    }
+
+    const team = await this.teamService.findByTeamId(req.params.teamId);
+
+    if (!team) {
+      throw new ApiError("Team ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+    }
+
+    const success = await this.memberService.delete(
+      req.params.teamId,
+      req.params.verificationCode
+    );
+
+    if (!success) {
+      throw new ApiError(
+        "Todo ID doesn't exist",
+        null,
+        ErrorCode.INCORRECT_VERIFICATION_CODE
+      );
+    }
+
+    user.addTeam(team.id);
+    await this.userService.update(user);
+
+    const newMember = new Member(req.params.teamId, req.currentUserId);
+    newMember.setStatus(MemberStatus.ACTIVE);
+    newMember.setEmail(req.body.email);
+    await this.memberService.save(newMember);
+
+    res.json({
+      teamId: req.params.teamId,
+      status: newMember.getStatus(),
       email: req.body.email,
     });
   };

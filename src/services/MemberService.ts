@@ -29,7 +29,27 @@ export class MemberService {
     }
   }
 
-  public async removeAllMembers(teamId: string) {
+  public async delete(teamId: string, userId: string) {
+    const member = new Member(teamId, userId);
+
+    try {
+      const result = await this.dbClient
+        .deleteItem({
+          TableName: this.tableName,
+          Key: DynamoDB.Converter.marshall(member.keys()),
+          ReturnValues: 'ALL_OLD',
+        })
+        .promise();
+
+      return !!result.Attributes;
+      // Return true when we successfully delete the item
+      // Otherwise, it return false, it happens the item doesn't exists
+    } catch (e: any) {
+      throw new ApiError('DBClient error: "delete" operation impossible', e);
+    }
+  }
+
+  public async deleteAllMembers(teamId: string) {
     try {
       const list = await this.findAllByTeamId(teamId);
       let result = true;

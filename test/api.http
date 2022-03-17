@@ -175,5 +175,17 @@ POST http://localhost:4000/team/{{teamId}}/invite HTTP/1.1
 content-type: application/json
 
 {
-  "email": "test2@gmail.com"
+  "email": "test3@gmail.com"
+}
+
+### Join team
+# Warning: if you want to try the invite link from `ses-output` folder,
+# please make sure the link is correctly formatted.
+# In `ses-output` folder, you will find some unnecessary `equal` sign.
+# They should be remove otherwise, the verification will be incorrect.
+POST http://localhost:4000/team/01FYAPW4ATBDPE8ZR4BT6MC7NF/join/U-XdeixpkZuA72M0lhy_F HTTP/1.1
+content-type: application/json
+
+{
+  "email": "test3@gmail.com"
 }

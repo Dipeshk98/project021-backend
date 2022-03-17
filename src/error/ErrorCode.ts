@@ -3,4 +3,6 @@ export enum ErrorCode {
   NOT_FOUND = 'not_found',
   INCORRECT_ID = 'incorrect_id',
   NOT_TEAM_MEMBER = 'not_team_member',
+  ALREADY_TEAM_MEMBER = 'already_team_member',
+  INCORRECT_VERIFICATION_CODE = 'incorrect_verification_code',
 }
