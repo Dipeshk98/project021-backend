@@ -1,5 +1,6 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { User } from 'src/models/User';
 import { Env } from 'src/utils/Env';
 
@@ -60,6 +61,24 @@ export class UserService {
 
     if (!user) {
       return this.create(userId);
+    }
+
+    return user;
+  }
+
+  public async findAndIsTeamMember(userId: string, teamId: string) {
+    const user = await this.findByUserId(userId);
+
+    if (!user) {
+      throw new ApiError("User ID doesn't exist");
+    }
+
+    if (!user.isTeamMember(teamId)) {
+      throw new ApiError(
+        `User ${userId} isn't a team member of ${teamId}`,
+        null,
+        ErrorCode.NOT_TEAM_MEMBER
+      );
     }
 
     return user;

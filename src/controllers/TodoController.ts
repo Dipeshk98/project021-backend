@@ -21,19 +21,10 @@ export class TodoController {
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist");
-    }
-
-    if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    await this.userService.findAndIsTeamMember(
+      req.currentUserId,
+      req.params.teamId
+    );
 
     const list = await this.todoService.findAllByUserId(req.params.teamId);
 
@@ -46,19 +37,10 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist");
-    }
-
-    if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    await this.userService.findAndIsTeamMember(
+      req.currentUserId,
+      req.params.teamId
+    );
 
     const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
@@ -71,19 +53,10 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist");
-    }
-
-    if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    await this.userService.findAndIsTeamMember(
+      req.currentUserId,
+      req.params.teamId
+    );
 
     const todo = await this.todoService.findByKeys(
       req.params.teamId,
@@ -101,19 +74,10 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist");
-    }
-
-    if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    await this.userService.findAndIsTeamMember(
+      req.currentUserId,
+      req.params.teamId
+    );
 
     const success = await this.todoService.delete(
       req.params.teamId,
@@ -130,19 +94,10 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist");
-    }
-
-    if (!user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        "User isn't a team member",
-        null,
-        ErrorCode.NOT_TEAM_MEMBER
-      );
-    }
+    await this.userService.findAndIsTeamMember(
+      req.currentUserId,
+      req.params.teamId
+    );
 
     const todo = new Todo(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);
