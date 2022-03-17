@@ -74,6 +74,7 @@ export class TeamController {
     );
 
     if (!deleteMembersRes) {
+      // DynamoDB couldn't successfully delete all members.
       throw new ApiError('Not all members has been deleted');
     }
 
@@ -165,30 +166,22 @@ export class TeamController {
     const user = await this.userService.strictFindByUserId(req.currentUserId);
 
     if (user.isTeamMember(req.params.teamId)) {
-      throw new ApiError(
-        'User is already a team member',
-        null,
-        ErrorCode.ALREADY_TEAM_MEMBER
-      );
+      throw new ApiError('Already a member', null, ErrorCode.ALREADY_MEMBER);
     }
 
     const team = await this.teamService.findByTeamId(req.params.teamId);
 
     if (!team) {
-      throw new ApiError("Team ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
-    const success = await this.memberService.delete(
+    const deleteRes = await this.memberService.delete(
       req.params.teamId,
       req.params.verificationCode
     );
 
-    if (!success) {
-      throw new ApiError(
-        "Todo ID doesn't exist",
-        null,
-        ErrorCode.INCORRECT_VERIFICATION_CODE
-      );
+    if (!deleteRes) {
+      throw new ApiError('Incorrect code', null, ErrorCode.INCORRECT_CODE);
     }
 
     user.addTeam(team.id);
@@ -215,11 +208,7 @@ export class TeamController {
     const list = await this.memberService.findAllByTeamId(req.params.teamId);
 
     if (list.length <= 1) {
-      throw new ApiError(
-        'Team member not able to remove',
-        null,
-        ErrorCode.MIN_ONE_TEAM_MEMBER
-      );
+      throw new ApiError('Need one member', null, ErrorCode.NEED_ONE_MEMBER);
     }
 
     const removedUser = await this.userService.findAndVerifyTeam(
@@ -236,11 +225,10 @@ export class TeamController {
     );
 
     if (!success) {
-      throw new ApiError(
-        "Member ID doesn't exist",
-        null,
-        ErrorCode.INCORRECT_ID
-      );
+      // In `User` class, the user is a team member.
+      // In `Member` class, the user isn't a team member.
+      // The data is inconsistent and shouldn't happen.
+      throw new ApiError("It shouldn't happen: inconsistent data");
     }
 
     res.json({

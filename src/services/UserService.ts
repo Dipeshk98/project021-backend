@@ -87,7 +87,7 @@ export class UserService {
       throw new ApiError(
         `User ${userId} isn't a team member of ${teamId}`,
         null,
-        ErrorCode.NOT_TEAM_MEMBER
+        ErrorCode.NOT_MEMBER
       );
     }
 
