@@ -33,7 +33,7 @@ export class Member extends AbstractItem {
       this.skId = tmpUserId;
     } else {
       // In pending status, we use the skId for verification code
-      this.skId = nanoid();
+      this.skId = nanoid(30);
     }
   }
 
