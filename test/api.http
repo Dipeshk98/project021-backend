@@ -133,12 +133,12 @@ DELETE http://localhost:4000/{{teamId}}/todo/{{id}} HTTP/1.1
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/{{teamId}}/todo/list HTTP/1.1
 
-### Get settings (next)
+### Get settings
 @teamId = {{profile.response.body.$.teamList[0].id}}
 GET http://localhost:4000/team/{{teamId}}/settings HTTP/1.1
 content-type: application/json
 
-### Stripe create session (next)
+### Stripe create session
 @teamId = {{profile.response.body.$.teamList[0].id}}
 POST http://localhost:4000/{{teamId}}/billing/create-checkout-session HTTP/1.1
 content-type: application/json
@@ -156,12 +156,12 @@ content-type: application/json
   "priceId": "price_1In575EK74ldPEzAusBLAt"
 }
 
-### Create Stripe customer portal link (next)
+### Create Stripe customer portal link
 @teamId = {{profile.response.body.$.teamList[0].id}}
 POST http://localhost:4000/{{teamId}}/billing/customer-portal HTTP/1.1
 content-type: application/json
 
-### Update user email (next)
+### Update user email
 PUT http://localhost:4000/user/email-update HTTP/1.1
 content-type: application/json
 
