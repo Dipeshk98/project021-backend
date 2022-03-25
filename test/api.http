@@ -41,7 +41,7 @@ content-type: application/json
   "displayName": "team one"
 }
 
-### Change team name (next)
+### Change team name
 @teamId = {{profile.response.body.$.teamList[0].id}}
 PUT http://localhost:4000/team/{{teamId}}/name HTTP/1.1
 content-type: application/json
