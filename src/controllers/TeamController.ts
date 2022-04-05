@@ -205,12 +205,6 @@ export class TeamController {
       req.params.teamId
     );
 
-    const list = await this.memberService.findAllByTeamId(req.params.teamId);
-
-    if (list.length <= 1) {
-      throw new ApiError('Need one member', null, ErrorCode.NEED_ONE_MEMBER);
-    }
-
     const removedUser = await this.userService.findAndVerifyTeam(
       req.params.userId,
       req.params.teamId
