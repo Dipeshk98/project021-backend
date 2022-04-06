@@ -190,7 +190,7 @@ content-type: application/json
   "email": "test3@gmail.com"
 }
 
-### Remove user from team (next)
+### Remove user from team
 @teamId = {{profile.response.body.$.teamList[0].id}}
 DELETE http://localhost:4000/team/{{teamId}}/remove/8c27d077-fd80-4cda-9b49-b4745d10037d HTTP/1.1
 content-type: application/json
