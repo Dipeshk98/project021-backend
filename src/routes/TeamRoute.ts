@@ -40,7 +40,7 @@ teamRouter.post(
 );
 
 teamRouter.delete(
-  '/team/:teamId/remove/:userId',
+  '/team/:teamId/remove/:memberId',
   paramsRemoveValidate,
   teamController.remove
 );

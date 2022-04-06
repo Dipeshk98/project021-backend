@@ -169,7 +169,7 @@ content-type: application/json
   "email": "test@gmail.com"
 }
 
-### Team invite (next)
+### Team invite
 @teamId = {{profile.response.body.$.teamList[0].id}}
 POST http://localhost:4000/team/{{teamId}}/invite HTTP/1.1
 content-type: application/json

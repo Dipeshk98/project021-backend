@@ -116,7 +116,7 @@ export class TeamController {
 
     res.json({
       list: list.map((elt) => ({
-        userId: elt.skId,
+        memberId: elt.skId,
         email: elt.getEmail(),
         status: elt.getStatus(),
       })),
@@ -205,17 +205,19 @@ export class TeamController {
       req.params.teamId
     );
 
-    const removedUser = await this.userService.findAndVerifyTeam(
-      req.params.userId,
-      req.params.teamId
-    );
+    if (!req.query.isPending) {
+      const removedUser = await this.userService.findAndVerifyTeam(
+        req.params.memberId,
+        req.params.teamId
+      );
 
-    removedUser.removeTeam(req.params.teamId);
-    await this.userService.update(removedUser);
+      removedUser.removeTeam(req.params.teamId);
+      await this.userService.update(removedUser);
+    }
 
     const success = await this.memberService.delete(
       req.params.teamId,
-      req.params.userId
+      req.params.memberId
     );
 
     if (!success) {
