@@ -206,6 +206,7 @@ export class TeamController {
     );
 
     if (!req.query.isPending) {
+      // When the user is in active status/when the user has accepted the invitation
       const removedUser = await this.userService.findAndVerifyTeam(
         req.params.memberId,
         req.params.teamId
