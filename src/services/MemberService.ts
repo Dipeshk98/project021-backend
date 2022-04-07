@@ -81,6 +81,29 @@ export class MemberService {
     }
   }
 
+  public async findByKeys(teamId: string, userId: string) {
+    const member = new Member(teamId, userId);
+
+    try {
+      const result = await this.dbClient
+        .getItem({
+          TableName: this.tableName,
+          Key: DynamoDB.Converter.marshall(member.keys()),
+        })
+        .promise();
+
+      if (!result.Item) {
+        return null;
+      }
+
+      member.fromItem(DynamoDB.Converter.unmarshall(result.Item));
+    } catch (ex: any) {
+      throw new ApiError('DBClient error: operation impossible', ex);
+    }
+
+    return member;
+  }
+
   public async findAllByTeamId(teamId: string) {
     try {
       const list = await this.dbClient

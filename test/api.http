@@ -178,12 +178,18 @@ content-type: application/json
   "email": "test3@gmail.com"
 }
 
+### Get Join info
+@teamId = {{profile.response.body.$.teamList[0].id}}
+GET http://localhost:4000/team/{{teamId}}/join/f1KnLYiMlDM3jJ7YYrRTl_1Jl2rpLp HTTP/1.1
+content-type: application/json
+
 ### Join team (next)
 # Warning: if you want to try the invite link from `ses-output` folder,
 # please make sure the link is correctly formatted.
 # In `ses-output` folder, you will find some unnecessary `equal` sign.
 # They should be remove otherwise, the verification will be incorrect.
-POST http://localhost:4000/team/01FYCGZGAVKBWRPATQ217JMPDT/join/f0uCzs5reauD1V2t-nUPr HTTP/1.1
+@teamId = {{profile.response.body.$.teamList[0].id}}
+POST http://localhost:4000/team/{{teamId}}/join/f0uCzs5reauD1V2t-nUPr HTTP/1.1
 content-type: application/json
 
 {

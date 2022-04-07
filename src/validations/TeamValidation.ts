@@ -40,6 +40,15 @@ export const bodyInviteValidate = validateRequest({
 
 export type BodyInviteHandler = typeof bodyInviteValidate;
 
+export const paramsJoinValidate = validateRequest({
+  params: z.object({
+    teamId: z.string().nonempty(),
+    verificationCode: z.string().nonempty(),
+  }),
+});
+
+export type ParamsJoinHandler = typeof paramsJoinValidate;
+
 export const fullJoinValidate = validateRequest({
   params: z.object({
     teamId: z.string().nonempty(),

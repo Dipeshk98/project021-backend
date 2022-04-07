@@ -5,6 +5,7 @@ import {
   bodyInviteValidate,
   bodyTeamNameValidate,
   fullJoinValidate,
+  paramsJoinValidate,
   paramsRemoveValidate,
   paramsTeamIdValidate,
 } from 'src/validations/TeamValidation';
@@ -31,6 +32,12 @@ teamRouter.post(
   '/team/:teamId/invite',
   bodyInviteValidate,
   teamController.invite
+);
+
+teamRouter.get(
+  '/team/:teamId/join/:verificationCode',
+  paramsJoinValidate,
+  teamController.getJoinInfo
 );
 
 teamRouter.post(

@@ -13,6 +13,7 @@ import {
   BodyInviteHandler,
   BodyTeamNameHandler,
   FullJoinHandler,
+  ParamsJoinHandler,
   ParamsRemoveHandler,
   ParamsTeamIdHandler,
 } from 'src/validations/TeamValidation';
@@ -159,6 +160,31 @@ export class TeamController {
       teamId: team.id,
       status: member.getStatus(),
       email: req.body.email,
+    });
+  };
+
+  public getJoinInfo: ParamsJoinHandler = async (req, res) => {
+    const member = await this.memberService.findByKeys(
+      req.params.teamId,
+      req.params.verificationCode
+    );
+
+    if (!member) {
+      throw new ApiError(
+        'Incorrect TeamID or verificationCode',
+        null,
+        ErrorCode.INCORRECT_CODE
+      );
+    }
+
+    const team = await this.teamService.findByTeamId(req.params.teamId);
+
+    if (!team) {
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
+    }
+
+    res.json({
+      displayName: team.getDisplayName(),
     });
   };
 
