@@ -15,14 +15,14 @@ export class TeamInviteEmailTemplate extends AbstractEmailTemplate {
   }
 
   public buildSubject(): string {
-    return `Invitation to join ${this.team.getDisplayName()}`;
+    return `Invite to join ${this.team.getDisplayName()}`;
   }
 
   public buildText(): string {
-    return `Hi there,\n\nClick to the following link to join ${this.team.getDisplayName()} as a team member:\n${Env.getValue(
+    return `Hi there,\n\nYou've been invited to join ${this.team.getDisplayName()} as a team member.\n\nAccept invite by clicking the following link:\n${Env.getValue(
       'FRONTEND_DOMAIN_URL'
-    )}/team/${this.team.id}/join/${
+    )}/join/?teamId=${this.team.id}&verificationCode=${
       this.verificationCode
-    }\n\nThanks for your time.`;
+    }\n\nIf you believe you have received this email by mistake, feel free to ignore it.\n\nThanks for your time.`;
   }
 }
