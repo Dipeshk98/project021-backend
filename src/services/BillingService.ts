@@ -46,6 +46,8 @@ export class BillingService {
     return stripeCustomer.id;
   }
 
+  // TODO: Remove getStripe and make it a class attribute instead of injecting directly from import
+  // eslint-disable-next-line class-methods-use-this
   async createCheckoutSession(customerId: string, priceId: string) {
     try {
       return await getStripe().checkout.sessions.create({
@@ -112,6 +114,8 @@ export class BillingService {
     });
   }
 
+  // TODO: Should become a static method or move this function into User? Open to suggestion
+  // eslint-disable-next-line class-methods-use-this
   getPlanFromSubscription(subscription?: ISubscription) {
     const billingEnv = BillingPlan[Env.getValue('BILLING_PLAN_ENV')];
 
