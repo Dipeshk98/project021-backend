@@ -30,18 +30,6 @@ custom:
       - offline
     outputDir: "./ses-output"
 
-  dynamodb:
-    stages:
-      - offline
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-      seed: true
-    seed:
-      domain:
-        sources:
-          - table: ${self:custom.tableName.offline}
   bundle:
     linting: false
   serverless-offline:
