@@ -20,7 +20,7 @@ export const StripeCheckoutEvent = z.object({
 // Non-exhaustive attributes for Stripe Customer
 export const StripeCustomer = z.object({
   metadata: z.object({
-    userId: z.string(),
+    teamId: z.string(),
   }),
 });
 

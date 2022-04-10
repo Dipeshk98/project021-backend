@@ -1,6 +1,9 @@
 import { getDbClient } from 'src/utils/DBClient';
 
 import { BillingService } from './BillingService';
+import { EmailService } from './EmailService';
+import { MemberService } from './MemberService';
+import { TeamService } from './TeamService';
 import { TodoService } from './TodoService';
 import { UserService } from './UserService';
 
@@ -11,6 +14,16 @@ const dbClient = getDbClient();
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
 const userService = new UserService(dbClient);
 const todoService = new TodoService(dbClient);
-const billingService = new BillingService(userService);
+const memberService = new MemberService(dbClient);
+const teamService = new TeamService(dbClient, userService, memberService);
+const billingService = new BillingService(teamService);
+const emailService = new EmailService();
 
-export { billingService, userService, todoService };
+export {
+  billingService,
+  userService,
+  todoService,
+  emailService,
+  teamService,
+  memberService,
+};

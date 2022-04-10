@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
+import { ErrorCode } from 'src/error/ErrorCode';
 import { User } from 'src/models/User';
-import { ISubscription } from 'src/types/StripeTypes';
 import { Env } from 'src/utils/Env';
 
 export class UserService {
@@ -27,7 +27,7 @@ export class UserService {
         })
         .promise();
     } catch (ex: any) {
-      throw new ApiError('UserService: impossible to create', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return user;
@@ -50,7 +50,7 @@ export class UserService {
 
       user.fromItem(DynamoDB.Converter.unmarshall(result.Item));
     } catch (ex: any) {
-      throw new ApiError('UserService: get operation impossible', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return user;
@@ -61,6 +61,34 @@ export class UserService {
 
     if (!user) {
       return this.create(userId);
+    }
+
+    return user;
+  }
+
+  public async strictFindByUserId(userId: string) {
+    const user = await this.findByUserId(userId);
+
+    if (!user) {
+      throw new ApiError(
+        `Incorrect UserID ${userId}`,
+        null,
+        ErrorCode.INCORRECT_USER_ID
+      );
+    }
+
+    return user;
+  }
+
+  public async findAndVerifyTeam(userId: string, teamId: string) {
+    const user = await this.strictFindByUserId(userId);
+
+    if (!user.isTeamMember(teamId)) {
+      throw new ApiError(
+        `User ${userId} isn't a team member of ${teamId}`,
+        null,
+        ErrorCode.NOT_MEMBER
+      );
     }
 
     return user;
@@ -82,34 +110,7 @@ export class UserService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
-    }
-  }
-
-  public async updateSubscription(userId: string, subscription: ISubscription) {
-    try {
-      await this.dbClient
-        .updateItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall({
-            PK: `${User.BEGINS_KEYS}${userId}`,
-            SK: `${User.BEGINS_KEYS}${userId}`,
-          }),
-          UpdateExpression: 'SET subscription = :subscription',
-          ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':subscription': subscription,
-          }),
-          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
-        })
-        .promise();
-
-      return true;
-    } catch (e: any) {
-      if (e.code === 'ConditionalCheckFailedException') {
-        return false;
-      }
-
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 }

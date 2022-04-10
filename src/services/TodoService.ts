@@ -1,7 +1,6 @@
 import { DynamoDB } from 'aws-sdk';
 import { ApiError } from 'src/error/ApiError';
 import { Todo } from 'src/models/Todo';
-import { User } from 'src/models/User';
 import { Env } from 'src/utils/Env';
 
 export class TodoService {
@@ -25,7 +24,7 @@ export class TodoService {
         })
         .promise();
     } catch (ex: any) {
-      throw new ApiError('TodoService: impossible to create', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
   }
 
@@ -46,7 +45,7 @@ export class TodoService {
 
       todo.fromItem(DynamoDB.Converter.unmarshall(result.Item));
     } catch (ex: any) {
-      throw new ApiError('TodoService: get operation impossible', ex);
+      throw new ApiError('DBClient error: operation impossible', ex);
     }
 
     return todo;
@@ -68,7 +67,7 @@ export class TodoService {
       // Return true when we successfully delete the item
       // Otherwise, it return false, it happens the item doesn't exists
     } catch (e: any) {
-      throw new ApiError('DBClient error: "delete" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -88,7 +87,7 @@ export class TodoService {
         return false;
       }
 
-      throw new ApiError('DBClient error: "update" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 
@@ -99,7 +98,7 @@ export class TodoService {
           TableName: this.tableName,
           KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skBegins)',
           ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':pk': `${User.BEGINS_KEYS}${userId}`,
+            ':pk': `${Todo.BEGINS_KEYS}${userId}`,
             ':skBegins': Todo.BEGINS_KEYS,
           }),
         })
@@ -116,7 +115,7 @@ export class TodoService {
         return todo;
       });
     } catch (e: any) {
-      throw new ApiError('DBClient error: "list" operation impossible', e);
+      throw new ApiError('DBClient error: operation impossible', e);
     }
   }
 }

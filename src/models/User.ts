@@ -1,22 +1,24 @@
-import { ISubscription } from 'src/types/StripeTypes';
-
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
 
 export class User extends AbstractItem {
   static BEGINS_KEYS = 'USER#';
 
-  private id: string;
+  public readonly id: string;
 
   private firstSignIn: Date;
 
-  private stripeCustomerId?: string;
+  private teamList: string[];
 
-  private subscription?: ISubscription;
-
+  /**
+   * Constructor for User class.
+   * @constructor
+   * @param id - The ID of the user.
+   */
   constructor(id: string) {
     super();
     this.id = id;
     this.firstSignIn = new Date();
+    this.teamList = [];
   }
 
   get pk() {
@@ -27,42 +29,36 @@ export class User extends AbstractItem {
     return `${User.BEGINS_KEYS}${this.id}`;
   }
 
-  getId() {
-    return this.id;
-  }
-
   getFirstSignIn() {
     return this.firstSignIn;
   }
 
-  setStripeCustomerId(customerId: string) {
-    this.stripeCustomerId = customerId;
+  getTeamList() {
+    return this.teamList;
   }
 
-  getStripeCustomerId() {
-    return this.stripeCustomerId;
+  isTeamMember(teamId: string) {
+    return this.teamList.includes(teamId);
   }
 
-  hasStripeCustomerId() {
-    return !!this.stripeCustomerId;
+  addTeam(teamId: string) {
+    this.teamList.push(teamId);
   }
 
-  getSubscription() {
-    return this.subscription;
+  removeTeam(teamId: string) {
+    this.teamList = this.teamList.filter((elt) => elt !== teamId);
   }
 
   toItem() {
     return {
       ...this.keys(),
       firstSignIn: this.firstSignIn.toISOString(),
-      stripeCustomerId: this.stripeCustomerId,
-      subscription: this.subscription,
+      teamList: this.teamList,
     };
   }
 
   fromItem(item: IDynamodbItem) {
     this.firstSignIn = new Date(item.firstSignIn);
-    this.stripeCustomerId = item.stripeCustomerId;
-    this.subscription = item.subscription;
+    this.teamList = item.teamList;
   }
 }

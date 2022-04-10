@@ -1,14 +1,37 @@
-import { billingService, todoService, userService } from 'src/services';
+import {
+  billingService,
+  emailService,
+  memberService,
+  teamService,
+  todoService,
+  userService,
+} from 'src/services';
 
 import { BillingController } from './BillingController';
+import { TeamController } from './TeamController';
 import { TodoController } from './TodoController';
 import { UserController } from './UserController';
 
 // Manual `dependency injection` (DI) without external libraries.
 // No overhead, some DI library can increase cold start in serverless architecture.
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
-const userController = new UserController(userService, billingService);
-const todoController = new TodoController(todoService);
-const billingController = new BillingController(billingService, userService);
+const userController = new UserController(
+  userService,
+  teamService,
+  memberService
+);
+const todoController = new TodoController(todoService, userService);
+const billingController = new BillingController(
+  billingService,
+  userService,
+  teamService
+);
+const teamController = new TeamController(
+  teamService,
+  userService,
+  memberService,
+  billingService,
+  emailService
+);
 
-export { userController, todoController, billingController };
+export { userController, todoController, billingController, teamController };

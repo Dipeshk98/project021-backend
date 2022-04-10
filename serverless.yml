@@ -25,18 +25,11 @@ custom:
     staging: false
     prod: false
 
-  dynamodb:
+  ses:
     stages:
       - offline
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-      seed: true
-    seed:
-      domain:
-        sources:
-          - table: ${self:custom.tableName.offline}
+    outputDir: "./ses-output"
+
   bundle:
     linting: false
   serverless-offline:
@@ -46,6 +39,7 @@ custom:
 
 provider:
   name: aws
+  stage: ${self:custom.stage}
   runtime: nodejs14.x
   memorySize: 512
   timeout: 10
@@ -133,5 +127,6 @@ disabledDeprecations:
 plugins:
   - serverless-dotenv-plugin
   - serverless-bundle
-  - serverless-dynamodb-local
+  - serverless-dynalite-local
   - serverless-offline
+  - serverless-offline-ses

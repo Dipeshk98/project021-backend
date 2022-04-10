@@ -1,46 +1,65 @@
-import { RequestHandler } from 'express';
-import { ApiError } from 'src/error/ApiError';
-import { ErrorCode } from 'src/error/ErrorCode';
-import { BillingService } from 'src/services/BillingService';
+import { MemberService } from 'src/services/MemberService';
+import { TeamService } from 'src/services/TeamService';
 import { UserService } from 'src/services/UserService';
+import {
+  BodyEmailHandler,
+  ParamsEmailHandler,
+} from 'src/validations/UserValidation';
 
 export class UserController {
-  private billingService: BillingService;
-
   private userService: UserService;
 
-  constructor(userService: UserService, billingService: BillingService) {
+  private teamService: TeamService;
+
+  private memberService: MemberService;
+
+  constructor(
+    userService: UserService,
+    teamService: TeamService,
+    memberService: MemberService
+  ) {
     this.userService = userService;
-    this.billingService = billingService;
+    this.teamService = teamService;
+    this.memberService = memberService;
   }
 
   /**
    * Retrieve User information or create a new User, it happens when the user signs in for the first time.
    */
-  public getProfile: RequestHandler = async (req, res) => {
+  public getProfile: ParamsEmailHandler = async (req, res) => {
     const user = await this.userService.findOrCreate(req.currentUserId);
 
-    res.json({
-      id: user.getId(),
-      firstSignIn: user.getFirstSignIn().toISOString(),
-    });
-  };
+    if (user.getTeamList().length === 0) {
+      // Create a new team when the user isn't member of any team
+      const team = await this.teamService.create(
+        'New Team',
+        user.id,
+        req.query.email
+      );
 
-  public getSettings: RequestHandler = async (req, res) => {
-    const user = await this.userService.findByUserId(req.currentUserId);
-
-    if (!user) {
-      throw new ApiError("User ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      user.addTeam(team.id);
+      await this.userService.update(user);
     }
 
-    const plan = this.billingService.getPlanFromSubscription(
-      user.getSubscription()
+    const teamList = await this.teamService.findAllByTeamIdList(
+      user.getTeamList()
     );
 
     res.json({
-      planId: plan.id,
-      planName: plan.name,
-      hasStripeCustomerId: user.hasStripeCustomerId(),
+      id: user.id,
+      firstSignIn: user.getFirstSignIn().toISOString(),
+      teamList,
+    });
+  };
+
+  public updateEmail: BodyEmailHandler = async (req, res) => {
+    const user = await this.userService.strictFindByUserId(req.currentUserId);
+
+    await this.memberService.updateEmail(user, req.body.email);
+
+    res.json({
+      id: user.id,
+      email: req.body.email,
     });
   };
 }

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { todoController } from 'src/controllers';
+import { paramsTeamIdValidate } from 'src/validations/TeamValidation';
 import {
   paramsTodoValidate,
   bodyTodoValidate,
@@ -8,14 +9,22 @@ import {
 
 const todoRouter = Router();
 
-todoRouter.get('/todo/list', todoController.list);
+todoRouter.get('/:teamId/todo/list', paramsTeamIdValidate, todoController.list);
 
-todoRouter.post('/todo/create', bodyTodoValidate, todoController.create);
+todoRouter.post(
+  '/:teamId/todo/create',
+  bodyTodoValidate,
+  todoController.create
+);
 
-todoRouter.get('/todo/:id', paramsTodoValidate, todoController.read);
+todoRouter.get('/:teamId/todo/:id', paramsTodoValidate, todoController.read);
 
-todoRouter.delete('/todo/:id', paramsTodoValidate, todoController.delete);
+todoRouter.delete(
+  '/:teamId/todo/:id',
+  paramsTodoValidate,
+  todoController.delete
+);
 
-todoRouter.put('/todo/:id', fullTodoValidate, todoController.update);
+todoRouter.put('/:teamId/todo/:id', fullTodoValidate, todoController.update);
 
 export { todoRouter };

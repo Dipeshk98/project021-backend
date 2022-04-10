@@ -1,8 +1,9 @@
-import { RequestHandler } from 'express';
 import { ApiError } from 'src/error/ApiError';
 import { ErrorCode } from 'src/error/ErrorCode';
 import { Todo } from 'src/models/Todo';
 import { TodoService } from 'src/services/TodoService';
+import { UserService } from 'src/services/UserService';
+import { ParamsTeamIdHandler } from 'src/validations/TeamValidation';
 import {
   ParamsTodoHandler,
   BodyTodoHandler,
@@ -12,12 +13,20 @@ import {
 export class TodoController {
   private todoService: TodoService;
 
-  constructor(todoService: TodoService) {
+  private userService: UserService;
+
+  constructor(todoService: TodoService, userService: UserService) {
     this.todoService = todoService;
+    this.userService = userService;
   }
 
-  public list: RequestHandler = async (req, res) => {
-    const list = await this.todoService.findAllByUserId(req.currentUserId);
+  public list: ParamsTeamIdHandler = async (req, res) => {
+    await this.userService.findAndVerifyTeam(
+      req.currentUserId,
+      req.params.teamId
+    );
+
+    const list = await this.todoService.findAllByUserId(req.params.teamId);
 
     res.json({
       list: list.map((elt) => ({
@@ -28,7 +37,12 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    const todo = new Todo(req.currentUserId);
+    await this.userService.findAndVerifyTeam(
+      req.currentUserId,
+      req.params.teamId
+    );
+
+    const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
     await this.todoService.save(todo);
 
@@ -39,13 +53,18 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    const todo = await this.todoService.findByKeys(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
+      req.params.teamId
+    );
+
+    const todo = await this.todoService.findByKeys(
+      req.params.teamId,
       req.params.id
     );
 
     if (!todo) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({
@@ -55,13 +74,18 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    const success = await this.todoService.delete(
+    await this.userService.findAndVerifyTeam(
       req.currentUserId,
+      req.params.teamId
+    );
+
+    const success = await this.todoService.delete(
+      req.params.teamId,
       req.params.id
     );
 
     if (!success) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({
@@ -70,12 +94,17 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    const todo = new Todo(req.currentUserId, req.params.id);
+    await this.userService.findAndVerifyTeam(
+      req.currentUserId,
+      req.params.teamId
+    );
+
+    const todo = new Todo(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);
     const success = await this.todoService.update(todo);
 
     if (!success) {
-      throw new ApiError("Todo ID doesn't exist", null, ErrorCode.INCORRECT_ID);
+      throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);
     }
 
     res.json({

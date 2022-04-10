@@ -1,7 +1,6 @@
 import { ulid } from 'ulid';
 
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
-import { User } from './User';
 
 export class Todo extends AbstractItem {
   static BEGINS_KEYS = 'TODO#';
@@ -18,7 +17,7 @@ export class Todo extends AbstractItem {
    * @param ownerId - The owner ID of the todo.
    * @param id - The ID of the todo.
    * @param removeBegins - Is BEGINS_KEYS included in the ID.
-   * If yes, it need to be removed.
+   * If yes, it needs to be removed.
    */
   constructor(ownerId: string, id?: string, removeBegins?: boolean) {
     super();
@@ -38,7 +37,7 @@ export class Todo extends AbstractItem {
   }
 
   get pk() {
-    return `${User.BEGINS_KEYS}${this.ownerId}`;
+    return `${Todo.BEGINS_KEYS}${this.ownerId}`;
   }
 
   get sk() {
