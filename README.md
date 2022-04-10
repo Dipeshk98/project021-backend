@@ -15,22 +15,6 @@ cd my-project-name-backend
 npm install
 ```
 
-Before installing local dynamoDB, make sure you have openjdk 17.x.x or newer:
-
-> :warning: Even if you have already Java installed on your computer, please make sure your Java isn't too old. Java is only used by the local and offline AWS dynamoDB. So, if your old Java version isn't compatible with the local DynamoDB, your all backend won't start correctly and you don't get any warning 😥
-
-```
-brew install java # Brew is only valid on Mac. Or, you can install it manually on the official Java website.
-
-# At the end of installation, Brew indicates some instruction to install Java correctly, please follow them
-```
-
-You also need to install a local dynamodb:
-
-```
-npx sls dynamodb install
-```
-
 Then, you can run locally in development mode with live reload:
 
 ```
@@ -93,10 +77,6 @@ npm run deploy-prod
 ```
 
 (optional) You can try Seed.run for an automatic backend deployment integrated to your GitHub workflow.
-
-### DynamoDB seed
-
-By default, your backend application starts with empty data in DynamoDB. You can change this behavior by modifying the JSON file located at `db/seed.json`. Each time you run your backend application, your Dynamodb will be initialized by the seed data you have provided.
 
 ## Install dynamodb-admin (optional)
 
