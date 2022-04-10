@@ -18,6 +18,8 @@ export class Team extends AbstractItem {
    * Constructor for Team class.
    * @constructor
    * @param id - The ID of the team.
+   * @param removeBegins - Is BEGINS_KEYS included in the ID.
+   * If yes, it needs to be removed.
    */
   constructor(id?: string, removeBegins?: boolean) {
     super();

@@ -17,7 +17,7 @@ export class Todo extends AbstractItem {
    * @param ownerId - The owner ID of the todo.
    * @param id - The ID of the todo.
    * @param removeBegins - Is BEGINS_KEYS included in the ID.
-   * If yes, it need to be removed.
+   * If yes, it needs to be removed.
    */
   constructor(ownerId: string, id?: string, removeBegins?: boolean) {
     super();

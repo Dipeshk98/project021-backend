@@ -15,9 +15,12 @@ export class Member extends AbstractItem {
   private email?: string;
 
   /**
-   * Constructor for Team class.
+   * Constructor for Member class.
    * @constructor
+   * @param teamId - The ID of the team.
    * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
+   * @param removeBegins - Is BEGINS_KEYS included in the ID.
+   * If yes, it needs to be removed.
    */
   constructor(teamId: string, userId?: string, removeBegins?: boolean) {
     super();

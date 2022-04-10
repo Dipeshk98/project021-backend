@@ -30,6 +30,7 @@ export class UserController {
     const user = await this.userService.findOrCreate(req.currentUserId);
 
     if (user.getTeamList().length === 0) {
+      // Create a new team when the user isn't member of any team
       const team = await this.teamService.create(
         'New Team',
         user.id,

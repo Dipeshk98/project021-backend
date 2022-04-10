@@ -9,6 +9,11 @@ export class User extends AbstractItem {
 
   private teamList: string[];
 
+  /**
+   * Constructor for User class.
+   * @constructor
+   * @param id - The ID of the user.
+   */
   constructor(id: string) {
     super();
     this.id = id;
