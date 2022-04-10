@@ -31,7 +31,7 @@ export class UserController {
 
     if (user.getTeamList().length === 0) {
       const team = await this.teamService.create(
-        'Team name',
+        'New Team',
         user.id,
         req.query.email
       );
