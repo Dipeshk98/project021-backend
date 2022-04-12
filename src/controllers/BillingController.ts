@@ -59,6 +59,8 @@ export class BillingController {
       throw new ApiError('Incorrect Stripe webhook signature', ex);
     }
 
+    // FYI, here is the explanation why we need these Stripe events:
+    // https://github.com/stripe/stripe-firebase-extensions/issues/146
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
