@@ -11,7 +11,7 @@ export const getDbClient = () => {
     if (Env.getValue('IS_OFFLINE', false)) {
       dynamodbOptions = {
         region: 'localhost',
-        endpoint: 'http://localhost:4567',
+        endpoint: 'http://localhost:8000',
         accessKeyId: 'RANDOM_LOCAL_VALUE', // Needed for local environment in case AWS credentials isn't defined
         secretAccessKey: 'RANDOM_LOCAL_VALUE',
       };
