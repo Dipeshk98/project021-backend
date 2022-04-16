@@ -76,6 +76,10 @@ provider:
           # the specific table for the stage
           Resource:
             - !ImportValue '${self:custom.sstApp}-TableArn'
+        - Effect: 'Allow'
+          Action:
+            - ses:SendRawEmail
+          Resource: "*"
 
   environment:
     TABLE_NAME: ${self:custom.tableName.${self:custom.stage}}

@@ -22,7 +22,10 @@ export class EmailService {
 
   send(template: AbstractEmailTemplate, email: string) {
     return this.transporter.sendMail({
-      from: Env.getValue('EMAIL_FROM'),
+      from: {
+        name: Env.getValue('SITE_NAME'),
+        address: Env.getValue('SENDER_EMAIL_ADDRESS'),
+      },
       to: email,
       subject: template.buildSubject(),
       text: template.buildText(),
