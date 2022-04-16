@@ -44,14 +44,15 @@ provider:
   memorySize: 512
   timeout: 10
   logRetentionInDays: 90
-  lambdaHashingVersion: 20201221 # https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
   logs:
     httpApi: true
   httpApi:
     # metrics: true # Enable if you need
     cors:
       allowedOrigins:
-        - ${env:FRONTEND_DOMAIN_URL}
+        # In serverless 2, this step was automatically done but, serverless>=3.0.0 introduces changes that significantly impacts this step.
+        # FIXME: Update the allowedOrigin to matched the environment variable `FRONTEND_DOMAIN_URL`.
+        - http://localhost:3000
       allowedHeaders: # Set the default value from Serverless framework, this workaround is needed by serverless-offline
         - Content-Type
         - X-Amz-Date
@@ -60,18 +61,21 @@ provider:
         - X-Amz-Security-Token
         - X-Amz-User-Agent
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      # Restrict our IAM role permissions to
-      # the specific table for the stage
-      Resource:
-        - !ImportValue '${self:custom.sstApp}-TableArn'
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchGetItem
+          # Restrict our IAM role permissions to
+          # the specific table for the stage
+          Resource:
+            - !ImportValue '${self:custom.sstApp}-TableArn'
 
   environment:
     TABLE_NAME: ${self:custom.tableName.${self:custom.stage}}
@@ -120,13 +124,9 @@ resources:
 package:
   individually: true
 
-# Needed by `serverless-dotenv-plugin` to work correctly
-disabledDeprecations:
-  - NEW_VARIABLES_RESOLVER
-
 plugins:
   - serverless-dotenv-plugin
   - serverless-bundle
-  - serverless-dynalite-local
-  - serverless-offline
+  - '@nearst/serverless-dynalite'
   - serverless-offline-ses
+  - serverless-offline
