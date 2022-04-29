@@ -5,8 +5,7 @@ import {
   teamService,
   todoService,
   userService,
-} from 'src/services';
-
+} from '../services';
 import { BillingController } from './BillingController';
 import { TeamController } from './TeamController';
 import { TodoController } from './TodoController';

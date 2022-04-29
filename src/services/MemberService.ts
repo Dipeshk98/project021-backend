@@ -1,8 +1,9 @@
 import { DynamoDB } from 'aws-sdk';
-import { ApiError } from 'src/error/ApiError';
-import { Member } from 'src/models/Member';
-import { User } from 'src/models/User';
-import { Env } from 'src/utils/Env';
+
+import { ApiError } from '../error/ApiError';
+import { Member } from '../models/Member';
+import { User } from '../models/User';
+import { Env } from '../utils/Env';
 
 export class MemberService {
   private dbClient: DynamoDB;

@@ -1,9 +1,10 @@
 module.exports = {
-  roots: ['<rootDir>/src'],
+  preset: 'jest-dynalite',
   testMatch: ['**/*.test.{js,ts}'],
   transform: {
     '^.+\\.ts$': ['ts-jest'],
   },
+  setupFiles: ['<rootDir>/jest.env-setup.js'],
   collectCoverage: true,
   collectCoverageFrom: [
     './src/**/*.{js,ts}',

@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import { MemberStatus } from 'src/types/MemberStatus';
 
+import { MemberStatus } from '../types/MemberStatus';
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
 
 export class Member extends AbstractItem {

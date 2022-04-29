@@ -1,14 +1,14 @@
-import { ApiError } from 'src/error/ApiError';
-import { ErrorCode } from 'src/error/ErrorCode';
-import { Todo } from 'src/models/Todo';
-import { TodoService } from 'src/services/TodoService';
-import { UserService } from 'src/services/UserService';
-import { ParamsTeamIdHandler } from 'src/validations/TeamValidation';
+import { ApiError } from '../error/ApiError';
+import { ErrorCode } from '../error/ErrorCode';
+import { Todo } from '../models/Todo';
+import { TodoService } from '../services/TodoService';
+import { UserService } from '../services/UserService';
+import { ParamsTeamIdHandler } from '../validations/TeamValidation';
 import {
   BodyTodoHandler,
   FullTodoHandler,
   ParamsTodoHandler,
-} from 'src/validations/TodoValidation';
+} from '../validations/TodoValidation';
 
 export class TodoController {
   private todoService: TodoService;

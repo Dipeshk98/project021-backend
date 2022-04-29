@@ -1,10 +1,10 @@
-import { MemberService } from 'src/services/MemberService';
-import { TeamService } from 'src/services/TeamService';
-import { UserService } from 'src/services/UserService';
+import { MemberService } from '../services/MemberService';
+import { TeamService } from '../services/TeamService';
+import { UserService } from '../services/UserService';
 import {
   BodyEmailHandler,
   ParamsEmailHandler,
-} from 'src/validations/UserValidation';
+} from '../validations/UserValidation';
 
 export class UserController {
   private userService: UserService;

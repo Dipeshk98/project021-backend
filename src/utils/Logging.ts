@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { ApiError } from 'src/error/ApiError';
+import { ApiError } from '../error/ApiError';
 
 // Tried several node logging system, none of them are working very well with Serverless.
 // Either create a lot of overhead on Lambda or either doesn't integrate well with Cloudwatch.
