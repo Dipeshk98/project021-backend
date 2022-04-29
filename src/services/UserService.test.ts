@@ -1,3 +1,5 @@
+import assert from 'assert';
+
 import { getDbClient } from '@/utils/DBClient';
 
 import { UserService } from './UserService';
@@ -8,11 +10,12 @@ describe('TodoService', () => {
       const userId = 'abc-123';
 
       const userService = new UserService(getDbClient());
-      userService.create(userId);
+      await userService.create(userId);
 
       const user = await userService.findByUserId(userId);
 
-      expect(user).not.toBeNull();
+      assert(user !== null, "user shouldn't be null");
+      expect(user.id).toEqual(userId);
     });
   });
 });
