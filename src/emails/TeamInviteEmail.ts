@@ -1,5 +1,6 @@
-import { Team } from '../models/Team';
-import { Env } from '../utils/Env';
+import { Team } from '@/models/Team';
+import { Env } from '@/utils/Env';
+
 import { AbstractEmailTemplate } from './AbstractEmailTemplate';
 
 export class TeamInviteEmailTemplate extends AbstractEmailTemplate {

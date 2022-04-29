@@ -1,4 +1,5 @@
-import { getDbClient } from '../utils/DBClient';
+import { getDbClient } from '@/utils/DBClient';
+
 import { UserService } from './UserService';
 
 describe('TodoService', () => {

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { billingController } from '../controllers';
-import { bodyPriceValidate } from '../validations/BillingValidation';
-import { paramsTeamIdValidate } from '../validations/TeamValidation';
+import { billingController } from '@/controllers';
+import { bodyPriceValidate } from '@/validations/BillingValidation';
+import { paramsTeamIdValidate } from '@/validations/TeamValidation';
 
 const billingRouter = Router();
 

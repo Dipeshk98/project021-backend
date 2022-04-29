@@ -1,8 +1,8 @@
 import { DynamoDB } from 'aws-sdk';
 
-import { ApiError } from '../error/ApiError';
-import { Todo } from '../models/Todo';
-import { Env } from '../utils/Env';
+import { ApiError } from '@/error/ApiError';
+import { Todo } from '@/models/Todo';
+import { Env } from '@/utils/Env';
 
 export class TodoService {
   private dbClient: DynamoDB;

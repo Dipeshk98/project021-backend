@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validateRequest } from '../middlewares/Validation';
+import { validateRequest } from '@/middlewares/Validation';
 
 export const bodyCreateTeamValidate = validateRequest({
   body: z.object({

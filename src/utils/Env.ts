@@ -1,4 +1,4 @@
-import { ApiError } from '../error/ApiError';
+import { ApiError } from '@/error/ApiError';
 
 export class Env {
   /**

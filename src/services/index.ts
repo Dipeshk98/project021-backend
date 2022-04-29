@@ -1,4 +1,5 @@
-import { getDbClient } from '../utils/DBClient';
+import { getDbClient } from '@/utils/DBClient';
+
 import { BillingService } from './BillingService';
 import { EmailService } from './EmailService';
 import { MemberService } from './MemberService';

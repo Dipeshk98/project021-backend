@@ -1,6 +1,7 @@
 import { ulid } from 'ulid';
 
-import { ISubscription } from '../types/StripeTypes';
+import { ISubscription } from '@/types/StripeTypes';
+
 import { AbstractItem, IDynamodbItem } from './AbstractItem';
 
 export class Team extends AbstractItem {

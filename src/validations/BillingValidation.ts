@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validateRequest } from '../middlewares/Validation';
+import { validateRequest } from '@/middlewares/Validation';
 
 export const bodyPriceValidate = validateRequest({
   params: z.object({

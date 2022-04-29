@@ -1,12 +1,13 @@
 import { DynamoDB } from 'aws-sdk';
 
-import { ApiError } from '../error/ApiError';
-import { ErrorCode } from '../error/ErrorCode';
-import { Member } from '../models/Member';
-import { Team } from '../models/Team';
-import { MemberStatus } from '../types/MemberStatus';
-import { ISubscription } from '../types/StripeTypes';
-import { Env } from '../utils/Env';
+import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
+import { Member } from '@/models/Member';
+import { Team } from '@/models/Team';
+import { MemberStatus } from '@/types/MemberStatus';
+import { ISubscription } from '@/types/StripeTypes';
+import { Env } from '@/utils/Env';
+
 import { MemberService } from './MemberService';
 import { UserService } from './UserService';
 

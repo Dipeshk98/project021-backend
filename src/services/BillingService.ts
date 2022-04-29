@@ -1,16 +1,17 @@
 import Stripe from 'stripe';
 
-import { ApiError } from '../error/ApiError';
+import { ApiError } from '@/error/ApiError';
 import {
   ISubscription,
   StripeCheckoutEvent,
   StripeCustomer,
   StripeSubscriptionEvent,
   SubscriptionStatus,
-} from '../types/StripeTypes';
-import { BillingPlan } from '../utils/BillingPlan';
-import { Env } from '../utils/Env';
-import { getStripe } from '../utils/Stripe';
+} from '@/types/StripeTypes';
+import { BillingPlan } from '@/utils/BillingPlan';
+import { Env } from '@/utils/Env';
+import { getStripe } from '@/utils/Stripe';
+
 import { TeamService } from './TeamService';
 
 export class BillingService {

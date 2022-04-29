@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { teamController } from '../controllers';
+import { teamController } from '@/controllers';
 import {
   bodyCreateTeamValidate,
   bodyInviteValidate,
@@ -9,7 +9,7 @@ import {
   paramsJoinValidate,
   paramsRemoveValidate,
   paramsTeamIdValidate,
-} from '../validations/TeamValidation';
+} from '@/validations/TeamValidation';
 
 const teamRouter = Router();
 

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import { userController } from '../controllers';
+import { userController } from '@/controllers';
 import {
   bodyEmailValidate,
   paramsEmailValidate,
-} from '../validations/UserValidation';
+} from '@/validations/UserValidation';
 
 const userRouter = Router();
 

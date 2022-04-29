@@ -1,14 +1,14 @@
 import { RequestHandler } from 'express';
 import Stripe from 'stripe';
 
-import { ApiError } from '../error/ApiError';
-import { BillingService } from '../services/BillingService';
-import { TeamService } from '../services/TeamService';
-import { UserService } from '../services/UserService';
-import { Env } from '../utils/Env';
-import { getStripe } from '../utils/Stripe';
-import { BodyPriceHandler } from '../validations/BillingValidation';
-import { ParamsTeamIdHandler } from '../validations/TeamValidation';
+import { ApiError } from '@/error/ApiError';
+import { BillingService } from '@/services/BillingService';
+import { TeamService } from '@/services/TeamService';
+import { UserService } from '@/services/UserService';
+import { Env } from '@/utils/Env';
+import { getStripe } from '@/utils/Stripe';
+import { BodyPriceHandler } from '@/validations/BillingValidation';
+import { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 
 export class BillingController {
   private billingService: BillingService;
