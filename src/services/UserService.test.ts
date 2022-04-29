@@ -1,5 +1,3 @@
-import { randUser } from '@ngneat/falso';
-
 import { getDbClient } from '@/utils/DBClient';
 
 import { UserService } from './UserService';
@@ -7,7 +5,7 @@ import { UserService } from './UserService';
 describe('TodoService', () => {
   describe('Create todo', () => {
     it('should create a new user and get the user from the db', async () => {
-      const userId = randUser().id;
+      const userId = 'abc-123';
 
       const userService = new UserService(getDbClient());
       userService.create(userId);
