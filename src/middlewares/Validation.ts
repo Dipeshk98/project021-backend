@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { ValidationError, RequestError } from 'src/error/RequestError';
+import { RequestError, ValidationError } from 'src/error/RequestError';
 import { ZodError, ZodIssue, ZodSchema } from 'zod';
 
 export declare type RequestValidation<TParams, TQuery, TBody> = {

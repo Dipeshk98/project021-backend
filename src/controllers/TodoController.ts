@@ -5,9 +5,9 @@ import { TodoService } from 'src/services/TodoService';
 import { UserService } from 'src/services/UserService';
 import { ParamsTeamIdHandler } from 'src/validations/TeamValidation';
 import {
-  ParamsTodoHandler,
   BodyTodoHandler,
   FullTodoHandler,
+  ParamsTodoHandler,
 } from 'src/validations/TodoValidation';
 
 export class TodoController {

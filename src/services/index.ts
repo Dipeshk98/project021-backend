@@ -21,9 +21,9 @@ const emailService = new EmailService();
 
 export {
   billingService,
-  userService,
-  todoService,
   emailService,
-  teamService,
   memberService,
+  teamService,
+  todoService,
+  userService,
 };

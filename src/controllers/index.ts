@@ -34,4 +34,4 @@ const teamController = new TeamController(
   emailService
 );
 
-export { userController, todoController, billingController, teamController };
+export { billingController, teamController, todoController, userController };
