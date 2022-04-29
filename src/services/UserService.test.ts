@@ -1,16 +1,20 @@
+import { randUser } from '@ngneat/falso';
+
 import { getDbClient } from '@/utils/DBClient';
 
 import { UserService } from './UserService';
 
 describe('TodoService', () => {
   describe('Create todo', () => {
-    it('test', async () => {
+    it('should create a new user and get the user from the db', async () => {
+      const userId = randUser().id;
+
       const userService = new UserService(getDbClient());
-      userService.create('1234567');
+      userService.create(userId);
 
-      const user = await userService.findByUserId('1234567');
+      const user = await userService.findByUserId(userId);
 
-      expect(user).toBeDefined();
+      expect(user).not.toBeNull();
     });
   });
 });
