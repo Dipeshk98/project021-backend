@@ -65,7 +65,7 @@ describe('UserService', () => {
 
       await expect(
         userService.findAndVerifyTeam(userId, teamId)
-      ).rejects.toThrow(/isn't a team member/);
+      ).rejects.toThrow("isn't a team member");
     });
 
     it('should add user to the team', async () => {
