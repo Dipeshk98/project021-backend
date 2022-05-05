@@ -36,8 +36,10 @@ describe('TodoService', () => {
       await todoService.save(todo31);
       await todoService.delete(userId3, todo31.id);
 
-      // Verify todos from User 1
+      // The order is maintaining because the id is from `ulid` library
       const todoList1 = await todoService.findAllByUserId(userId1);
+
+      // Verify todos from User 1
       expect(todoList1).toHaveLength(2);
       expect(todoList1[0]!.getTitle()).toEqual('todo-user-1-1');
       expect(todoList1[1]!.getTitle()).toEqual('todo-user-1-2');
