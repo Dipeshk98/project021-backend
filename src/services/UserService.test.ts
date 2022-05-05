@@ -26,7 +26,7 @@ describe('UserService', () => {
       const user = await userService.findByUserId(userId);
 
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual(userId);
+      expect(user.id).toEqual('user-123');
     });
 
     it("should create a new user with `findOrCreate` because the user don't exist", async () => {
@@ -34,7 +34,7 @@ describe('UserService', () => {
       const user = await userService.findOrCreate(userId);
 
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual(userId);
+      expect(user.id).toEqual('user-123');
     });
 
     it("shouldn't create a new user using `findOrCreate` method", async () => {
@@ -44,7 +44,7 @@ describe('UserService', () => {
       userService.create = jest.fn();
       user = await userService.findOrCreate(userId);
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual(userId);
+      expect(user.id).toEqual('user-123');
       expect(userService.create).not.toHaveBeenCalled();
     });
 
@@ -81,7 +81,7 @@ describe('UserService', () => {
       // Verify user belongs to the team
       user = await userService.findAndVerifyTeam(userId, teamId);
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual(userId);
+      expect(user.id).toEqual('user-123');
     });
   });
 });
