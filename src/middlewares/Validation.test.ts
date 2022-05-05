@@ -113,4 +113,52 @@ describe('Validation middleware', () => {
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('Body request', () => {
+    let validate: RequestHandler;
+    let response: httpMocks.MockResponse<Response>;
+    let next: jest.Mock;
+
+    beforeEach(() => {
+      validate = validateRequest<any>({
+        body: z.object({
+          displayName: z.string().nonempty(),
+        }),
+      });
+      response = httpMocks.createResponse();
+      next = jest.fn();
+    });
+
+    it('should throw an exception with an incorrect query', () => {
+      const request = httpMocks.createRequest({
+        method: 'GET',
+        url: '/',
+        body: {
+          displayName: '',
+        },
+      });
+
+      expect(() => validate(request, response, next)).toThrow(
+        expect.objectContaining({
+          message: 'Error in request validation',
+          errorList: [{ param: 'displayName', type: 'too_small' }],
+        })
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should call next and test `query` without errors', () => {
+      const request = httpMocks.createRequest({
+        method: 'GET',
+        url: '/',
+        body: {
+          displayName: 'Team Name 123',
+        },
+      });
+
+      validate(request, response, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+  });
 });
