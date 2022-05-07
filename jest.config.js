@@ -12,6 +12,7 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
     './src/**/*.{js,ts}',
+    './test/**/*.{js,ts}',
     '!src/handler.ts',
     '!**/*.d.ts',
     '!**/node_modules/**',
