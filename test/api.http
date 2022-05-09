@@ -1,4 +1,6 @@
 ### Create get or create profile
+# Warning: before running all other endpoints, you absolutely need to call this endpoint.
+# It'll create the user in the database which is needed by other endpoints.
 # @name profile
 GET http://localhost:4000/user/profile?email=test@example.com HTTP/1.1
 content-type: application/json
