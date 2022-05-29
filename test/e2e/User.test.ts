@@ -8,7 +8,7 @@ describe('User', () => {
   });
 
   describe('User profile', () => {
-    it('should return an error missing the email as parameter. Email is used to create a new team.', async () => {
+    it('should return an error with a missing email as parameter. Email is used to create a new team.', async () => {
       const response = await supertest(app).get('/user/profile');
 
       expect(response.statusCode).toEqual(400);

@@ -1,5 +1,3 @@
-import 'express-async-errors';
-
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { Request } from 'express';
 import serverlessHttp from 'serverless-http';
