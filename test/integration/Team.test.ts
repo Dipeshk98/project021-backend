@@ -105,4 +105,21 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
   });
+
+  describe('Get team settings', () => {
+    it("shouldn't get the team settings and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).get(`/team/123/settings`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should return team settings', async () => {
+      const response = await supertest(app).get(`/team/${teamId}/settings`);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.hasStripeCustomerId).toBeFalsy();
+      expect(response.body.planId).toEqual('FREE');
+    });
+  });
 });
