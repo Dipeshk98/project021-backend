@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 
 import { app } from '@/app';
+import { ErrorCode } from '@/error/ErrorCode';
 
 describe('Team', () => {
   let teamId: string;
@@ -17,6 +18,18 @@ describe('Team', () => {
   });
 
   describe('Create team', () => {
+    it('should return an error with missing user email and display name as a parameter. They are needed to create team.', async () => {
+      const response = await supertest(app).post('/team/create');
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([
+          { param: 'displayName', type: 'invalid_type' },
+          { param: 'userEmail', type: 'invalid_type' },
+        ])
+      );
+    });
+
     it('should create a team with the correct displayName', async () => {
       const response = await supertest(app).post('/team/create').send({
         userEmail: 'example@example.com',
@@ -29,6 +42,13 @@ describe('Team', () => {
   });
 
   describe('List team members', () => {
+    it("shouldn't list team members and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).get(`/team/123/list-members`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
     it('should list team members', async () => {
       const response = await supertest(app).get(`/team/${teamId}/list-members`);
 
