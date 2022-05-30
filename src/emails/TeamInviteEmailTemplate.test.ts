@@ -1,6 +1,6 @@
 import { Team } from '@/models/Team';
 
-import { TeamInviteEmailTemplate } from './TeamInviteEmail';
+import { TeamInviteEmailTemplate } from './TeamInviteEmailTemplate';
 
 describe('TeamInviteEmail', () => {
   describe('Build Email', () => {

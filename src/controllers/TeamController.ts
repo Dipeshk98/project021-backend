@@ -1,4 +1,4 @@
-import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmail';
+import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Member } from '@/models/Member';
