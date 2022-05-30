@@ -24,6 +24,8 @@ describe('EmailService', () => {
     expect(sendMailMock).toBeCalledWith(
       expect.objectContaining({
         to: 'user@example.com',
+        subject: 'Test email subject',
+        text: 'Test email text',
       })
     );
   });
