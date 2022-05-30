@@ -14,13 +14,15 @@ export declare type RequestValidation<TParams, TQuery, TBody> = {
  * @param fieldErrors - Errors returned by Zod.
  * @returns errorList - Generated errorList from Zod flatten errors.
  */
-const convertToErrorList = (fieldErrors: { [k: string]: string[] }) => {
+const convertToErrorList = (fieldErrors: {
+  [k: string]: string[] | undefined;
+}) => {
   const errorList: ValidationError[] = [];
 
   Object.entries(fieldErrors).forEach(([key, value]) => {
     // React-hook-form in the frontend can only display one error.
     // The backend API only need to return the first error for each fields.
-    const firstElt = value[0];
+    const firstElt = value?.[0];
 
     if (firstElt) {
       errorList.push({
