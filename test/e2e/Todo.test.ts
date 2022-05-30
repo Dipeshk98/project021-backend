@@ -17,8 +17,8 @@ describe('Todo', () => {
     teamId = response.body.teamList[0].id;
   });
 
-  describe('Create Todo', () => {
-    it('should return an error with a missing title as a parameter. Title is needed to create a Todo.', async () => {
+  describe('Create todo', () => {
+    it('should return an error with a missing title as a parameter. Title is needed to create a todo.', async () => {
       const response = await supertest(app).post(`/${teamId}/todo/create`);
 
       expect(response.statusCode).toEqual(400);
@@ -48,8 +48,8 @@ describe('Todo', () => {
     });
   });
 
-  describe('Get Todo', () => {
-    it("shouldn't be able to get a non-existing Todo and throw an exception", async () => {
+  describe('Get todo', () => {
+    it("shouldn't be able to get a non-existing todo and throw an exception", async () => {
       const response = await supertest(app).get(`/${teamId}/todo/123`);
 
       expect(response.statusCode).toEqual(500);
@@ -76,22 +76,22 @@ describe('Todo', () => {
     });
   });
 
-  describe('Delete Todo', () => {
-    it("shouldn't delete Todo and return an error because the user isn't a member", async () => {
+  describe('Delete todo', () => {
+    it("shouldn't delete todo and return an error because the user isn't a member", async () => {
       const response = await supertest(app).delete(`/123/todo/123`);
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it("shouldn't be able to delete a non-existing Todo and throw an exception", async () => {
+    it("shouldn't be able to delete a non-existing todo and throw an exception", async () => {
       const response = await supertest(app).delete(`/${teamId}/todo/123`);
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TODO_ID);
     });
 
-    it('should create a todo and be able to delete the newly created Todo', async () => {
+    it('should create a todo and be able to delete the newly created todo', async () => {
       let response = await supertest(app).post(`/${teamId}/todo/create`).send({
         title: 'Todo title',
       });
@@ -103,8 +103,8 @@ describe('Todo', () => {
     });
   });
 
-  describe('Update Todo', () => {
-    it('should return an error with a missing title as a parameter. Title is needed to update a Todo', async () => {
+  describe('Update todo', () => {
+    it('should return an error with a missing title as a parameter. Title is needed to update a todo', async () => {
       const response = await supertest(app).put(`/${teamId}/todo/123`);
 
       expect(response.statusCode).toEqual(400);
@@ -113,7 +113,7 @@ describe('Todo', () => {
       );
     });
 
-    it("shouldn't update Todo title and return an error because the user isn't a team member", async () => {
+    it("shouldn't update todo title and return an error because the user isn't a team member", async () => {
       const response = await supertest(app).put('/123/todo/123').send({
         title: 'New title',
       });
@@ -122,7 +122,7 @@ describe('Todo', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it("shouldn't be able to update a non-existing Todo and return an error", async () => {
+    it("shouldn't be able to update a non-existing todo and return an error", async () => {
       const response = await supertest(app).put(`/${teamId}/todo/123`).send({
         title: 'New title',
       });
@@ -131,7 +131,7 @@ describe('Todo', () => {
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TODO_ID);
     });
 
-    it('should create a todo and be able to update the newly created Todo title', async () => {
+    it('should create a todo and be able to update the newly created todo title', async () => {
       let response = await supertest(app).post(`/${teamId}/todo/create`).send({
         title: 'Todo title',
       });
@@ -145,7 +145,7 @@ describe('Todo', () => {
     });
   });
 
-  describe('List Todo', () => {
+  describe('List todo', () => {
     it("shouldn't list todo and return an error because the user isn't a team member", async () => {
       const response = await supertest(app).get(`/123/todo/list`);
 
