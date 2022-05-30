@@ -17,9 +17,14 @@ describe('EmailService', () => {
     emailService = new EmailService();
   });
 
-  it('should able to send email', async () => {
+  it('should able to send email to the correct email', async () => {
     await emailService.send(new TestEmailTemplate(), 'user@example.com');
 
     expect(sendMailMock).toHaveBeenCalled();
+    expect(sendMailMock).toBeCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+      })
+    );
   });
 });
