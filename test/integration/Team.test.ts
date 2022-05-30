@@ -85,4 +85,24 @@ describe('Team', () => {
       expect(response.body.displayName).toEqual('New Team display name');
     });
   });
+
+  describe('Delete team', () => {
+    it("shouldn't delete team and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).delete(`/team/123`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("should delete team and shouldn't be able to retrieve team member list", async () => {
+      let response = await supertest(app).delete(`/team/${teamId}`);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.success).toBeTruthy();
+
+      response = await supertest(app).get(`/team/${teamId}/list-members`);
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+  });
 });
