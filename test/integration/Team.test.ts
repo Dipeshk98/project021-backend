@@ -56,4 +56,33 @@ describe('Team', () => {
       expect(response.body.list[0].email).toEqual('example@example.com');
     });
   });
+
+  describe('Update team name', () => {
+    it('should return an error with missing display name as a parameter. Display name is needed to update team name', async () => {
+      const response = await supertest(app).put(`/team/${teamId}/name`);
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'displayName', type: 'invalid_type' }])
+      );
+    });
+
+    it("shouldn't update team name and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).put(`/team/123/name`).send({
+        displayName: 'Team display name',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should be able to update the team name', async () => {
+      const response = await supertest(app).put(`/team/${teamId}/name`).send({
+        displayName: 'New Team display name',
+      });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.displayName).toEqual('New Team display name');
+    });
+  });
 });

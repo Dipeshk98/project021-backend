@@ -100,6 +100,11 @@ describe('Todo', () => {
       response = await supertest(app).delete(`/${teamId}/todo/${todoId}`);
       expect(response.statusCode).toEqual(200);
       expect(response.body.success).toBeTruthy();
+
+      // Shouldn't be able to retrieve the todo
+      response = await supertest(app).get(`/${teamId}/todo/${todoId}`);
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TODO_ID);
     });
   });
 
