@@ -11,6 +11,7 @@ module.exports = {
     '^__mocks__/(.*)$': '<rootDir>/__mocks__/$1',
   },
   setupFiles: ['<rootDir>/jest.env-setup.js'],
+  clearMocks: true,
   collectCoverage: true,
   collectCoverageFrom: [
     './src/**/*.{js,ts}',
