@@ -122,4 +122,24 @@ describe('Team', () => {
       expect(response.body.planId).toEqual('FREE');
     });
   });
+
+  describe('Invite team members', () => {
+    it("should return an error with missing email as a parameter. It's needed to invite team member.", async () => {
+      const response = await supertest(app).post(`/team/${teamId}/invite`);
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'email', type: 'invalid_type' }])
+      );
+    });
+
+    it("shouldn't invite team member and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).post(`/team/123/invite`).send({
+        email: 'example@example.com',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+  });
 });
