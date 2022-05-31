@@ -1,7 +1,9 @@
+import nodemailer from '__mocks__/nodemailer';
 import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
+import { MemberStatus } from '@/types/MemberStatus';
 
 describe('Team', () => {
   let teamId: string;
@@ -140,6 +142,26 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should send invitation by sending email', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.status).toEqual(MemberStatus.PENDING);
+
+      // Verify if the email is sent
+      const { sendMail } = nodemailer.createTransport();
+      expect(sendMail).toHaveBeenCalled();
+      expect(sendMail).toBeCalledWith(
+        expect.objectContaining({
+          to: 'example@example.com',
+        })
+      );
     });
   });
 });

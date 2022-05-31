@@ -1,14 +1,8 @@
+import nodemailer from '__mocks__/nodemailer';
+
 import { TestEmailTemplate } from '@/emails/TestEmailTemplate';
 
 import { EmailService } from './EmailService';
-
-const sendMailMock = jest.fn();
-
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn().mockImplementation(() => ({
-    sendMail: sendMailMock,
-  })),
-}));
 
 describe('EmailService', () => {
   let emailService: EmailService;
@@ -21,8 +15,10 @@ describe('EmailService', () => {
     it('should able to send email to the correct email', async () => {
       await emailService.send(new TestEmailTemplate(), 'user@example.com');
 
-      expect(sendMailMock).toHaveBeenCalled();
-      expect(sendMailMock).toBeCalledWith(
+      const { sendMail } = nodemailer.createTransport();
+
+      expect(sendMail).toHaveBeenCalled();
+      expect(sendMail).toBeCalledWith(
         expect.objectContaining({
           to: 'user@example.com',
           subject: 'Test email subject',

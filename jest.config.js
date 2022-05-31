@@ -7,6 +7,8 @@ module.exports = {
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     '^@/(.*)$': '<rootDir>/src/$1',
+
+    '^__mocks__/(.*)$': '<rootDir>/__mocks__/$1',
   },
   setupFiles: ['<rootDir>/jest.env-setup.js'],
   collectCoverage: true,

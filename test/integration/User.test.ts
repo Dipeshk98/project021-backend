@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 
 import { app } from '@/app';
+import { MemberStatus } from '@/types/MemberStatus';
 
 describe('User', () => {
   beforeAll(() => {
@@ -42,7 +43,7 @@ describe('User', () => {
 
       // The user should be an active member of the team and the email address should be correct
       response = await supertest(app).get(`/team/${teamId}/list-members`);
-      expect(response.body.list[0].status).toEqual('ACTIVE');
+      expect(response.body.list[0].status).toEqual(MemberStatus.ACTIVE);
       expect(response.body.list[0].email).toEqual('example@example.com');
     });
 
