@@ -184,7 +184,7 @@ describe('Team', () => {
 
     it('should return team information', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
-        email: 'example3@example.com',
+        email: 'example@example.com',
       });
 
       const { sendMail } = nodemailer.createTransport();
