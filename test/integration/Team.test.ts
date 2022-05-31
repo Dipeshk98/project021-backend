@@ -164,4 +164,42 @@ describe('Team', () => {
       );
     });
   });
+
+  describe('Get join info', () => {
+    it("shouldn't return join information and return an error because the team doesn't exist.", async () => {
+      const response = await supertest(app).get(`/team/123/join/123`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TEAM_ID);
+    });
+
+    it("shouldn't return join information and return an error with incorrect verification code.", async () => {
+      const response = await supertest(app).get(
+        `/team/${teamId}/join/INCORRECT`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_CODE);
+    });
+
+    it('should return team information', async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'example3@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      response = await supertest(app).get(`/team/${teamId}/list-members`);
+
+      response = await supertest(app).get(
+        `/team/${teamId}/join/${verificationCode}`
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.displayName).toEqual('New Team');
+    });
+  });
 });
