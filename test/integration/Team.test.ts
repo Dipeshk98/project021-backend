@@ -8,11 +8,10 @@ import { MemberStatus } from '@/types/MemberStatus';
 describe('Team', () => {
   let teamId: string;
 
-  beforeAll(() => {
-    app.request.currentUserId = '123';
-  });
-
   beforeEach(async () => {
+    // Need to reset currentUserId before each tests because currentUserId can be changed
+    app.request.currentUserId = '123';
+
     const response = await supertest(app).get(
       '/user/profile?email=example@example.com'
     );
@@ -192,14 +191,88 @@ describe('Team', () => {
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
-      response = await supertest(app).get(`/team/${teamId}/list-members`);
-
       response = await supertest(app).get(
         `/team/${teamId}/join/${verificationCode}`
       );
 
       expect(response.statusCode).toEqual(200);
       expect(response.body.displayName).toEqual('New Team');
+    });
+  });
+
+  describe('Join team', () => {
+    it('should return an error with missing email as a parameter. Email is needed to join team.', async () => {
+      const response = await supertest(app).post(`/team/${teamId}/join/123`);
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'email', type: 'invalid_type' }])
+      );
+    });
+
+    it("shouldn't join team and return an error because the user is already a member.", async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'example@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode}`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.ALREADY_MEMBER);
+    });
+
+    it("shouldn't join team and return an error with incorrect verification code.", async () => {
+      // Using different user ID
+      app.request.currentUserId = '125';
+
+      let response = await supertest(app).get(
+        '/user/profile?email=user2@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/INCORRECT`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_CODE);
+    });
+
+    it('should send invitation by sending email and a second user join the team', async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      // Using different user ID
+      app.request.currentUserId = '125';
+
+      response = await supertest(app).get(
+        '/user/profile?email=user2@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode}`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.status).toEqual(MemberStatus.ACTIVE);
     });
   });
 });
