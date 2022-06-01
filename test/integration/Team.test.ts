@@ -284,7 +284,7 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it("shouldn't delete team member and return an error with incorrect member id", async () => {
+    it("shouldn't delete team member and return an error with incorrect member id in 'PENDING' status", async () => {
       const response = await supertest(app).delete(
         `/team/${teamId}/remove/INCORRECT?isPending=true`
       );
@@ -307,6 +307,56 @@ describe('Team', () => {
         `/team/${teamId}/remove/${verificationCode}?isPending=true`
       );
 
+      expect(response.body.success).toBeTruthy();
+    });
+
+    it("shouldn't delete team member and return an error with incorrect member id in 'ACTIVE' status", async () => {
+      const response = await supertest(app).delete(
+        `/team/${teamId}/remove/INCORRECT`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_USER_ID);
+    });
+
+    it('should add a new user in team and remove it from the team', async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      // Using different user ID
+      app.request.currentUserId = '125';
+
+      response = await supertest(app).get(
+        '/user/profile?email=user2@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode}`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      // Back to the original user ID
+      app.request.currentUserId = '123';
+
+      response = await supertest(app).delete(`/team/${teamId}/remove/125`);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.success).toBeTruthy();
+    });
+
+    it('should remove the user himself from the team', async () => {
+      const response = await supertest(app).delete(
+        `/team/${teamId}/remove/123`
+      );
+
+      expect(response.statusCode).toEqual(200);
       expect(response.body.success).toBeTruthy();
     });
   });
