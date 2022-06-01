@@ -275,4 +275,39 @@ describe('Team', () => {
       expect(response.body.status).toEqual(MemberStatus.ACTIVE);
     });
   });
+
+  describe('Delete team member', () => {
+    it("shouldn't delete team member and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).delete(`/team/123/remove/123`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("shouldn't delete team member and return an error with incorrect member id", async () => {
+      const response = await supertest(app).delete(
+        `/team/${teamId}/remove/INCORRECT?isPending=true`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
+    it("should send invitation and remove invitation in 'PENDING' status", async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      response = await supertest(app).delete(
+        `/team/${teamId}/remove/${verificationCode}?isPending=true`
+      );
+
+      expect(response.body.success).toBeTruthy();
+    });
+  });
 });
