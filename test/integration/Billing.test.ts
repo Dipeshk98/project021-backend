@@ -1,4 +1,5 @@
 import {
+  mockBillingPortalSessionsCreate,
   mockCheckoutSessionCreate,
   mockCustomersCreate,
 } from '__mocks__/stripe';
@@ -104,6 +105,52 @@ describe('Billing', () => {
       expect(mockCheckoutSessionCreate.mock.calls[1][0].customer).toEqual(
         'RANDOM_STRIPE_CUSTOMER_ID'
       ); // Stripe customer ID should remain the same, it needs to be reused
+    });
+  });
+
+  describe('Create customer portal link', () => {
+    it("shouldn't generate a customer portal link and return an error because the user isn't a member", async () => {
+      const response = await supertest(app).post(
+        `/123/billing/customer-portal`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("shouldn't generate a customer portal link because the user has never create checkout session", async () => {
+      const response = await supertest(app).post(
+        `/${teamId}/billing/customer-portal`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
+    it('should create a checkout session and generate a customer portal link', async () => {
+      mockCustomersCreate.mockReturnValueOnce({
+        id: 'RANDOM_STRIPE_CUSTOMER_ID',
+      });
+      mockCheckoutSessionCreate.mockReturnValueOnce({
+        id: 'RANDOM_STRIPE_SESSION_ID',
+      });
+
+      let response = await supertest(app)
+        .post(`/${teamId}/billing/create-checkout-session`)
+        .send({
+          priceId: 'PRICE_ID',
+        });
+
+      mockBillingPortalSessionsCreate.mockReturnValueOnce({
+        url: 'RANDOM_STRIPE_CUSTOMER_PORTAL_LINK',
+      });
+
+      response = await supertest(app).post(
+        `/${teamId}/billing/customer-portal`
+      );
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.url).toEqual('RANDOM_STRIPE_CUSTOMER_PORTAL_LINK');
     });
   });
 });

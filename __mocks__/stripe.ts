@@ -1,5 +1,6 @@
 export const mockCustomersCreate = jest.fn();
 export const mockCheckoutSessionCreate = jest.fn();
+export const mockBillingPortalSessionsCreate = jest.fn();
 
 export default jest.fn(() => ({
   customers: {
@@ -8,6 +9,11 @@ export default jest.fn(() => ({
   checkout: {
     sessions: {
       create: mockCheckoutSessionCreate,
+    },
+  },
+  billingPortal: {
+    sessions: {
+      create: mockBillingPortalSessionsCreate,
     },
   },
 }));
