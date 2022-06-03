@@ -9,7 +9,6 @@ describe('Team', () => {
   let teamId: string;
 
   beforeEach(async () => {
-    // Need to reset currentUserId before each tests because currentUserId can be changed
     app.request.currentUserId = '123';
 
     const response = await supertest(app).get(

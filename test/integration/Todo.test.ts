@@ -6,11 +6,9 @@ import { ErrorCode } from '@/error/ErrorCode';
 describe('Todo', () => {
   let teamId: string;
 
-  beforeAll(() => {
-    app.request.currentUserId = '123';
-  });
-
   beforeEach(async () => {
+    app.request.currentUserId = '123';
+
     const response = await supertest(app).get(
       '/user/profile?email=example@example.com'
     );
