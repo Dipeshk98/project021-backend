@@ -2,11 +2,13 @@ import {
   mockBillingPortalSessionsCreate,
   mockCheckoutSessionCreate,
   mockCustomersCreate,
+  originalStripe,
 } from '__mocks__/stripe';
 import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
+import { Env } from '@/utils/Env';
 
 describe('Billing', () => {
   let teamId: string;
@@ -151,6 +153,69 @@ describe('Billing', () => {
 
       expect(response.statusCode).toEqual(200);
       expect(response.body.url).toEqual('RANDOM_STRIPE_CUSTOMER_PORTAL_LINK');
+    });
+  });
+
+  describe('Billing webhook', () => {
+    it("shouldn't process the event with empty request", async () => {
+      const response = await supertest(app).post('/billing/webhook');
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
+    it("shouldn't process the event without header and payload", async () => {
+      const response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json');
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
+    it("shouldn't process the event without payload", async () => {
+      const payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        type: 'checkout.session.completed',
+      };
+      const payloadString = JSON.stringify(payload, null, 2);
+
+      const header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: Env.getValue('STRIPE_WEBHOOK_SECRET'),
+      });
+
+      const response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
+    it("shouldn't process with incorrect secret", async () => {
+      const payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        type: 'checkout.session.completed',
+      };
+      const payloadString = JSON.stringify(payload, null, 2);
+
+      const header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: 'INVALID_STRIPE_SECRET',
+      });
+
+      const response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header)
+        .send(payloadString);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
     });
   });
 });
