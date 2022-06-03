@@ -360,4 +360,122 @@ describe('Team', () => {
       expect(response.body.success).toBeTruthy();
     });
   });
+
+  describe('Complex invitation workflow', () => {
+    it('should send 2 invitations with ACTIVE and PENDING status in listing', async () => {
+      // Send invitation and the user accept it
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      // Using different user ID
+      app.request.currentUserId = '125';
+
+      response = await supertest(app).get(
+        '/user/profile?email=user2@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode}`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      // Send another invitation without any other steps
+      response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user3@example.com',
+      });
+
+      response = await supertest(app).get(`/team/${teamId}/list-members`);
+      expect(response.body.list).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            email: 'example@example.com',
+            memberId: '123',
+            status: MemberStatus.ACTIVE,
+          }),
+          expect.objectContaining({
+            email: 'user2@example.com',
+            memberId: '125',
+            status: MemberStatus.ACTIVE,
+          }),
+          expect.objectContaining({
+            email: 'user3@example.com',
+            status: MemberStatus.PENDING,
+          }),
+        ])
+      );
+    });
+
+    it('should send 2 invitation. Both are accepted but one of them will be removed.', async () => {
+      // Send invitation and the user accept it. But, it'll be removed
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+      });
+
+      const { sendMail } = nodemailer.createTransport();
+      const verificationCode = sendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      // Using different user ID
+      app.request.currentUserId = '125';
+
+      response = await supertest(app).get(
+        '/user/profile?email=user2@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode}`)
+        .send({
+          email: 'user2@example.com',
+        });
+
+      // Send another invitation and the user accept it. But, it won't be removed.
+      response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user3@example.com',
+      });
+
+      const verificationCode2 = sendMail.mock.calls[1][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      // Using different user ID
+      app.request.currentUserId = '126';
+
+      response = await supertest(app).get(
+        '/user/profile?email=user3@example.com'
+      );
+
+      response = await supertest(app)
+        .post(`/team/${teamId}/join/${verificationCode2}`)
+        .send({
+          email: 'user3@example.com',
+        });
+
+      // Remove the first added user
+      response = await supertest(app).delete(`/team/${teamId}/remove/125`);
+
+      response = await supertest(app).get(`/team/${teamId}/list-members`);
+      expect(response.body.list).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            email: 'example@example.com',
+            memberId: '123',
+            status: MemberStatus.ACTIVE,
+          }),
+          expect.objectContaining({
+            email: 'user3@example.com',
+            memberId: '126',
+            status: MemberStatus.ACTIVE,
+          }),
+        ])
+      );
+    });
+  });
 });
