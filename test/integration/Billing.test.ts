@@ -221,6 +221,29 @@ describe('Billing', () => {
       expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
     });
 
+    it("shouldn't process with incorrect event type", async () => {
+      const payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        type: 'INCORRECT_TYPE',
+      };
+      const payloadString = JSON.stringify(payload, null, 2);
+
+      const header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: Env.getValue('STRIPE_WEBHOOK_SECRET'),
+      });
+
+      const response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header)
+        .send(payloadString);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+    });
+
     it('should process checkout.session.completed and not enable the user PRO subscription when in pending status', async () => {
       mockSubscriptionsRetrieve.mockReturnValueOnce({
         id: 'RANDOM_ID',
