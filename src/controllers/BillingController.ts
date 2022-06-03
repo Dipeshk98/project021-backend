@@ -71,7 +71,7 @@ export class BillingController {
     } else if (event.type === 'checkout.session.completed') {
       await this.billingService.processCheckoutEvent(event);
     } else {
-      throw new ApiError('Stripe are calling with more events than expected');
+      throw new ApiError('Stripe are calling with unexpected events');
     }
 
     res.json({ received: true });

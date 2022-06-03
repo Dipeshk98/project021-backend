@@ -4,7 +4,7 @@ import { app } from '@/app';
 import { MemberStatus } from '@/types/MemberStatus';
 
 describe('User', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     app.request.currentUserId = '123';
   });
 

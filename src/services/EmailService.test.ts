@@ -1,4 +1,4 @@
-import nodemailer from '__mocks__/nodemailer';
+import { mockSendMail } from '__mocks__/nodemailer';
 
 import { TestEmailTemplate } from '@/emails/TestEmailTemplate';
 
@@ -15,10 +15,8 @@ describe('EmailService', () => {
     it('should able to send email to the correct email', async () => {
       await emailService.send(new TestEmailTemplate(), 'user@example.com');
 
-      const { sendMail } = nodemailer.createTransport();
-
-      expect(sendMail).toHaveBeenCalled();
-      expect(sendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalled();
+      expect(mockSendMail).toBeCalledWith(
         expect.objectContaining({
           to: 'user@example.com',
           subject: 'Test email subject',
