@@ -221,6 +221,55 @@ describe('Billing', () => {
       expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
     });
 
+    it('should process checkout.session.completed and not enable the user PRO subscription when in pending status', async () => {
+      mockSubscriptionsRetrieve.mockReturnValueOnce({
+        id: 'RANDOM_ID',
+        status: 'pending',
+        plan: {
+          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        },
+        customer: 'RANDOM_STRIPE_CUSTOMER_ID',
+      });
+
+      mockCustomersRetrieve.mockReturnValueOnce({
+        metadata: {
+          teamId,
+        },
+      });
+
+      const payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        data: {
+          object: {
+            customer: 'cus_STRIPE_CUSTOMER_ID',
+            subscription: 'sub_STRIPE_SUBSCRIPTION',
+          },
+        },
+        type: 'checkout.session.completed',
+      };
+      const payloadString = JSON.stringify(payload, null, 2);
+
+      const header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: Env.getValue('STRIPE_WEBHOOK_SECRET'),
+      });
+
+      let response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header)
+        .send(payloadString);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.received).toBeTruthy();
+
+      response = await supertest(app).get(`/team/${teamId}/settings`);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.planId).toEqual('FREE');
+      expect(response.body.planName).toEqual('Free');
+    });
+
     it('should process checkout.session.completed and enable the user PRO subscription', async () => {
       mockSubscriptionsRetrieve.mockReturnValueOnce({
         id: 'RANDOM_ID',
@@ -265,6 +314,7 @@ describe('Billing', () => {
       expect(response.body.received).toBeTruthy();
 
       response = await supertest(app).get(`/team/${teamId}/settings`);
+      expect(response.statusCode).toEqual(200);
       expect(response.body.planId).toEqual('PRO');
       expect(response.body.planName).toEqual('Pro');
     });
