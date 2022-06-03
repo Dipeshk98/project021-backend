@@ -121,7 +121,9 @@ export class BillingService {
     const billingEnv = BillingPlan[Env.getValue('BILLING_PLAN_ENV')];
 
     if (!billingEnv) {
-      throw new ApiError("BILLING_PLAN_ENV environment variable isn't defined");
+      throw new ApiError(
+        "BILLING_PLAN_ENV environment variable isn't defined correctly"
+      );
     }
 
     if (!subscription) {
