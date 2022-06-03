@@ -63,5 +63,47 @@ describe('Billing', () => {
       expect(response.statusCode).toEqual(200);
       expect(response.body.sessionId).toEqual('RANDOM_STRIPE_SESSION_ID');
     });
+
+    it("should able to call 'create-checkout-session' several times without creating a new Stripe customer", async () => {
+      mockCustomersCreate
+        .mockReturnValueOnce({
+          id: 'RANDOM_STRIPE_CUSTOMER_ID',
+        })
+        .mockReturnValueOnce({
+          id: 'RANDOM_STRIPE_CUSTOMER_ID_2',
+        });
+
+      mockCheckoutSessionCreate
+        .mockReturnValueOnce({
+          id: 'RANDOM_STRIPE_SESSION_ID',
+        })
+        .mockReturnValueOnce({
+          id: 'RANDOM_STRIPE_SESSION_ID_2',
+        });
+
+      let response = await supertest(app)
+        .post(`/${teamId}/billing/create-checkout-session`)
+        .send({
+          priceId: 'PRICE_ID',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.sessionId).toEqual('RANDOM_STRIPE_SESSION_ID');
+      expect(mockCheckoutSessionCreate.mock.calls[0][0].customer).toEqual(
+        'RANDOM_STRIPE_CUSTOMER_ID'
+      );
+
+      response = await supertest(app)
+        .post(`/${teamId}/billing/create-checkout-session`)
+        .send({
+          priceId: 'PRICE_ID',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.sessionId).toEqual('RANDOM_STRIPE_SESSION_ID_2');
+      expect(mockCheckoutSessionCreate.mock.calls[1][0].customer).toEqual(
+        'RANDOM_STRIPE_CUSTOMER_ID'
+      ); // Stripe customer ID should remain the same, it needs to be reused
+    });
   });
 });
