@@ -389,5 +389,93 @@ describe('Billing', () => {
       expect(response.body.planId).toEqual('FREE');
       expect(response.body.planName).toEqual('Free');
     });
+
+    it('should process customer.subscription.created and customer.subscription.updated', async () => {
+      const subscriptionCreated = {
+        id: 'RANDOM_ID',
+        status: 'pending',
+        plan: {
+          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        },
+        customer: 'RANDOM_STRIPE_CUSTOMER_ID',
+      };
+
+      const subscriptionUpdated = {
+        id: 'RANDOM_ID',
+        status: 'active',
+        plan: {
+          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        },
+        customer: 'RANDOM_STRIPE_CUSTOMER_ID',
+      };
+
+      mockSubscriptionsRetrieve
+        .mockReturnValueOnce(subscriptionCreated)
+        .mockReturnValueOnce(subscriptionUpdated);
+
+      mockCustomersRetrieve.mockReturnValue({
+        metadata: {
+          teamId,
+        },
+      });
+
+      let payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        data: {
+          object: subscriptionCreated,
+        },
+        type: 'customer.subscription.created',
+      };
+      let payloadString = JSON.stringify(payload, null, 2);
+
+      let header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: Env.getValue('STRIPE_WEBHOOK_SECRET'),
+      });
+
+      let response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header)
+        .send(payloadString);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.received).toBeTruthy();
+
+      response = await supertest(app).get(`/team/${teamId}/settings`);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.planId).toEqual('FREE');
+      expect(response.body.planName).toEqual('Free');
+
+      payload = {
+        id: 'evt_test_webhook',
+        object: 'event',
+        data: {
+          object: subscriptionUpdated,
+        },
+        type: 'customer.subscription.updated',
+      };
+      payloadString = JSON.stringify(payload, null, 2);
+
+      header = originalStripe.webhooks.generateTestHeaderString({
+        payload: payloadString,
+        secret: Env.getValue('STRIPE_WEBHOOK_SECRET'),
+      });
+
+      response = await supertest(app)
+        .post('/billing/webhook')
+        .set('Content-Type', 'application/json')
+        .set('stripe-signature', header)
+        .send(payloadString);
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.received).toBeTruthy();
+
+      response = await supertest(app).get(`/team/${teamId}/settings`);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.planId).toEqual('PRO');
+      expect(response.body.planName).toEqual('Pro');
+    });
   });
 });
