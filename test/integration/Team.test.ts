@@ -1,4 +1,4 @@
-import nodemailer from '__mocks__/nodemailer';
+import { mockSendMail } from '__mocks__/nodemailer';
 import supertest from 'supertest';
 
 import { app } from '@/app';
@@ -153,9 +153,8 @@ describe('Team', () => {
       expect(response.body.status).toEqual(MemberStatus.PENDING);
 
       // Verify if the email is sent
-      const { sendMail } = nodemailer.createTransport();
-      expect(sendMail).toHaveBeenCalled();
-      expect(sendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalled();
+      expect(mockSendMail).toBeCalledWith(
         expect.objectContaining({
           to: 'example@example.com',
         })
@@ -185,8 +184,7 @@ describe('Team', () => {
         email: 'example@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -214,8 +212,7 @@ describe('Team', () => {
         email: 'example@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -252,8 +249,7 @@ describe('Team', () => {
         email: 'user2@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -297,8 +293,7 @@ describe('Team', () => {
         email: 'user2@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -323,8 +318,7 @@ describe('Team', () => {
         email: 'user2@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -367,8 +361,7 @@ describe('Team', () => {
         email: 'user2@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -417,8 +410,7 @@ describe('Team', () => {
         email: 'user2@example.com',
       });
 
-      const { sendMail } = nodemailer.createTransport();
-      const verificationCode = sendMail.mock.calls[0][0].text.match(
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
@@ -440,7 +432,7 @@ describe('Team', () => {
         email: 'user3@example.com',
       });
 
-      const verificationCode2 = sendMail.mock.calls[1][0].text.match(
+      const verificationCode2 = mockSendMail.mock.calls[1][0].text.match(
         /&verificationCode=(\S+)/
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
