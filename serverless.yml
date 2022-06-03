@@ -32,6 +32,7 @@ custom:
 
   bundle:
     linting: false
+    excludeFiles: "**/*.test.ts"
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true

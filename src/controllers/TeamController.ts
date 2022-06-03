@@ -1,13 +1,13 @@
-import { TeamInviteEmailTemplate } from 'src/emails/TeamInviteEmail';
-import { ApiError } from 'src/error/ApiError';
-import { ErrorCode } from 'src/error/ErrorCode';
-import { Member } from 'src/models/Member';
-import { BillingService } from 'src/services/BillingService';
-import { EmailService } from 'src/services/EmailService';
-import { MemberService } from 'src/services/MemberService';
-import { TeamService } from 'src/services/TeamService';
-import { UserService } from 'src/services/UserService';
-import { MemberStatus } from 'src/types/MemberStatus';
+import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
+import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
+import { Member } from '@/models/Member';
+import { BillingService } from '@/services/BillingService';
+import { EmailService } from '@/services/EmailService';
+import { MemberService } from '@/services/MemberService';
+import { TeamService } from '@/services/TeamService';
+import { UserService } from '@/services/UserService';
+import { MemberStatus } from '@/types/MemberStatus';
 import {
   BodyCreateTeamHandler,
   BodyInviteHandler,
@@ -16,7 +16,7 @@ import {
   ParamsJoinHandler,
   ParamsRemoveHandler,
   ParamsTeamIdHandler,
-} from 'src/validations/TeamValidation';
+} from '@/validations/TeamValidation';
 
 export class TeamController {
   private teamService: TeamService;

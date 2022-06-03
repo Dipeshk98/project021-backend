@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { ApiError } from 'src/error/ApiError';
-import { ErrorCode } from 'src/error/ErrorCode';
-import { RequestError } from 'src/error/RequestError';
-import { captureMessage, captureException } from 'src/utils/Logging';
+import { NextFunction, Request, Response } from 'express';
+
+import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
+import { RequestError } from '@/error/RequestError';
+import { captureException, captureMessage } from '@/utils/Logging';
 
 /**
  * Handling 404 error not found.

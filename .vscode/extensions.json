@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "mikestead.dotenv",
-    "humao.rest-client"
+    "humao.rest-client",
+    "Orta.vscode-jest"
   ]
 }

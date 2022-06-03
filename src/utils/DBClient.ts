@@ -7,8 +7,15 @@ let dbClient: DynamoDB | null = null;
 export const getDbClient = () => {
   if (!dbClient) {
     let dynamodbOptions = {};
+    const mockDynamodbEndpoint = Env.getValue('MOCK_DYNAMODB_ENDPOINT', false);
 
-    if (Env.getValue('IS_OFFLINE', false)) {
+    if (mockDynamodbEndpoint) {
+      dynamodbOptions = {
+        region: 'local',
+        endpoint: mockDynamodbEndpoint,
+        sslEnabled: false,
+      };
+    } else if (Env.getValue('IS_OFFLINE', false)) {
       dynamodbOptions = {
         region: 'localhost',
         endpoint: 'http://localhost:8000',

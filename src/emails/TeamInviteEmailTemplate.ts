@@ -1,5 +1,5 @@
-import { Team } from 'src/models/Team';
-import { Env } from 'src/utils/Env';
+import { Team } from '@/models/Team';
+import { Env } from '@/utils/Env';
 
 import { AbstractEmailTemplate } from './AbstractEmailTemplate';
 

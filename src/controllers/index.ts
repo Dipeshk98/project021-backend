@@ -5,7 +5,7 @@ import {
   teamService,
   todoService,
   userService,
-} from 'src/services';
+} from '@/services';
 
 import { BillingController } from './BillingController';
 import { TeamController } from './TeamController';
@@ -34,4 +34,4 @@ const teamController = new TeamController(
   emailService
 );
 
-export { userController, todoController, billingController, teamController };
+export { billingController, teamController, todoController, userController };

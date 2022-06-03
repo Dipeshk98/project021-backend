@@ -1,5 +1,6 @@
-import { validateRequest } from 'src/middlewares/Validation';
 import { z } from 'zod';
+
+import { validateRequest } from '@/middlewares/Validation';
 
 export const paramsTodoValidate = validateRequest({
   params: z.object({
