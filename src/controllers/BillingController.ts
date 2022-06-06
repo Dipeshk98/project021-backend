@@ -58,7 +58,11 @@ export class BillingController {
         Env.getValue('STRIPE_WEBHOOK_SECRET', true)
       );
     } catch (ex: any) {
-      throw new ApiError('Incorrect Stripe webhook signature', ex);
+      throw new ApiError(
+        'Incorrect Stripe webhook signature',
+        ex,
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     }
 
     // FYI, here is the explanation why we need these Stripe events:
