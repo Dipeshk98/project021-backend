@@ -1,6 +1,7 @@
 export enum ErrorCode {
   INTERNAL_SERVER_ERROR = 'internal_server_error',
   NOT_FOUND = 'not_found',
+  INCORRECT_DATA = 'incorrect_data',
   INCORRECT_USER_ID = 'incorrect_user_id',
   INCORRECT_TEAM_ID = 'incorrect_team_id',
   INCORRECT_TODO_ID = 'incorrect_todo_id',

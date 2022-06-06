@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
 import { BillingService } from '@/services/BillingService';
 import { TeamService } from '@/services/TeamService';
 import { UserService } from '@/services/UserService';
@@ -89,7 +90,11 @@ export class BillingController {
       // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink`
       // when the `stripeCustomerId` isn't defined.
       // The option is hidden in the frontend when the `stripCustomerId` isn't defined.
-      throw new ApiError("Stripe customer ID shouldn't be null");
+      throw new ApiError(
+        "Stripe customer ID shouldn't be null",
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
     }
 
     const portalSession = await getStripe().billingPortal.sessions.create({
