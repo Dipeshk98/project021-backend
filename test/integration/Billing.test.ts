@@ -164,7 +164,9 @@ describe('Billing', () => {
       const response = await supertest(app).post('/billing/webhook');
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     });
 
     it("shouldn't process the event without header and payload", async () => {
@@ -173,7 +175,9 @@ describe('Billing', () => {
         .set('Content-Type', 'application/json');
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     });
 
     it("shouldn't process the event without payload", async () => {
@@ -195,7 +199,9 @@ describe('Billing', () => {
         .set('stripe-signature', header);
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     });
 
     it("shouldn't process with incorrect secret", async () => {
@@ -218,7 +224,9 @@ describe('Billing', () => {
         .send(payloadString);
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     });
 
     it("shouldn't process with incorrect event type", async () => {
