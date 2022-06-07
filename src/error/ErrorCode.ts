@@ -1,7 +1,7 @@
 export enum ErrorCode {
   INTERNAL_SERVER_ERROR = 'internal_server_error',
   NOT_FOUND = 'not_found',
-  INCORRECT_DATA = 'incorrect_data', // The user data is corrupted. Bugs in the code? Or potential hacker?
+  INCORRECT_DATA = 'incorrect_data', // The data is corrupted. Bugs in the code? Or potential hacker?
   INCORRECT_USER_ID = 'incorrect_user_id',
   INCORRECT_TEAM_ID = 'incorrect_team_id',
   INCORRECT_TODO_ID = 'incorrect_todo_id',

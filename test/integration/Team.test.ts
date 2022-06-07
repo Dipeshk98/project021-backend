@@ -285,7 +285,7 @@ describe('Team', () => {
       );
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
     });
 
     it("should send invitation and remove invitation in 'PENDING' status", async () => {
