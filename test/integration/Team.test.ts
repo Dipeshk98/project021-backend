@@ -283,13 +283,13 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it("shouldn't delete team member and return an error with incorrect member id in 'PENDING' status", async () => {
+    it("shouldn't delete team member and return an error with incorrect member id", async () => {
       const response = await supertest(app).delete(
-        `/team/${teamId}/remove/INCORRECT?isPending=true`
+        `/team/${teamId}/remove/INCORRECT`
       );
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_MEMBER_ID);
     });
 
     it("should send invitation and remove invitation in 'PENDING' status", async () => {
@@ -302,19 +302,10 @@ describe('Team', () => {
       )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
 
       response = await supertest(app).delete(
-        `/team/${teamId}/remove/${verificationCode}?isPending=true`
+        `/team/${teamId}/remove/${verificationCode}`
       );
 
       expect(response.body.success).toBeTruthy();
-    });
-
-    it("shouldn't delete team member and return an error with incorrect member id in 'ACTIVE' status", async () => {
-      const response = await supertest(app).delete(
-        `/team/${teamId}/remove/INCORRECT`
-      );
-
-      expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_USER_ID);
     });
 
     it('should add a new user in team and remove it from the team', async () => {

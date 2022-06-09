@@ -227,8 +227,20 @@ export class TeamController {
       req.params.teamId
     );
 
-    if (!req.query.isPending) {
-      // When the user is in active status/when the user has accepted the invitation
+    const member = await this.memberService.findByKeys(
+      req.params.teamId,
+      req.params.memberId
+    );
+
+    if (!member) {
+      throw new ApiError(
+        'Incorrect MemberID',
+        null,
+        ErrorCode.INCORRECT_MEMBER_ID
+      );
+    }
+
+    if (member.getStatus() === MemberStatus.ACTIVE) {
       const removedUser = await this.userService.findAndVerifyTeam(
         req.params.memberId,
         req.params.teamId
@@ -239,19 +251,12 @@ export class TeamController {
     }
 
     const success = await this.memberService.delete(
-      req.params.teamId,
-      req.params.memberId
+      member.getTeamId(),
+      member.skId
     );
 
     if (!success) {
-      // In `User` class, the user is a team member.
-      // In `Member` class, the user isn't a team member.
-      // The data is inconsistent and shouldn't happen.
-      throw new ApiError(
-        "It shouldn't happen: inconsistent data",
-        null,
-        ErrorCode.INCORRECT_DATA
-      );
+      throw new ApiError('Impossible to delete');
     }
 
     res.json({
