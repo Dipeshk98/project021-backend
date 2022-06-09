@@ -226,19 +226,16 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.ALREADY_MEMBER);
     });
 
-    it("shouldn't join team and return an error with incorrect verification code.", async () => {
-      // Using different user ID
+    it("shouldn't join team using other existing user id and not using the correct verification code", async () => {
       app.request.currentUserId = '125';
 
       let response = await supertest(app).get(
         '/user/profile?email=user2@example.com'
       );
 
-      response = await supertest(app)
-        .post(`/team/${teamId}/join/INCORRECT`)
-        .send({
-          email: 'user2@example.com',
-        });
+      response = await supertest(app).post(`/team/${teamId}/join/123`).send({
+        email: 'user2@example.com',
+      });
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_CODE);
@@ -285,7 +282,7 @@ describe('Team', () => {
       );
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
     });
 
     it("should send invitation and remove invitation in 'PENDING' status", async () => {

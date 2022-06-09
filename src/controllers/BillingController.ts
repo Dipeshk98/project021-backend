@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
 import { BillingService } from '@/services/BillingService';
 import { TeamService } from '@/services/TeamService';
 import { UserService } from '@/services/UserService';
@@ -57,7 +58,11 @@ export class BillingController {
         Env.getValue('STRIPE_WEBHOOK_SECRET', true)
       );
     } catch (ex: any) {
-      throw new ApiError('Incorrect Stripe webhook signature', ex);
+      throw new ApiError(
+        'Incorrect Stripe webhook signature',
+        ex,
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
     }
 
     // FYI, here is the explanation why we need these Stripe events:
@@ -86,10 +91,14 @@ export class BillingController {
     const stripeCustomerId = team.getStripeCustomerId();
 
     if (!stripeCustomerId) {
-      // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink`
-      // when the `stripeCustomerId` isn't defined.
+      // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink` when the `stripeCustomerId` isn't defined.
       // The option is hidden in the frontend when the `stripCustomerId` isn't defined.
-      throw new ApiError("Stripe customer ID shouldn't be null");
+      // Is it a bug? Or, someone bypassing the frontend?
+      throw new ApiError(
+        "Stripe customer ID shouldn't be null",
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
     }
 
     const portalSession = await getStripe().billingPortal.sessions.create({

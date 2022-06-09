@@ -50,6 +50,37 @@ export class MemberService {
     }
   }
 
+  public async deleteOnlyInPending(teamId: string, verificationCode: string) {
+    const member = new Member(teamId, verificationCode);
+
+    try {
+      const result = await this.dbClient
+        .deleteItem({
+          TableName: this.tableName,
+          Key: DynamoDB.Converter.marshall(member.keys()),
+          ReturnValues: 'ALL_OLD',
+          ConditionExpression: `#status = :status`,
+          ExpressionAttributeNames: {
+            '#status': `status`, // We need to use ExpressionAttributeNames because `status` is a reserved keyword in DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ReservedWords.html
+          },
+          ExpressionAttributeValues: DynamoDB.Converter.marshall({
+            ':status': `PENDING`,
+          }),
+        })
+        .promise();
+
+      return !!result.Attributes;
+      // Return true when we successfully delete the item
+      // Otherwise, it return false, it happens the item doesn't exists
+    } catch (e: any) {
+      if (e.code === 'ConditionalCheckFailedException') {
+        return false;
+      }
+
+      throw new ApiError('DBClient error: operation impossible', e);
+    }
+  }
+
   public async deleteAllMembers(teamId: string) {
     try {
       const list = await this.findAllByTeamId(teamId);

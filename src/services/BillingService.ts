@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
+import { ErrorCode } from '@/error/ErrorCode';
 import {
   ISubscription,
   StripeCheckoutEvent,
@@ -25,7 +26,7 @@ export class BillingService {
     const team = await this.teamService.findByTeamId(teamId);
 
     if (!team) {
-      throw new ApiError('Incorrect TeamID');
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
     const customerId = team.getStripeCustomerId();

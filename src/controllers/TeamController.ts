@@ -197,7 +197,7 @@ export class TeamController {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
-    const deleteRes = await this.memberService.delete(
+    const deleteRes = await this.memberService.deleteOnlyInPending(
       req.params.teamId,
       req.params.verificationCode
     );
@@ -247,7 +247,11 @@ export class TeamController {
       // In `User` class, the user is a team member.
       // In `Member` class, the user isn't a team member.
       // The data is inconsistent and shouldn't happen.
-      throw new ApiError("It shouldn't happen: inconsistent data");
+      throw new ApiError(
+        "It shouldn't happen: inconsistent data",
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
     }
 
     res.json({
