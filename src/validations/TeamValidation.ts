@@ -63,9 +63,6 @@ export const fullJoinValidate = validateRequest({
 export type FullJoinHandler = typeof fullJoinValidate;
 
 export const paramsRemoveValidate = validateRequest({
-  query: z.object({
-    isPending: z.string().optional(),
-  }),
   params: z.object({
     teamId: z.string().nonempty(),
     memberId: z.string().nonempty(),

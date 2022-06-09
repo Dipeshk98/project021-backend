@@ -123,6 +123,7 @@ content-type: application/json
 # please make sure the link is correctly formatted.
 # In `ses-output` folder, you will find some unnecessary `equal` sign.
 # They should be remove otherwise, the verification will be incorrect.
+# You should also replace `=3D` by `=` (just the `equal` sign).
 @teamId = {{profile.response.body.$.teamList[0].id}}
 POST http://localhost:4000/team/{{teamId}}/join/f1KnLYiMlDM3jJ7YYrRTl_1Jl2rpLp HTTP/1.1
 content-type: application/json

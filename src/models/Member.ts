@@ -51,6 +51,10 @@ export class Member extends AbstractItem {
     return `${Member.BEGINS_KEYS}${this.skId}`;
   }
 
+  getTeamId() {
+    return this.teamId;
+  }
+
   setStatus(status: MemberStatus) {
     this.status = status;
   }
