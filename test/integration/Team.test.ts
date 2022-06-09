@@ -179,6 +179,13 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_CODE);
     });
 
+    it("shouldn't return team information using other existing user id and not using the correct verification code", async () => {
+      const response = await supertest(app).get(`/team/${teamId}/join/123`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_CODE);
+    });
+
     it('should return team information', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'example@example.com',

@@ -175,7 +175,7 @@ export class TeamController {
       req.params.verificationCode
     );
 
-    if (!member) {
+    if (!member || member.getStatus() === MemberStatus.ACTIVE) {
       throw new ApiError('Incorrect code', null, ErrorCode.INCORRECT_CODE);
     }
 
