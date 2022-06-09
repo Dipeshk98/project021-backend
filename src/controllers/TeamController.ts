@@ -197,7 +197,7 @@ export class TeamController {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
-    const deleteRes = await this.memberService.delete(
+    const deleteRes = await this.memberService.deleteOnlyInPending(
       req.params.teamId,
       req.params.verificationCode
     );

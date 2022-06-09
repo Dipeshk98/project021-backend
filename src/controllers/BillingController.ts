@@ -91,9 +91,9 @@ export class BillingController {
     const stripeCustomerId = team.getStripeCustomerId();
 
     if (!stripeCustomerId) {
-      // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink`
-      // when the `stripeCustomerId` isn't defined.
+      // It shouldn't happens because the user shouldn't be able to call `createCustomerPortalLink` when the `stripeCustomerId` isn't defined.
       // The option is hidden in the frontend when the `stripCustomerId` isn't defined.
+      // Is it a bug? Or, someone bypassing the frontend?
       throw new ApiError(
         "Stripe customer ID shouldn't be null",
         null,

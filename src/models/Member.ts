@@ -12,6 +12,8 @@ export class Member extends AbstractItem {
   public readonly skId: string;
 
   private status = MemberStatus.PENDING;
+  // `status` is a reserved keyword in DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ReservedWords.html
+  // There is no issue working in JavaScript/TypeScript. But, when you are working with DynamoDB, please be careful.
 
   private email?: string;
 
