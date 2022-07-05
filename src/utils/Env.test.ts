@@ -18,17 +18,33 @@ describe('Environment variable', () => {
     });
 
     it('should return the value from the environment variable', () => {
-      process.env.RANDOM_DEFINED_KEY_FOR_JEST_TESTING = 'random_string';
+      // Save the original process.env
+      const originalEnv = process.env;
+      process.env = {
+        ...originalEnv,
+        RANDOM_DEFINED_KEY_FOR_JEST_TESTING: 'random_string',
+      };
 
       const value = Env.getValue('RANDOM_DEFINED_KEY_FOR_JEST_TESTING');
       expect(value).toEqual('random_string');
+
+      // Restore the original process.env
+      process.env = originalEnv;
     });
 
     it('should return the value from the environment variable even if not required', () => {
-      process.env.RANDOM_DEFINED_KEY_FOR_JEST_TESTING2 = 'random_string2';
+      // Save the original process.env
+      const originalEnv = process.env;
+      process.env = {
+        ...originalEnv,
+        RANDOM_DEFINED_KEY_FOR_JEST_TESTING2: 'random_string2',
+      };
 
       const value = Env.getValue('RANDOM_DEFINED_KEY_FOR_JEST_TESTING2', false);
       expect(value).toEqual('random_string2');
+
+      // Restore the original process.env
+      process.env = originalEnv;
     });
   });
 });
