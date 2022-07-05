@@ -25,9 +25,9 @@ describe('Environment variable', () => {
     });
 
     it('should return the value from the environment variable even if not required', () => {
-      process.env.RANDOM_DEFINED_KEY_FOR_TESTING2 = 'random_string2';
+      process.env.RANDOM_DEFINED_KEY_FOR_JEST_TESTING2 = 'random_string2';
 
-      const value = Env.getValue('RANDOM_DEFINED_KEY_FOR_TESTING2', false);
+      const value = Env.getValue('RANDOM_DEFINED_KEY_FOR_JEST_TESTING2', false);
       expect(value).toEqual('random_string2');
     });
   });

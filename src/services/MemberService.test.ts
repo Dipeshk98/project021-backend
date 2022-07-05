@@ -6,29 +6,31 @@ import { MemberService } from './MemberService';
 describe('MemberService', () => {
   let memberService: MemberService;
 
-  const teamId = 'team-123';
-  const userId = 'user-123';
-
-  beforeEach(async () => {
+  beforeEach(() => {
     memberService = new MemberService(getDbClient());
-
-    // Member 1 in pending
-    const member1 = new Member(teamId);
-    member1.setEmail('example1@example.com');
-    await memberService.save(member1);
-
-    // Member 2 in active
-    const member2 = new Member(teamId, userId);
-    member2.setEmail('example2@example.com');
-    await memberService.save(member2);
-
-    // Member 3 in pending
-    const member3 = new Member(teamId);
-    member3.setEmail('example3@example.com');
-    await memberService.save(member3);
   });
 
   describe('Batch manipulation (loop)', () => {
+    const teamId = 'team-123';
+    const userId = 'user-123';
+
+    beforeEach(async () => {
+      // Member 1 in pending
+      const member1 = new Member(teamId);
+      member1.setEmail('example1@example.com');
+      await memberService.save(member1);
+
+      // Member 2 in active
+      const member2 = new Member(teamId, userId);
+      member2.setEmail('example2@example.com');
+      await memberService.save(member2);
+
+      // Member 3 in pending
+      const member3 = new Member(teamId);
+      member3.setEmail('example3@example.com');
+      await memberService.save(member3);
+    });
+
     it('should get the member email', async () => {
       const list = await memberService.findAllByTeamId(teamId);
       expect(list).toHaveLength(3);
