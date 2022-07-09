@@ -24,6 +24,11 @@ app.use(
   })
 );
 
+// Create a health check endpoint
+app.get('/health', (_req, res) => {
+  res.status(200).json({ server: 'ok' });
+});
+
 // Load Express routers
 app.use(userRouter);
 app.use(todoRouter);
