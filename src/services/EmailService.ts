@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import nodemailer from 'nodemailer';
 
-import { AbstractEmailTemplate } from '@/emails/AbstractEmailTemplate';
+import type { AbstractEmailTemplate } from '@/emails/AbstractEmailTemplate';
 import { Env } from '@/utils/Env';
 
 export class EmailService {

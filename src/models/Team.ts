@@ -1,8 +1,9 @@
 import { ulid } from 'ulid';
 
-import { ISubscription } from '@/types/StripeTypes';
+import type { ISubscription } from '@/types/StripeTypes';
 
-import { AbstractItem, IDynamodbItem } from './AbstractItem';
+import type { IDynamodbItem } from './AbstractItem';
+import { AbstractItem } from './AbstractItem';
 
 export class Team extends AbstractItem {
   static BEGINS_KEYS = 'TEAM#';

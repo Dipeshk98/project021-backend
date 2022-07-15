@@ -1,7 +1,8 @@
-import { RequestHandler } from 'express';
-import { ZodError, ZodIssue, ZodSchema } from 'zod';
+import type { RequestHandler } from 'express';
+import type { ZodError, ZodIssue, ZodSchema } from 'zod';
 
-import { RequestError, ValidationError } from '@/error/RequestError';
+import type { ValidationError } from '@/error/RequestError';
+import { RequestError } from '@/error/RequestError';
 
 export declare type RequestValidation<TParams, TQuery, TBody> = {
   params?: ZodSchema<TParams>;

@@ -1,5 +1,5 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
-import { Request } from 'express';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { Request } from 'express';
 import serverlessHttp from 'serverless-http';
 
 import { app } from './app';

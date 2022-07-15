@@ -1,9 +1,9 @@
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
+import type { ISubscription } from '@/types/StripeTypes';
 import {
-  ISubscription,
   StripeCheckoutEvent,
   StripeCustomer,
   StripeSubscriptionEvent,
@@ -13,7 +13,7 @@ import { BillingPlan } from '@/utils/BillingPlan';
 import { Env } from '@/utils/Env';
 import { getStripe } from '@/utils/Stripe';
 
-import { TeamService } from './TeamService';
+import type { TeamService } from './TeamService';
 
 export class BillingService {
   private teamService: TeamService;

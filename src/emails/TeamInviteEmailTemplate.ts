@@ -1,4 +1,4 @@
-import { Team } from '@/models/Team';
+import type { Team } from '@/models/Team';
 import { Env } from '@/utils/Env';
 
 import { AbstractEmailTemplate } from './AbstractEmailTemplate';

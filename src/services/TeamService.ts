@@ -5,11 +5,11 @@ import { ErrorCode } from '@/error/ErrorCode';
 import { Member } from '@/models/Member';
 import { Team } from '@/models/Team';
 import { MemberStatus } from '@/types/MemberStatus';
-import { ISubscription } from '@/types/StripeTypes';
+import type { ISubscription } from '@/types/StripeTypes';
 import { Env } from '@/utils/Env';
 
-import { MemberService } from './MemberService';
-import { UserService } from './UserService';
+import type { MemberService } from './MemberService';
+import type { UserService } from './UserService';
 
 export class TeamService {
   private dbClient: DynamoDB;
