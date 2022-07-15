@@ -1,7 +1,7 @@
-import { MemberService } from '@/services/MemberService';
-import { TeamService } from '@/services/TeamService';
-import { UserService } from '@/services/UserService';
-import {
+import type { MemberService } from '@/services/MemberService';
+import type { TeamService } from '@/services/TeamService';
+import type { UserService } from '@/services/UserService';
+import type {
   BodyEmailHandler,
   ParamsEmailHandler,
 } from '@/validations/UserValidation';

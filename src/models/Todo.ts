@@ -1,6 +1,7 @@
 import { ulid } from 'ulid';
 
-import { AbstractItem, IDynamodbItem } from './AbstractItem';
+import type { IDynamodbItem } from './AbstractItem';
+import { AbstractItem } from './AbstractItem';
 
 export class Todo extends AbstractItem {
   static BEGINS_KEYS = 'TODO#';

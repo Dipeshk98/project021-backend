@@ -1,4 +1,4 @@
-import { RequestHandler, Response } from 'express';
+import type { RequestHandler, Response } from 'express';
 import httpMocks from 'node-mocks-http';
 import { z } from 'zod';
 

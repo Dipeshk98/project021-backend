@@ -2,7 +2,8 @@ import { nanoid } from 'nanoid';
 
 import { MemberStatus } from '@/types/MemberStatus';
 
-import { AbstractItem, IDynamodbItem } from './AbstractItem';
+import type { IDynamodbItem } from './AbstractItem';
+import { AbstractItem } from './AbstractItem';
 
 export class Member extends AbstractItem {
   static BEGINS_KEYS = 'MEMBER#';

@@ -1,10 +1,10 @@
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Todo } from '@/models/Todo';
-import { TodoService } from '@/services/TodoService';
-import { UserService } from '@/services/UserService';
-import { ParamsTeamIdHandler } from '@/validations/TeamValidation';
-import {
+import type { TodoService } from '@/services/TodoService';
+import type { UserService } from '@/services/UserService';
+import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
+import type {
   BodyTodoHandler,
   FullTodoHandler,
   ParamsTodoHandler,

@@ -1,4 +1,5 @@
-import { AbstractItem, IDynamodbItem } from './AbstractItem';
+import type { IDynamodbItem } from './AbstractItem';
+import { AbstractItem } from './AbstractItem';
 
 export class User extends AbstractItem {
   static BEGINS_KEYS = 'USER#';
