@@ -29,33 +29,34 @@ Located at `test/api.http`, it's a file where you can run requests directly in `
 
 ### File structure, most important folder
 
-```
+```sh
 .
 ├── README.md                               # README file
+├── __mocks__                               # Jest mocks folder for mocking imports
 ├── aws-resources                           # Additional AWS resources used by serverless.yml
-├── db
-│   └── seed.json                           # File used for DynamoDB seed
 ├── serverless.yml                          # Serverless configuration file
 ├── src
-│   ├── controllers                         # Controller folder
-│   │   └── index.ts
-│   ├── error                               # Error folder
-│   │   ├── ApiError.ts
-│   │   ├── ErrorCode.ts
-│   │   └── RequestError.ts                 # Express Handler for error
-│   ├── handler.ts                          # Entrypoint for lambda
-│   ├── middlewares                         # Express middleware
-│   │   └── Validation.ts
-│   ├── models                              # Database models
-│   │   └── AbstractItem.ts                 # All database models are extended from AbstractItem
-│   ├── routes                              # Express JS routes
-│   ├── services                            # Service folder
-│   │   └── index.ts
-│   ├── types                               # Types for TypeScript
-│   ├── utils                               # Utility folder
-│   └── validations                         # Incoming request validator with Zod
-└── test
-    └── api.http                            # HTTP request example
+│   ├── app.ts                              # Express.js initialization
+│   ├── controllers                         # Controller folder
+│   │   └── index.ts
+│   ├── emails                              # Email templates folder
+│   ├── error                               # Error management folder
+│   │   ├── ApiError.ts
+│   │   ├── ErrorCode.ts
+│   │   └── RequestError.ts                 # Express Handler for error
+│   ├── handler.ts                          # AWS Lambda entrypoint
+│   ├── middlewares                         # Express middleware
+│   │   └── Validation.ts
+│   ├── models                              # Database models
+│   │   ├── AbstractItem.ts                 # All database models are extended from AbstractItem
+│   ├── routes                              # Express.s routes
+│   ├── services                            # Services folder
+│   │   └── index.ts
+│   ├── types                               # Types for TypeScript
+│   ├── utils                               # Utility folder
+│   └── validations                         # Incoming request validator with Zod
+├── test                                    # Test folder
+    └── integration                         # Integration tests
 ```
 
 ### Customization
@@ -93,6 +94,12 @@ dynamodb-admin
 ```
 
 Open http://localhost:8001 with your favorite browser and you can visually browse your data stored in your local DynamoDB.
+
+# Testing
+
+All unit tests are located close to the source code in the same folder. For example, a file located at `src/service/` with the name `RandomService.ts` will have a unit test file located at `test/service/RandomService.test.ts`.
+
+The backend also includes integration tests for testing all backend layers including the database. They are located at `test/integration/`.
 
 ### Things to know
 
