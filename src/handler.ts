@@ -6,7 +6,7 @@ import { app } from './app';
 import { ApiError } from './error/ApiError';
 import { Env } from './utils/Env';
 
-// Wrap serverless-http around Express
+// Wrap `serverless-http` around Express.js
 export const handler = serverlessHttp(app, {
   request(req: Request, context: APIGatewayProxyEvent) {
     // authProvider will be defined if the route is protected by the default aws_iam API gateway authorizer.
