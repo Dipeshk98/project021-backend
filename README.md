@@ -53,9 +53,9 @@ Located at `test/api.http`, it's a file where you can run requests directly in `
 │   ├── services                            # Services folder
 │   │   └── index.ts
 │   ├── types                               # Types for TypeScript
-│   ├── utils                               # Utility folder
+│   ├── utils                               # Utilities
 │   └── validations                         # Incoming request validator with Zod
-├── test                                    # Test folder
+└── test                                    # Test folder
     └── integration                         # Integration tests
 ```
 
@@ -95,9 +95,9 @@ dynamodb-admin
 
 Open http://localhost:8001 with your favorite browser and you can visually browse your data stored in your local DynamoDB.
 
-# Testing
+### Testing
 
-All unit tests are located close to the source code in the same folder. For example, a file located at `src/service/` with the name `RandomService.ts` will have a unit test file located at `test/service/RandomService.test.ts`.
+All unit tests are located close to the source code in the same folder. For example, a file located at `src/service/` with the name `RandomService.ts` will have a unit test file located at `src/service/RandomService.test.ts`.
 
 The backend also includes integration tests for testing all backend layers including the database. They are located at `test/integration/`.
 
