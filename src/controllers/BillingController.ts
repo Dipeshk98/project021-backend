@@ -3,33 +3,33 @@ import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
+import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
-import type { UserService } from '@/services/UserService';
 import { Env } from '@/utils/Env';
 import { getStripe } from '@/utils/Stripe';
 import type { BodyPriceHandler } from '@/validations/BillingValidation';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 
 export class BillingController {
-  private billingService: BillingService;
-
-  private userService: UserService;
-
   private teamService: TeamService;
 
+  private billingService: BillingService;
+
+  private userRepository: UserRepository;
+
   constructor(
+    teamService: TeamService,
     billingService: BillingService,
-    userService: UserService,
-    teamService: TeamService
+    userRepository: UserRepository
   ) {
-    this.billingService = billingService;
-    this.userService = userService;
     this.teamService = teamService;
+    this.billingService = billingService;
+    this.userRepository = userRepository;
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );

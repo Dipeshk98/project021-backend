@@ -1,9 +1,9 @@
 import { ulid } from 'ulid';
 
-import type { IDynamodbItem } from './AbstractItem';
-import { AbstractItem } from './AbstractItem';
+import { AbstractModel } from './AbstractModel';
+import type { TodoEntity } from './Schema';
 
-export class Todo extends AbstractItem {
+export class Todo extends AbstractModel<TodoEntity> {
   static BEGINS_KEYS = 'TODO#';
 
   public readonly ownerId: string;
@@ -17,21 +17,13 @@ export class Todo extends AbstractItem {
    * @constructor
    * @param ownerId - The owner ID of the todo.
    * @param id - The ID of the todo.
-   * @param removeBegins - Is BEGINS_KEYS included in the ID.
-   * If yes, it needs to be removed.
    */
-  constructor(ownerId: string, id?: string, removeBegins?: boolean) {
+  constructor(ownerId: string, id?: string) {
     super();
     this.ownerId = ownerId;
 
     if (id) {
-      let tmpId = id;
-
-      if (removeBegins) {
-        tmpId = tmpId.replace(Todo.BEGINS_KEYS, '');
-      }
-
-      this.id = tmpId;
+      this.id = id;
     } else {
       this.id = ulid();
     }
@@ -53,14 +45,18 @@ export class Todo extends AbstractItem {
     return this.title;
   }
 
-  toItem() {
+  toEntity() {
     return {
       ...this.keys(),
       title: this.title,
     };
   }
 
-  fromItem(item: IDynamodbItem) {
-    this.title = item.title;
+  fromEntity(entity: TodoEntity) {
+    if (entity.title) this.title = entity.title;
+  }
+
+  static removeBeginsKeys(pk: string) {
+    return pk.replace(Todo.BEGINS_KEYS, '');
   }
 }

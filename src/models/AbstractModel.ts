@@ -1,6 +1,9 @@
-export type IDynamodbItem = { [key: string]: any };
+import type { PrimaryKeys } from './Schema';
 
-export abstract class AbstractItem {
+/**
+ * All database models are extended from AbstractModel
+ */
+export abstract class AbstractModel<T extends PrimaryKeys> {
   /**
    * DynamoDB Partition key.
    */
@@ -27,11 +30,11 @@ export abstract class AbstractItem {
   /**
    * Convert to DynamoDB item.
    */
-  abstract toItem(): IDynamodbItem;
+  abstract toEntity(): T;
 
   /**
    * Map DynamoDB item to class attributes.
    * @param item - The item returned by DynamoDB which need to convert to class attributes.
    */
-  abstract fromItem(item: IDynamodbItem): void;
+  abstract fromEntity(item: T): void;
 }

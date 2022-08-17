@@ -2,9 +2,12 @@ import { DynamoDB } from 'aws-sdk';
 
 import { Env } from './Env';
 
-let dbClient: DynamoDB | null = null;
+let dbClient: DynamoDB.DocumentClient | null = null;
 
-export const getDbClient = () => {
+/**
+ * Singleton for the connection to DynamoDB.
+ */
+export const getDBClient = () => {
   if (!dbClient) {
     let dynamodbOptions = {};
     const mockDynamodbEndpoint = Env.getValue('MOCK_DYNAMODB_ENDPOINT', false);
@@ -24,7 +27,7 @@ export const getDbClient = () => {
       };
     }
 
-    dbClient = new DynamoDB({
+    dbClient = new DynamoDB.DocumentClient({
       ...dynamodbOptions,
       httpOptions: {
         // Make the debugging easier if there is an error with DynamoDB by setting http timeout

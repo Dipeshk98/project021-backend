@@ -2,11 +2,12 @@ import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Member } from '@/models/Member';
+import type { MemberRepository } from '@/repositories/MemberRepository';
+import type { TeamRepository } from '@/repositories/TeamRepository';
+import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { EmailService } from '@/services/EmailService';
-import type { MemberService } from '@/services/MemberService';
 import type { TeamService } from '@/services/TeamService';
-import type { UserService } from '@/services/UserService';
 import { MemberStatus } from '@/types/MemberStatus';
 import type {
   BodyCreateTeamHandler,
@@ -21,9 +22,11 @@ import type {
 export class TeamController {
   private teamService: TeamService;
 
-  private userService: UserService;
+  private userRepository: UserRepository;
 
-  private memberService: MemberService;
+  private memberRepository: MemberRepository;
+
+  private teamRepository: TeamRepository;
 
   private billingService: BillingService;
 
@@ -31,29 +34,30 @@ export class TeamController {
 
   constructor(
     teamService: TeamService,
-    userService: UserService,
-    memberService: MemberService,
+    userRepository: UserRepository,
+    memberRepository: MemberRepository,
+    teamRepository: TeamRepository,
     billingService: BillingService,
     emailService: EmailService
   ) {
     this.teamService = teamService;
-    this.userService = userService;
-    this.memberService = memberService;
+    this.userRepository = userRepository;
+    this.memberRepository = memberRepository;
+    this.teamRepository = teamRepository;
     this.billingService = billingService;
     this.emailService = emailService;
   }
 
   public create: BodyCreateTeamHandler = async (req, res) => {
-    const user = await this.userService.strictFindByUserId(req.currentUserId);
+    const user = await this.userRepository.strictFindByUserId(
+      req.currentUserId
+    );
 
     const team = await this.teamService.create(
       req.body.displayName,
-      user.id,
+      user,
       req.body.userEmail
     );
-
-    user.addTeam(team.id);
-    await this.userService.update(user);
 
     res.json({
       id: team.id,
@@ -62,24 +66,18 @@ export class TeamController {
   };
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
-    const user = await this.userService.findAndVerifyTeam(
+    const user = await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
     user.removeTeam(req.params.teamId);
-    await this.userService.update(user);
+    await this.userRepository.save(user);
 
-    const deleteMembersRes = await this.memberService.deleteAllMembers(
+    await this.memberRepository.deleteAllMembers(req.params.teamId);
+    const deleteTeamRes = await this.teamRepository.deleteByTeamId(
       req.params.teamId
     );
-
-    if (!deleteMembersRes) {
-      // DynamoDB couldn't successfully delete all members.
-      throw new ApiError('Not all members has been deleted');
-    }
-
-    const deleteTeamRes = await this.teamService.delete(req.params.teamId);
 
     if (!deleteTeamRes) {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
@@ -91,12 +89,12 @@ export class TeamController {
   };
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    await this.teamService.updateDisplayName(
+    await this.teamRepository.updateDisplayName(
       req.params.teamId,
       req.body.displayName
     );
@@ -108,12 +106,12 @@ export class TeamController {
   };
 
   public listMembers: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    const list = await this.memberService.findAllByTeamId(req.params.teamId);
+    const list = await this.memberRepository.findAllByTeamId(req.params.teamId);
 
     res.json({
       list: list.map((elt) => ({
@@ -149,7 +147,7 @@ export class TeamController {
 
     const member = new Member(req.params.teamId);
     member.setEmail(req.body.email);
-    await this.memberService.save(member);
+    await this.memberRepository.save(member);
 
     await this.emailService.send(
       new TeamInviteEmailTemplate(team, member.skId),
@@ -164,13 +162,13 @@ export class TeamController {
   };
 
   public getJoinInfo: ParamsJoinHandler = async (req, res) => {
-    const team = await this.teamService.findByTeamId(req.params.teamId);
+    const team = await this.teamRepository.findByTeamId(req.params.teamId);
 
     if (!team) {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
-    const member = await this.memberService.findByKeys(
+    const member = await this.memberRepository.findByKeys(
       req.params.teamId,
       req.params.verificationCode
     );
@@ -185,19 +183,21 @@ export class TeamController {
   };
 
   public join: FullJoinHandler = async (req, res) => {
-    const user = await this.userService.strictFindByUserId(req.currentUserId);
+    const user = await this.userRepository.strictFindByUserId(
+      req.currentUserId
+    );
 
     if (user.isTeamMember(req.params.teamId)) {
       throw new ApiError('Already a member', null, ErrorCode.ALREADY_MEMBER);
     }
 
-    const team = await this.teamService.findByTeamId(req.params.teamId);
+    const team = await this.teamRepository.findByTeamId(req.params.teamId);
 
     if (!team) {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
 
-    const deleteRes = await this.memberService.deleteOnlyInPending(
+    const deleteRes = await this.memberRepository.deleteOnlyInPending(
       req.params.teamId,
       req.params.verificationCode
     );
@@ -207,12 +207,12 @@ export class TeamController {
     }
 
     user.addTeam(team.id);
-    await this.userService.update(user);
+    await this.userRepository.save(user);
 
     const newMember = new Member(req.params.teamId, req.currentUserId);
     newMember.setStatus(MemberStatus.ACTIVE);
     newMember.setEmail(req.body.email);
-    await this.memberService.save(newMember);
+    await this.memberRepository.save(newMember);
 
     res.json({
       teamId: req.params.teamId,
@@ -222,12 +222,12 @@ export class TeamController {
   };
 
   public remove: ParamsRemoveHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    const member = await this.memberService.findByKeys(
+    const member = await this.memberRepository.findByKeys(
       req.params.teamId,
       req.params.memberId
     );
@@ -241,16 +241,16 @@ export class TeamController {
     }
 
     if (member.getStatus() === MemberStatus.ACTIVE) {
-      const removedUser = await this.userService.findAndVerifyTeam(
+      const removedUser = await this.userRepository.findAndVerifyTeam(
         req.params.memberId,
         req.params.teamId
       );
 
       removedUser.removeTeam(req.params.teamId);
-      await this.userService.update(removedUser);
+      await this.userRepository.save(removedUser);
     }
 
-    const success = await this.memberService.delete(
+    const success = await this.memberRepository.deleteByKeys(
       member.getTeamId(),
       member.skId
     );

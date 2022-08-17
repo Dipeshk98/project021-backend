@@ -1,11 +1,10 @@
 import {
-  billingService,
-  emailService,
-  memberService,
-  teamService,
-  todoService,
-  userService,
-} from '@/services';
+  memberRepository,
+  teamRepository,
+  todoRepository,
+  userRepository,
+} from '@/repositories';
+import { billingService, emailService, teamService } from '@/services';
 
 import { BillingController } from './BillingController';
 import { TeamController } from './TeamController';
@@ -16,20 +15,21 @@ import { UserController } from './UserController';
 // No overhead, some DI library can increase cold start in serverless architecture.
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
 const userController = new UserController(
-  userService,
   teamService,
-  memberService
+  userRepository,
+  teamRepository
 );
-const todoController = new TodoController(todoService, userService);
+const todoController = new TodoController(todoRepository, userRepository);
 const billingController = new BillingController(
+  teamService,
   billingService,
-  userService,
-  teamService
+  userRepository
 );
 const teamController = new TeamController(
   teamService,
-  userService,
-  memberService,
+  userRepository,
+  memberRepository,
+  teamRepository,
   billingService,
   emailService
 );

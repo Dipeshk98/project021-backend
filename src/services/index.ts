@@ -1,29 +1,22 @@
-import { getDbClient } from '@/utils/DBClient';
+import {
+  memberRepository,
+  teamRepository,
+  userRepository,
+} from '@/repositories';
 
 import { BillingService } from './BillingService';
 import { EmailService } from './EmailService';
-import { MemberService } from './MemberService';
 import { TeamService } from './TeamService';
-import { TodoService } from './TodoService';
-import { UserService } from './UserService';
-
-const dbClient = getDbClient();
 
 // Manual `dependency injection` (DI) without external libraries.
 // No overhead, some DI library can increase cold start in serverless architecture.
 // You still get the same benefit: less complex code, decouple the code and make it easier for testing.
-const userService = new UserService(dbClient);
-const todoService = new TodoService(dbClient);
-const memberService = new MemberService(dbClient);
-const teamService = new TeamService(dbClient, userService, memberService);
-const billingService = new BillingService(teamService);
+const teamService = new TeamService(
+  teamRepository,
+  userRepository,
+  memberRepository
+);
+const billingService = new BillingService(teamRepository);
 const emailService = new EmailService();
 
-export {
-  billingService,
-  emailService,
-  memberService,
-  teamService,
-  todoService,
-  userService,
-};
+export { billingService, emailService, teamService };

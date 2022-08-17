@@ -164,26 +164,35 @@ describe('Todo', () => {
     });
 
     it('should create 3 todos, remove one todo and list', async () => {
-      let response = await supertest(app).post(`/${teamId}/todo/create`).send({
-        title: 'Todo title one',
-      });
+      const response1 = await supertest(app)
+        .post(`/${teamId}/todo/create`)
+        .send({
+          title: 'Todo title one',
+        });
 
-      response = await supertest(app).post(`/${teamId}/todo/create`).send({
-        title: 'Todo title two',
-      });
-      const todoId = response.body.id;
+      const response2 = await supertest(app)
+        .post(`/${teamId}/todo/create`)
+        .send({
+          title: 'Todo title two',
+        });
+      const todoId = response2.body.id;
 
-      response = await supertest(app).post(`/${teamId}/todo/create`).send({
-        title: 'Todo title three',
-      });
+      const response3 = await supertest(app)
+        .post(`/${teamId}/todo/create`)
+        .send({
+          title: 'Todo title three',
+        });
 
-      response = await supertest(app).delete(`/${teamId}/todo/${todoId}`);
+      await supertest(app).delete(`/${teamId}/todo/${todoId}`);
 
-      response = await supertest(app).get(`/${teamId}/todo/list`);
-      expect(response.statusCode).toEqual(200);
-      expect(response.body.list).toHaveLength(2);
-      expect(response.body.list[0]!.title).toEqual('Todo title one');
-      expect(response.body.list[1]!.title).toEqual('Todo title three');
+      const listResponse = await supertest(app).get(`/${teamId}/todo/list`);
+      expect(listResponse.statusCode).toEqual(200);
+      expect(listResponse.body.list).toHaveLength(2);
+      expect(listResponse.body.list[0]?.id).toEqual(response1.body.id);
+      expect(listResponse.body.list[0]?.title).toEqual('Todo title one');
+
+      expect(listResponse.body.list[1]?.id).toEqual(response3.body.id);
+      expect(listResponse.body.list[1]?.title).toEqual('Todo title three');
     });
   });
 });

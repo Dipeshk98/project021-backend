@@ -2,10 +2,10 @@ import { ulid } from 'ulid';
 
 import type { ISubscription } from '@/types/StripeTypes';
 
-import type { IDynamodbItem } from './AbstractItem';
-import { AbstractItem } from './AbstractItem';
+import { AbstractModel } from './AbstractModel';
+import type { TeamEntity } from './Schema';
 
-export class Team extends AbstractItem {
+export class Team extends AbstractModel<TeamEntity> {
   static BEGINS_KEYS = 'TEAM#';
 
   public readonly id: string;
@@ -20,20 +20,12 @@ export class Team extends AbstractItem {
    * Constructor for Team class.
    * @constructor
    * @param id - The ID of the team.
-   * @param removeBegins - Is BEGINS_KEYS included in the ID.
-   * If yes, it needs to be removed.
    */
-  constructor(id?: string, removeBegins?: boolean) {
+  constructor(id?: string) {
     super();
 
     if (id) {
-      let tmpId = id;
-
-      if (removeBegins) {
-        tmpId = tmpId.replace(Team.BEGINS_KEYS, '');
-      }
-
-      this.id = tmpId;
+      this.id = id;
     } else {
       this.id = ulid();
     }
@@ -71,7 +63,7 @@ export class Team extends AbstractItem {
     return this.subscription;
   }
 
-  toItem() {
+  toEntity() {
     return {
       ...this.keys(),
       displayName: this.displayName,
@@ -80,9 +72,27 @@ export class Team extends AbstractItem {
     };
   }
 
-  fromItem(item: IDynamodbItem) {
-    this.displayName = item.displayName;
-    this.stripeCustomerId = item.stripeCustomerId;
-    this.subscription = item.subscription;
+  fromEntity(entity: TeamEntity) {
+    if (entity.displayName) this.displayName = entity.displayName;
+
+    if (entity.stripeCustomerId)
+      this.stripeCustomerId = entity.stripeCustomerId;
+
+    if (
+      entity.subscription &&
+      entity.subscription.id &&
+      entity.subscription.productId &&
+      entity.subscription.status
+    ) {
+      this.subscription = {
+        id: entity.subscription.id,
+        productId: entity.subscription.productId,
+        status: entity.subscription.status,
+      };
+    }
+  }
+
+  static removeBeginsKeys(pk: string) {
+    return pk.replace(Team.BEGINS_KEYS, '');
   }
 }

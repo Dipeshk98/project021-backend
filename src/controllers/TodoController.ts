@@ -1,8 +1,8 @@
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Todo } from '@/models/Todo';
-import type { TodoService } from '@/services/TodoService';
-import type { UserService } from '@/services/UserService';
+import type { TodoRepository } from '@/repositories/TodoRepository';
+import type { UserRepository } from '@/repositories/UserRepository';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 import type {
   BodyTodoHandler,
@@ -11,22 +11,22 @@ import type {
 } from '@/validations/TodoValidation';
 
 export class TodoController {
-  private todoService: TodoService;
+  private todoRepository: TodoRepository;
 
-  private userService: UserService;
+  private userRepository: UserRepository;
 
-  constructor(todoService: TodoService, userService: UserService) {
-    this.todoService = todoService;
-    this.userService = userService;
+  constructor(todoRepository: TodoRepository, userRepository: UserRepository) {
+    this.todoRepository = todoRepository;
+    this.userRepository = userRepository;
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    const list = await this.todoService.findAllByUserId(req.params.teamId);
+    const list = await this.todoRepository.findAllByUserId(req.params.teamId);
 
     res.json({
       list: list.map((elt) => ({
@@ -37,14 +37,14 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
     const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
-    await this.todoService.save(todo);
+    await this.todoRepository.save(todo);
 
     res.json({
       id: todo.id,
@@ -53,12 +53,12 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    const todo = await this.todoService.findByKeys(
+    const todo = await this.todoRepository.findByKeys(
       req.params.teamId,
       req.params.id
     );
@@ -74,12 +74,12 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    const success = await this.todoService.delete(
+    const success = await this.todoRepository.deleteByKeys(
       req.params.teamId,
       req.params.id
     );
@@ -94,14 +94,14 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.userService.findAndVerifyTeam(
+    await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
     const todo = new Todo(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);
-    const success = await this.todoService.update(todo);
+    const success = await this.todoRepository.update(todo);
 
     if (!success) {
       throw new ApiError('Incorrect TodoId', null, ErrorCode.INCORRECT_TODO_ID);

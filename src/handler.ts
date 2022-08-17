@@ -18,8 +18,7 @@ export const handler = serverlessHttp(app, {
       authProvider = Env.getValue('COGNITO_USER_ID_LOCAL', true);
     }
 
-    // authProvider is empty when the default `aws_iam` is defined.
-    // When the route in API gateway is public, no need authentication.
+    // When the route in API gateway is public, no need authentication and there is no user id.
     if (authProvider) {
       const parts = authProvider.split(':');
       // Set `currentUserId` in Express request.

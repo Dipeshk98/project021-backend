@@ -48,7 +48,7 @@ Located at `test/api.http`, it's a file where you can run requests directly in `
 │   ├── middlewares                         # Express middleware
 │   │   └── Validation.ts
 │   ├── models                              # Database models
-│   │   ├── AbstractItem.ts                 # All database models are extended from AbstractItem
+│   │   ├── AbstractModel.ts                # All database models are extended from AbstractModel
 │   ├── routes                              # Express.s routes
 │   ├── services                            # Services folder
 │   │   └── index.ts

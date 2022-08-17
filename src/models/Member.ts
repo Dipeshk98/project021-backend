@@ -2,10 +2,10 @@ import { nanoid } from 'nanoid';
 
 import { MemberStatus } from '@/types/MemberStatus';
 
-import type { IDynamodbItem } from './AbstractItem';
-import { AbstractItem } from './AbstractItem';
+import { AbstractModel } from './AbstractModel';
+import type { MemberEntity } from './Schema';
 
-export class Member extends AbstractItem {
+export class Member extends AbstractModel<MemberEntity> {
   static BEGINS_KEYS = 'MEMBER#';
 
   public readonly teamId: string;
@@ -23,21 +23,13 @@ export class Member extends AbstractItem {
    * @constructor
    * @param teamId - The ID of the team.
    * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
-   * @param removeBegins - Is BEGINS_KEYS included in the ID.
-   * If yes, it needs to be removed.
    */
-  constructor(teamId: string, userId?: string, removeBegins?: boolean) {
+  constructor(teamId: string, userId?: string) {
     super();
     this.teamId = teamId;
 
     if (userId) {
-      let tmpUserId = userId;
-
-      if (removeBegins) {
-        tmpUserId = tmpUserId.replace(Member.BEGINS_KEYS, '');
-      }
-
-      this.skId = tmpUserId;
+      this.skId = userId;
     } else {
       // In pending status, we use the skId for verification code
       this.skId = nanoid(30);
@@ -72,7 +64,7 @@ export class Member extends AbstractItem {
     return this.email;
   }
 
-  toItem() {
+  toEntity() {
     return {
       ...this.keys(),
       status: this.status,
@@ -80,8 +72,13 @@ export class Member extends AbstractItem {
     };
   }
 
-  fromItem(item: IDynamodbItem) {
-    this.status = item.status;
-    this.email = item.email;
+  fromEntity(entity: MemberEntity) {
+    if (entity.status) this.status = MemberStatus[entity.status];
+
+    if (entity.email) this.email = entity.email;
+  }
+
+  static removeBeginsKeys(pk: string) {
+    return pk.replace(Member.BEGINS_KEYS, '');
   }
 }

@@ -1,111 +1,50 @@
-import { DynamoDB } from 'aws-sdk';
-
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Member } from '@/models/Member';
 import { Team } from '@/models/Team';
+import type { User } from '@/models/User';
+import type { MemberRepository } from '@/repositories/MemberRepository';
+import type { TeamRepository } from '@/repositories/TeamRepository';
+import type { UserRepository } from '@/repositories/UserRepository';
 import { MemberStatus } from '@/types/MemberStatus';
-import type { ISubscription } from '@/types/StripeTypes';
-import { Env } from '@/utils/Env';
-
-import type { MemberService } from './MemberService';
-import type { UserService } from './UserService';
 
 export class TeamService {
-  private dbClient: DynamoDB;
+  private teamRepository: TeamRepository;
 
-  private tableName: string;
+  private userRepository: UserRepository;
 
-  private userService: UserService;
-
-  private memberService: MemberService;
+  private memberRepository: MemberRepository;
 
   constructor(
-    dbClient: DynamoDB,
-    userService: UserService,
-    memberService: MemberService
+    teamRepository: TeamRepository,
+    userRepository: UserRepository,
+    memberRepository: MemberRepository
   ) {
-    this.dbClient = dbClient;
-    this.tableName = Env.getValue('TABLE_NAME');
-    this.userService = userService;
-    this.memberService = memberService;
+    this.teamRepository = teamRepository;
+    this.userRepository = userRepository;
+    this.memberRepository = memberRepository;
   }
 
-  async create(displayName: string, userId: string, userEmail: string) {
+  async create(displayName: string, user: User, userEmail: string) {
     const team = new Team();
     team.setDisplayName(displayName);
-    await this.save(team);
+    await this.teamRepository.save(team);
 
-    const member = new Member(team.id, userId);
+    const member = new Member(team.id, user.id);
     member.setStatus(MemberStatus.ACTIVE);
     member.setEmail(userEmail);
-    await this.memberService.save(member);
+    await this.memberRepository.save(member);
+
+    user.addTeam(team.id);
+    await this.userRepository.save(user);
 
     return team;
   }
 
-  async save(team: Team) {
-    try {
-      await this.dbClient
-        .putItem({
-          TableName: this.tableName,
-          Item: DynamoDB.Converter.marshall(team.toItem()),
-          ConditionExpression:
-            'attribute_not_exists(PK) AND attribute_not_exists(SK)',
-        })
-        .promise();
-    } catch (ex: any) {
-      throw new ApiError('DBClient error: operation impossible', ex);
-    }
-  }
+  async findOnlyIfTeamMember(teamId: string, userId: string) {
+    await this.userRepository.findAndVerifyTeam(userId, teamId);
 
-  public async delete(teamId: string) {
-    const todo = new Team(teamId);
-
-    try {
-      const result = await this.dbClient
-        .deleteItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall(todo.keys()),
-          ReturnValues: 'ALL_OLD',
-        })
-        .promise();
-
-      return !!result.Attributes;
-      // Return true when we successfully delete the item
-      // Otherwise, it return false, it happens the item doesn't exists
-    } catch (e: any) {
-      throw new ApiError('DBClient error: operation impossible', e);
-    }
-  }
-
-  public async findByTeamId(teamId: string) {
-    const team = new Team(teamId);
-
-    try {
-      const result = await this.dbClient
-        .getItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall(team.keys()),
-        })
-        .promise();
-
-      if (!result.Item) {
-        return null;
-      }
-
-      team.fromItem(DynamoDB.Converter.unmarshall(result.Item));
-    } catch (ex: any) {
-      throw new ApiError('DBClient error: operation impossible', ex);
-    }
-
-    return team;
-  }
-
-  public async findOnlyIfTeamMember(teamId: string, userId: string) {
-    await this.userService.findAndVerifyTeam(userId, teamId);
-
-    const team = await this.findByTeamId(teamId);
+    const team = await this.teamRepository.findByTeamId(teamId);
 
     if (!team) {
       throw new ApiError(
@@ -114,117 +53,17 @@ export class TeamService {
         ErrorCode.INCORRECT_TEAM_ID
       );
     }
-
     return team;
   }
 
-  public async findAllByTeamIdList(teamIdList: string[]) {
-    try {
-      const result = await this.dbClient
-        .batchGetItem({
-          RequestItems: {
-            [this.tableName]: {
-              Keys: teamIdList.map((elt) =>
-                DynamoDB.Converter.marshall({
-                  PK: `${Team.BEGINS_KEYS}${elt}`,
-                  SK: `${Team.BEGINS_KEYS}${elt}`,
-                })
-              ),
-            },
-          },
-        })
-        .promise();
+  async updateEmailAllTeams(user: User, email: string) {
+    const teamList = user.getTeamList();
 
-      const response = result.Responses && result.Responses[this.tableName];
-
-      if (!response) {
-        return [];
-      }
-
-      return response
-        .map((elt) => {
-          const item = DynamoDB.Converter.unmarshall(elt);
-          const team = new Team(item.PK, true);
-          team.fromItem(item);
-          return team;
-        })
-        .sort((team1, team2) => team1.id.localeCompare(team2.id));
-    } catch (e: any) {
-      throw new ApiError('DBClient error: operation impossible', e);
-    }
-  }
-
-  public async update(team: Team) {
-    try {
-      await this.dbClient
-        .putItem({
-          TableName: this.tableName,
-          Item: DynamoDB.Converter.marshall(team.toItem()),
-          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
-        })
-        .promise();
-
-      return true;
-    } catch (e: any) {
-      if (e.code === 'ConditionalCheckFailedException') {
-        return false;
-      }
-
-      throw new ApiError('DBClient error: operation impossible', e);
-    }
-  }
-
-  public async updateDisplayName(teamId: string, displayName: string) {
-    try {
-      await this.dbClient
-        .updateItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall({
-            PK: `${Team.BEGINS_KEYS}${teamId}`,
-            SK: `${Team.BEGINS_KEYS}${teamId}`,
-          }),
-          UpdateExpression: 'SET displayName = :displayName',
-          ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':displayName': displayName,
-          }),
-          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
-        })
-        .promise();
-
-      return true;
-    } catch (e: any) {
-      if (e.code === 'ConditionalCheckFailedException') {
-        return false;
-      }
-
-      throw new ApiError('DBClient error: operation impossible', e);
-    }
-  }
-
-  public async updateSubscription(teamId: string, subscription: ISubscription) {
-    try {
-      await this.dbClient
-        .updateItem({
-          TableName: this.tableName,
-          Key: DynamoDB.Converter.marshall({
-            PK: `${Team.BEGINS_KEYS}${teamId}`,
-            SK: `${Team.BEGINS_KEYS}${teamId}`,
-          }),
-          UpdateExpression: 'SET subscription = :subscription',
-          ExpressionAttributeValues: DynamoDB.Converter.marshall({
-            ':subscription': subscription,
-          }),
-          ConditionExpression: 'attribute_exists(PK) AND attribute_exists(SK)',
-        })
-        .promise();
-
-      return true;
-    } catch (e: any) {
-      if (e.code === 'ConditionalCheckFailedException') {
-        return false;
-      }
-
-      throw new ApiError('DBClient error: operation impossible', e);
+    // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
+    // eslint-disable-next-line no-restricted-syntax
+    for (const elt of teamList) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.memberRepository.updateEmail(elt, user.id, email);
     }
   }
 }

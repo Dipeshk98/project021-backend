@@ -1,47 +1,40 @@
-import type { MemberService } from '@/services/MemberService';
+import type { TeamRepository } from '@/repositories/TeamRepository';
+import type { UserRepository } from '@/repositories/UserRepository';
 import type { TeamService } from '@/services/TeamService';
-import type { UserService } from '@/services/UserService';
 import type {
   BodyEmailHandler,
   ParamsEmailHandler,
 } from '@/validations/UserValidation';
 
 export class UserController {
-  private userService: UserService;
-
   private teamService: TeamService;
 
-  private memberService: MemberService;
+  private userRepository: UserRepository;
+
+  private teamRepository: TeamRepository;
 
   constructor(
-    userService: UserService,
     teamService: TeamService,
-    memberService: MemberService
+    userRepository: UserRepository,
+    teamRepository: TeamRepository
   ) {
-    this.userService = userService;
     this.teamService = teamService;
-    this.memberService = memberService;
+    this.userRepository = userRepository;
+    this.teamRepository = teamRepository;
   }
 
   /**
    * Retrieve User information or create a new User, it happens when the user signs in for the first time.
    */
   public getProfile: ParamsEmailHandler = async (req, res) => {
-    const user = await this.userService.findOrCreate(req.currentUserId);
+    const user = await this.userRepository.findOrCreate(req.currentUserId);
 
     if (user.getTeamList().length === 0) {
       // Create a new team when the user isn't member of any team
-      const team = await this.teamService.create(
-        'New Team',
-        user.id,
-        req.query.email
-      );
-
-      user.addTeam(team.id);
-      await this.userService.update(user);
+      await this.teamService.create('New Team', user, req.query.email);
     }
 
-    const teamList = await this.teamService.findAllByTeamIdList(
+    const teamList = await this.teamRepository.findAllByTeamIdList(
       user.getTeamList()
     );
 
@@ -53,9 +46,11 @@ export class UserController {
   };
 
   public updateEmail: BodyEmailHandler = async (req, res) => {
-    const user = await this.userService.strictFindByUserId(req.currentUserId);
+    const user = await this.userRepository.strictFindByUserId(
+      req.currentUserId
+    );
 
-    await this.memberService.updateEmail(user, req.body.email);
+    await this.teamService.updateEmailAllTeams(user, req.body.email);
 
     res.json({
       id: user.id,

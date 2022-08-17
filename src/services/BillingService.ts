@@ -2,6 +2,7 @@ import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
+import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { ISubscription } from '@/types/StripeTypes';
 import {
   StripeCheckoutEvent,
@@ -13,17 +14,15 @@ import { BillingPlan } from '@/utils/BillingPlan';
 import { Env } from '@/utils/Env';
 import { getStripe } from '@/utils/Stripe';
 
-import type { TeamService } from './TeamService';
-
 export class BillingService {
-  private teamService: TeamService;
+  private teamRepository: TeamRepository;
 
-  constructor(teamService: TeamService) {
-    this.teamService = teamService;
+  constructor(teamRepository: TeamRepository) {
+    this.teamRepository = teamRepository;
   }
 
   async createOrRetrieveCustomerId(teamId: string) {
-    const team = await this.teamService.findByTeamId(teamId);
+    const team = await this.teamRepository.findByTeamId(teamId);
 
     if (!team) {
       throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
@@ -43,7 +42,7 @@ export class BillingService {
     });
 
     team.setStripeCustomerId(stripeCustomer.id);
-    await this.teamService.update(team);
+    await this.teamRepository.save(team);
 
     return stripeCustomer.id;
   }
@@ -90,7 +89,7 @@ export class BillingService {
     );
     const customer = StripeCustomer.parse(stripeCustomer);
 
-    await this.teamService.updateSubscription(customer.metadata.teamId, {
+    await this.teamRepository.updateSubscription(customer.metadata.teamId, {
       id: subscription.id,
       productId: subscription.plan.product,
       status: subscription.status,
@@ -109,7 +108,7 @@ export class BillingService {
     );
     const customer = StripeCustomer.parse(stripeCustomer);
 
-    await this.teamService.updateSubscription(customer.metadata.teamId, {
+    await this.teamRepository.updateSubscription(customer.metadata.teamId, {
       id: subscription.id,
       productId: subscription.plan.product,
       status: subscription.status,

@@ -1,8 +1,8 @@
-import type { IDynamodbItem } from './AbstractItem';
-import { AbstractItem } from './AbstractItem';
+import { AbstractModel } from './AbstractModel';
+import type { UserEntity } from './Schema';
 
-export class User extends AbstractItem {
-  static BEGINS_KEYS = 'USER#';
+export class User extends AbstractModel<UserEntity> {
+  static PREFIX_KEYS = 'USER#';
 
   public readonly id: string;
 
@@ -23,11 +23,11 @@ export class User extends AbstractItem {
   }
 
   get pk() {
-    return `${User.BEGINS_KEYS}${this.id}`;
+    return `${User.PREFIX_KEYS}${this.id}`;
   }
 
   get sk() {
-    return `${User.BEGINS_KEYS}${this.id}`;
+    return `${User.PREFIX_KEYS}${this.id}`;
   }
 
   getFirstSignIn() {
@@ -50,16 +50,17 @@ export class User extends AbstractItem {
     this.teamList = this.teamList.filter((elt) => elt !== teamId);
   }
 
-  toItem() {
+  toEntity() {
     return {
       ...this.keys(),
-      firstSignIn: this.firstSignIn.toISOString(),
+      firstSignIn: this.firstSignIn,
       teamList: this.teamList,
     };
   }
 
-  fromItem(item: IDynamodbItem) {
-    this.firstSignIn = new Date(item.firstSignIn);
-    this.teamList = item.teamList;
+  fromEntity(entity: UserEntity) {
+    if (entity.firstSignIn) this.firstSignIn = new Date(entity.firstSignIn);
+
+    if (entity.teamList) this.teamList = entity.teamList;
   }
 }
