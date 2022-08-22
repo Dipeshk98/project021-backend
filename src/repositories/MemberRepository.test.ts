@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
 import { Member } from '@/models/Member';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberStatus } from '@/types/Member';
 
 import { MemberRepository } from './MemberRepository';
 

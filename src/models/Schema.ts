@@ -38,6 +38,7 @@ export const schema = {
       PK: { type: String },
       SK: { type: String },
       email: { type: String },
+      role: { type: String, enum: ['ADMIN', 'USER', 'READ_ONLY'] },
       status: { type: String, enum: ['ACTIVE', 'PENDING'] },
     },
     Todo: {

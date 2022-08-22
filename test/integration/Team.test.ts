@@ -3,7 +3,7 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 describe('Team', () => {
   let teamId: string;
@@ -129,27 +129,68 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(400);
       expect(response.body.errors).toEqual(
-        expect.arrayContaining([{ param: 'email', type: 'invalid_type' }])
+        expect.arrayContaining([
+          { param: 'role', type: 'invalid_type' },
+          { param: 'email', type: 'invalid_type' },
+        ])
+      );
+    });
+
+    it('should return an error when the role is not the enum', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'RANDOM',
+        });
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'role', type: 'invalid_enum_value' }])
       );
     });
 
     it("shouldn't invite team member and return an error because the user isn't a team member", async () => {
       const response = await supertest(app).post(`/team/123/invite`).send({
         email: 'example@example.com',
+        role: 'USER',
       });
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it('should send invitation by sending email', async () => {
+    it('should send invitation by sending email with `User` role', async () => {
       const response = await supertest(app)
         .post(`/team/${teamId}/invite`)
         .send({
           email: 'example@example.com',
+          role: 'USER',
         });
 
       expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.USER);
+      expect(response.body.status).toEqual(MemberStatus.PENDING);
+
+      // Verify if the email is sent
+      expect(mockSendMail).toHaveBeenCalled();
+      expect(mockSendMail).toBeCalledWith(
+        expect.objectContaining({
+          to: 'example@example.com',
+        })
+      );
+    });
+
+    it('should send invitation by sending email with `ADMIN` role', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'ADMIN',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.ADMIN);
       expect(response.body.status).toEqual(MemberStatus.PENDING);
 
       // Verify if the email is sent
@@ -189,6 +230,7 @@ describe('Team', () => {
     it('should return team information', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'example@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -217,6 +259,7 @@ describe('Team', () => {
     it("shouldn't join team and return an error because the user is already a member.", async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'example@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -251,6 +294,7 @@ describe('Team', () => {
     it('should send invitation by sending email and a second user join the team', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -271,6 +315,7 @@ describe('Team', () => {
         });
 
       expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.ADMIN);
       expect(response.body.status).toEqual(MemberStatus.ACTIVE);
     });
   });
@@ -295,6 +340,7 @@ describe('Team', () => {
     it("should send invitation and remove invitation in 'PENDING' status", async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -311,6 +357,7 @@ describe('Team', () => {
     it('should add a new user in team and remove it from the team', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -354,6 +401,7 @@ describe('Team', () => {
       // Send invitation and the user accept it
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -376,6 +424,7 @@ describe('Team', () => {
       // Send another invitation without any other steps
       response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user3@example.com',
+        role: 'USER',
       });
 
       response = await supertest(app).get(`/team/${teamId}/list-members`);
@@ -403,6 +452,7 @@ describe('Team', () => {
       // Send invitation and the user accept it. But, it'll be removed
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'USER',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -425,6 +475,7 @@ describe('Team', () => {
       // Send another invitation and the user accept it. But, it won't be removed.
       response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user3@example.com',
+        role: 'USER',
       });
 
       const verificationCode2 = mockSendMail.mock.calls[1][0].text.match(

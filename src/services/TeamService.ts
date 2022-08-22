@@ -6,7 +6,7 @@ import type { User } from '@/models/User';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 export class TeamService {
   private teamRepository: TeamRepository;
@@ -31,8 +31,9 @@ export class TeamService {
     await this.teamRepository.save(team);
 
     const member = new Member(team.id, user.id);
-    member.setStatus(MemberStatus.ACTIVE);
     member.setEmail(userEmail);
+    member.setRole(MemberRole.ADMIN);
+    member.setStatus(MemberStatus.ACTIVE);
     await this.memberRepository.save(member);
 
     user.addTeam(team.id);

@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractModel } from './AbstractModel';
 import type { MemberEntity } from './Schema';
@@ -12,9 +12,9 @@ export class Member extends AbstractModel<MemberEntity> {
 
   public readonly skId: string;
 
+  private role = MemberRole.READ_ONLY;
+
   private status = MemberStatus.PENDING;
-  // `status` is a reserved keyword in DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ReservedWords.html
-  // There is no issue working in JavaScript/TypeScript. But, when you are working with DynamoDB, please be careful.
 
   private email?: string;
 
@@ -48,6 +48,14 @@ export class Member extends AbstractModel<MemberEntity> {
     return this.teamId;
   }
 
+  setRole(role: MemberRole) {
+    this.role = role;
+  }
+
+  getRole() {
+    return this.role;
+  }
+
   setStatus(status: MemberStatus) {
     this.status = status;
   }
@@ -67,15 +75,18 @@ export class Member extends AbstractModel<MemberEntity> {
   toEntity() {
     return {
       ...this.keys(),
-      status: this.status,
       email: this.email,
+      role: this.role,
+      status: this.status,
     };
   }
 
   fromEntity(entity: MemberEntity) {
-    if (entity.status) this.status = MemberStatus[entity.status];
-
     if (entity.email) this.email = entity.email;
+
+    if (entity.role) this.role = MemberRole[entity.role];
+
+    if (entity.status) this.status = MemberStatus[entity.status];
   }
 
   static removeBeginsKeys(pk: string) {

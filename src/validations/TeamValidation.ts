@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { validateRequest } from '@/middlewares/Validation';
+import { MemberRole } from '@/types/Member';
 
 export const bodyCreateTeamValidate = validateRequest({
   body: z.object({
@@ -36,6 +37,7 @@ export const bodyInviteValidate = validateRequest({
   }),
   body: z.object({
     email: z.string().nonempty().email(),
+    role: z.nativeEnum(MemberRole),
   }),
 });
 

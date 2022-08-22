@@ -5,7 +5,7 @@ import { User } from '@/models/User';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberStatus } from '@/types/Member';
 
 import { TeamService } from './TeamService';
 

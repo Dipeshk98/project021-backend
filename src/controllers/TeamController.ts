@@ -8,7 +8,7 @@ import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { EmailService } from '@/services/EmailService';
 import type { TeamService } from '@/services/TeamService';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberStatus } from '@/types/Member';
 import type {
   BodyCreateTeamHandler,
   BodyInviteHandler,
@@ -147,6 +147,7 @@ export class TeamController {
 
     const member = new Member(req.params.teamId);
     member.setEmail(req.body.email);
+    member.setRole(req.body.role);
     await this.memberRepository.save(member);
 
     await this.emailService.send(
@@ -156,8 +157,9 @@ export class TeamController {
 
     res.json({
       teamId: team.id,
+      email: member.getEmail(),
+      role: member.getRole(),
       status: member.getStatus(),
-      email: req.body.email,
     });
   };
 
@@ -212,12 +214,14 @@ export class TeamController {
     const newMember = new Member(req.params.teamId, req.currentUserId);
     newMember.setStatus(MemberStatus.ACTIVE);
     newMember.setEmail(req.body.email);
+    newMember.setRole(deleteRes.getRole());
     await this.memberRepository.save(newMember);
 
     res.json({
       teamId: req.params.teamId,
-      status: newMember.getStatus(),
       email: req.body.email,
+      role: newMember.getRole(),
+      status: newMember.getStatus(),
     });
   };
 

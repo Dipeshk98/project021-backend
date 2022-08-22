@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 
 import { app } from '@/app';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberStatus } from '@/types/Member';
 
 describe('User', () => {
   beforeEach(() => {

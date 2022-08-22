@@ -1,7 +1,7 @@
 import type { Table } from 'dynamodb-onetable';
 
 import { Member } from '@/models/Member';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
 
@@ -16,10 +16,9 @@ export class MemberRepository extends AbstractRepository<Member> {
     return this.delete(member);
   }
 
-  deleteOnlyInPending(teamId: string, verificationCode: string) {
+  async deleteOnlyInPending(teamId: string, verificationCode: string) {
     const member = new Member(teamId, verificationCode);
-
-    return this.dbModel.remove(member.keys(), {
+    const entity = await this.dbModel.remove(member.keys(), {
       exists: true,
       throw: false,
       // eslint-disable-next-line no-template-curly-in-string
@@ -28,6 +27,13 @@ export class MemberRepository extends AbstractRepository<Member> {
         status: MemberStatus.PENDING,
       },
     });
+
+    if (entity == null) {
+      return null;
+    }
+
+    member.fromEntity(entity);
+    return member;
   }
 
   async deleteAllMembers(teamId: string) {
