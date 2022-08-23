@@ -5,9 +5,10 @@ import {
   bodyCreateTeamValidate,
   bodyInviteValidate,
   bodyTeamNameValidate,
+  fullEditMemberValidate,
   fullJoinValidate,
   paramsJoinValidate,
-  paramsRemoveValidate,
+  paramsRemoveMemberValidate,
   paramsTeamIdValidate,
 } from '@/validations/TeamValidation';
 
@@ -47,10 +48,16 @@ teamRouter.post(
   teamController.join
 );
 
+teamRouter.put(
+  '/team/:teamId/edit/:memberId',
+  fullEditMemberValidate,
+  teamController.editMember
+);
+
 teamRouter.delete(
   '/team/:teamId/remove/:memberId',
-  paramsRemoveValidate,
-  teamController.remove
+  paramsRemoveMemberValidate,
+  teamController.removeMember
 );
 
 teamRouter.get(

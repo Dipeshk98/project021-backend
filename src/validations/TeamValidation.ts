@@ -64,11 +64,23 @@ export const fullJoinValidate = validateRequest({
 
 export type FullJoinHandler = typeof fullJoinValidate;
 
-export const paramsRemoveValidate = validateRequest({
+export const fullEditMemberValidate = validateRequest({
+  params: z.object({
+    teamId: z.string().nonempty(),
+    memberId: z.string().nonempty(),
+  }),
+  body: z.object({
+    role: z.nativeEnum(MemberRole),
+  }),
+});
+
+export type ParamsEditMemberHandler = typeof fullEditMemberValidate;
+
+export const paramsRemoveMemberValidate = validateRequest({
   params: z.object({
     teamId: z.string().nonempty(),
     memberId: z.string().nonempty(),
   }),
 });
 
-export type ParamsRemoveHandler = typeof paramsRemoveValidate;
+export type ParamsRemoveMemberHandler = typeof paramsRemoveMemberValidate;

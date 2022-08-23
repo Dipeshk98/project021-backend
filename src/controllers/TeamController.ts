@@ -14,8 +14,9 @@ import type {
   BodyInviteHandler,
   BodyTeamNameHandler,
   FullJoinHandler,
+  ParamsEditMemberHandler,
   ParamsJoinHandler,
-  ParamsRemoveHandler,
+  ParamsRemoveMemberHandler,
   ParamsTeamIdHandler,
 } from '@/validations/TeamValidation';
 
@@ -225,7 +226,26 @@ export class TeamController {
     });
   };
 
-  public remove: ParamsRemoveHandler = async (req, res) => {
+  public editMember: ParamsEditMemberHandler = async (req, res) => {
+    await this.userRepository.findAndVerifyTeam(
+      req.currentUserId,
+      req.params.teamId
+    );
+
+    await this.memberRepository.updateRole(
+      req.params.teamId,
+      req.params.memberId,
+      req.body.role
+    );
+
+    res.json({
+      teamId: req.params.teamId,
+      memberId: req.params.memberId,
+      role: req.body.role,
+    });
+  };
+
+  public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
     await this.userRepository.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
