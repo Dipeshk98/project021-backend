@@ -32,7 +32,7 @@ export class TeamService {
 
     const member = new Member(team.id, user.id);
     member.setEmail(userEmail);
-    member.setRole(MemberRole.ADMIN);
+    member.setRole(MemberRole.OWNER);
     member.setStatus(MemberStatus.ACTIVE);
     await this.memberRepository.save(member);
 

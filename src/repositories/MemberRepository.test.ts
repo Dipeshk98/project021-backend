@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
 import { Member } from '@/models/Member';
-import { MemberStatus } from '@/types/Member';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { MemberRepository } from './MemberRepository';
 
@@ -134,6 +134,42 @@ describe('MemberRepository', () => {
       const member = await memberRepository.findByKeys(teamId, userId);
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('new-random@example.com');
+    });
+
+    it('should update the team member role to `ADMIN`', async () => {
+      const teamId = 'team-123';
+      const userId = 'user-123';
+      const savedMember = new Member(teamId, userId);
+      savedMember.setRole(MemberRole.READ_ONLY);
+      savedMember.setEmail('random@example.com');
+      await memberRepository.save(savedMember);
+
+      await memberRepository.updateRoleIfNotOwner(
+        teamId,
+        userId,
+        MemberRole.ADMIN
+      );
+
+      const member = await memberRepository.findByKeys(teamId, userId);
+      assert(member !== null, "member shouldn't be null");
+      expect(member.getRole()).toEqual(MemberRole.ADMIN);
+    });
+
+    it("shouldn't update the team member role when he is an `OWNER`", async () => {
+      const teamId = 'team-123';
+      const userId = 'user-123';
+      const savedMember = new Member(teamId, userId);
+      savedMember.setRole(MemberRole.OWNER);
+      savedMember.setEmail('random@example.com');
+      await memberRepository.save(savedMember);
+
+      await expect(
+        memberRepository.updateRoleIfNotOwner(
+          teamId,
+          userId,
+          MemberRole.READ_ONLY
+        )
+      ).rejects.toThrow(/The conditional request failed/);
     });
   });
 

@@ -1,8 +1,7 @@
 import type { Table } from 'dynamodb-onetable';
 
 import { Member } from '@/models/Member';
-import type { MemberRole } from '@/types/Member';
-import { MemberStatus } from '@/types/Member';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
 
@@ -73,9 +72,18 @@ export class MemberRepository extends AbstractRepository<Member> {
     await this.dbModel.update({ ...member.keys(), email });
   }
 
-  async updateRole(teamId: string, userId: string, role: MemberRole) {
+  async updateRoleIfNotOwner(teamId: string, userId: string, role: MemberRole) {
     const member = new Member(teamId, userId);
 
-    await this.dbModel.update({ ...member.keys(), role });
+    await this.dbModel.update(
+      { ...member.keys(), role },
+      {
+        // eslint-disable-next-line no-template-curly-in-string
+        where: '${role} <> @{role}',
+        substitutions: {
+          role: MemberRole.OWNER,
+        },
+      }
+    );
   }
 }

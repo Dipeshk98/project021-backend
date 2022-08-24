@@ -5,7 +5,7 @@ import { User } from '@/models/User';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import { MemberStatus } from '@/types/Member';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { TeamService } from './TeamService';
 
@@ -49,6 +49,7 @@ describe('TeamService', () => {
       );
       assert(member !== null, "todo shouldn't be null");
       expect(member.getEmail()).toEqual('random@example.com');
+      expect(member.getRole()).toEqual(MemberRole.OWNER);
       expect(member.getStatus()).toEqual(MemberStatus.ACTIVE);
     });
 

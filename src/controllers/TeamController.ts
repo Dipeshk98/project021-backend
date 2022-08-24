@@ -232,7 +232,9 @@ export class TeamController {
       req.params.teamId
     );
 
-    await this.memberRepository.updateRole(
+    // By default, the frontend won't display the option to update role for the owner.
+    // If it raises an error, someone try to bypass the frontend? Or is it a bug?
+    await this.memberRepository.updateRoleIfNotOwner(
       req.params.teamId,
       req.params.memberId,
       req.body.role

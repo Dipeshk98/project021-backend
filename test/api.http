@@ -107,7 +107,7 @@ content-type: application/json
 
 {
   "email": "test3@gmail.com",
-  "role": "USER"
+  "role": "ADMIN"
 }
 
 ### Get Join info
