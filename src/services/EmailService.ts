@@ -12,7 +12,7 @@ export class EmailService {
 
     if (Env.getValue('IS_OFFLINE', false)) {
       sesOptions = {
-        endpoint: 'http://localhost:9001',
+        endpoint: 'http://localhost:8005',
       };
     }
 

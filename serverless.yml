@@ -25,11 +25,6 @@ custom:
     staging: false
     prod: false
 
-  ses:
-    stages:
-      - offline
-    outputDir: "./ses-output"
-
   bundle:
     linting: false
     excludeFiles: "**/*.test.ts"
@@ -133,5 +128,5 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-bundle
   - '@nearst/serverless-dynalite'
-  - serverless-offline-ses
+  - serverless-offline-ses-v2
   - serverless-offline
