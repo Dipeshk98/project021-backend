@@ -28,7 +28,7 @@ export class MemberRepository extends AbstractRepository<Member> {
       },
     });
 
-    if (entity == null) {
+    if (!entity) {
       return null;
     }
 
@@ -74,10 +74,12 @@ export class MemberRepository extends AbstractRepository<Member> {
 
   async updateRoleIfNotOwner(teamId: string, userId: string, role: MemberRole) {
     const member = new Member(teamId, userId);
-
-    await this.dbModel.update(
+    // `update` method from `dynamodb-onetable` library can also return `undefined` with the `throw` set to false.
+    // The typing from the library is incorrect, need to add `undefined` manually
+    const entity = await this.dbModel.update(
       { ...member.keys(), role },
       {
+        throw: false,
         // eslint-disable-next-line no-template-curly-in-string
         where: '${role} <> @{role}',
         substitutions: {
@@ -85,5 +87,12 @@ export class MemberRepository extends AbstractRepository<Member> {
         },
       }
     );
+
+    if (!entity) {
+      return null;
+    }
+
+    member.fromEntity(entity);
+    return member;
   }
 }

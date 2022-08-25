@@ -320,6 +320,70 @@ describe('Team', () => {
     });
   });
 
+  describe('Edit team member', () => {
+    it("should return an error when the role doesn't exist", async () => {
+      const response = await supertest(app).put(`/team/123/edit/123`).send({
+        role: 'RANDOM',
+      });
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'role', type: 'invalid_enum_value' }])
+      );
+    });
+
+    it("shouldn't update team member role and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).put(`/team/123/edit/123`).send({
+        role: 'ADMIN',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("shouldn't update team member role and return an error with incorrect member id", async () => {
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/INCORRECT`)
+        .send({
+          role: 'ADMIN',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+    });
+
+    it("shouldn't update the role when the member is the owner", async () => {
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/123`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+    });
+
+    it('should add a new user in team and edit his role to `READ_ONLY`', async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+        role: 'ADMIN',
+      });
+
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      response = await supertest(app)
+        .put(`/team/${teamId}/edit/${verificationCode}`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual('READ_ONLY');
+    });
+  });
+
   describe('Delete team member', () => {
     it("shouldn't delete team member and return an error because the user isn't a team member", async () => {
       const response = await supertest(app).delete(`/team/123/remove/123`);
@@ -421,7 +485,12 @@ describe('Team', () => {
           email: 'user2@example.com',
         });
 
-      // Send another invitation without any other steps
+      // Edit the role in `ACTIVE` status
+      response = await supertest(app).put(`/team/${teamId}/edit/125`).send({
+        role: 'READ_ONLY',
+      });
+
+      // Send another invitation without accepting the invitation
       response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user3@example.com',
         role: 'ADMIN',
@@ -433,15 +502,18 @@ describe('Team', () => {
           expect.objectContaining({
             email: 'example@example.com',
             memberId: '123',
+            role: MemberRole.OWNER,
             status: MemberStatus.ACTIVE,
           }),
           expect.objectContaining({
             email: 'user2@example.com',
             memberId: '125',
+            role: MemberRole.READ_ONLY,
             status: MemberStatus.ACTIVE,
           }),
           expect.objectContaining({
             email: 'user3@example.com',
+            role: MemberRole.ADMIN,
             status: MemberStatus.PENDING,
           }),
         ])

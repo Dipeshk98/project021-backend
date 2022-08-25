@@ -163,13 +163,12 @@ describe('MemberRepository', () => {
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
-      await expect(
-        memberRepository.updateRoleIfNotOwner(
-          teamId,
-          userId,
-          MemberRole.READ_ONLY
-        )
-      ).rejects.toThrow(/The conditional request failed/);
+      const updateRes = await memberRepository.updateRoleIfNotOwner(
+        teamId,
+        userId,
+        MemberRole.READ_ONLY
+      );
+      expect(updateRes).toBeNull();
     });
   });
 

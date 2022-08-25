@@ -118,6 +118,7 @@ export class TeamController {
       list: list.map((elt) => ({
         memberId: elt.skId,
         email: elt.getEmail(),
+        role: elt.getRole(),
         status: elt.getStatus(),
       })),
     });
@@ -232,13 +233,21 @@ export class TeamController {
       req.params.teamId
     );
 
-    // By default, the frontend won't display the option to update role for the owner.
-    // If it raises an error, someone try to bypass the frontend? Or is it a bug?
-    await this.memberRepository.updateRoleIfNotOwner(
+    const updateRes = await this.memberRepository.updateRoleIfNotOwner(
       req.params.teamId,
       req.params.memberId,
       req.body.role
     );
+
+    if (!updateRes) {
+      // By default, the frontend won't display the option to update role for the owner.
+      // If it raises an error, someone try to bypass the frontend? Or is it a bug?
+      throw new ApiError(
+        'Incorrect Member ID or the member has the OWNER ROLE',
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
 
     res.json({
       teamId: req.params.teamId,
