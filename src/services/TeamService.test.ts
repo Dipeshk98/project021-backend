@@ -1,6 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
+import { Member } from '@/models/Member';
 import { User } from '@/models/User';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
@@ -141,6 +142,109 @@ describe('TeamService', () => {
       member3 = await memberRepository.findByKeys(team3.id, user.id);
       assert(member3 !== null, "member shouldn't be null");
       expect(member3.getEmail()).toEqual('new-random@example.com');
+    });
+  });
+
+  describe('Team permission', () => {
+    it('should create a new user and should not have a team by default', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      await expect(
+        teamService.findAndVerifyTeam('user-123', 'team-123')
+      ).rejects.toThrow("isn't a team member");
+    });
+
+    it('should create a new user, make it a team member but in `PENDING` state', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      const member = new Member('team-123', userId);
+      member.setStatus(MemberStatus.PENDING);
+      await memberRepository.create(member);
+
+      await expect(
+        teamService.findAndVerifyTeam('user-123', 'team-123')
+      ).rejects.toThrow("isn't a team member");
+    });
+
+    it('should create a new user, make it a team member but incorrect permission', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      const member = new Member('team-123', userId);
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.create(member);
+
+      await expect(
+        teamService.findAndVerifyTeam('user-123', 'team-123', [
+          MemberRole.OWNER,
+          MemberRole.ADMIN,
+        ])
+      ).rejects.toThrow('are not able to perform the action');
+    });
+
+    it('should create a new user, make it a team member but incorrect permission only owner can', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      const member = new Member('team-123', userId);
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.ADMIN);
+      await memberRepository.create(member);
+
+      await expect(
+        teamService.findAndVerifyTeam('user-123', 'team-123', [
+          MemberRole.OWNER,
+        ])
+      ).rejects.toThrow('are not able to perform the action');
+    });
+
+    it('should create a new user with a new team and verify membership and permission', async () => {
+      const createdUser = new User('user-123');
+      const createdTeam = await teamService.create(
+        'team-display-name',
+        createdUser,
+        'random@example.com'
+      );
+
+      const user = await teamService.findAndVerifyTeam(
+        'user-123',
+        createdTeam.id
+      );
+      expect(user.id).toEqual('user-123');
+    });
+
+    it('should create a new user and verify he is the owner', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      const member = new Member('team-123', userId);
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.OWNER);
+      await memberRepository.create(member);
+
+      const user = await teamService.findAndVerifyTeam('user-123', 'team-123', [
+        MemberRole.OWNER,
+      ]);
+      expect(user.id).toEqual('user-123');
+    });
+
+    it('should create a new user and verify he has the correct role', async () => {
+      const userId = 'user-123';
+      await userRepository.createWithUserId(userId);
+
+      const member = new Member('team-123', userId);
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.ADMIN);
+      await memberRepository.create(member);
+
+      const user = await teamService.findAndVerifyTeam('user-123', 'team-123', [
+        MemberRole.OWNER,
+        MemberRole.ADMIN,
+      ]);
+      expect(user.id).toEqual('user-123');
     });
   });
 });

@@ -42,6 +42,38 @@ export class TeamService {
     return team;
   }
 
+  async findAndVerifyTeam(
+    userId: string,
+    teamId: string,
+    requiredRoles: MemberRole[] = [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+      MemberRole.READ_ONLY,
+    ]
+  ) {
+    const user = await this.userRepository.strictFindByUserId(userId);
+
+    const member = await this.memberRepository.findByKeys(teamId, userId);
+
+    if (!member || member.getStatus() !== MemberStatus.ACTIVE) {
+      throw new ApiError(
+        `User ${userId} isn't a team member of ${teamId}`,
+        null,
+        ErrorCode.NOT_MEMBER
+      );
+    }
+
+    if (!requiredRoles.includes(member.getRole())) {
+      throw new ApiError(
+        `The user role ${member.getRole()} are not able to perform the action`,
+        null,
+        ErrorCode.INCORRECT_PERMISSION
+      );
+    }
+
+    return user;
+  }
+
   async findOnlyIfTeamMember(teamId: string, userId: string) {
     await this.userRepository.findAndVerifyTeam(userId, teamId);
 
