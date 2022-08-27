@@ -30,16 +30,22 @@ export class TeamService {
     team.setDisplayName(displayName);
     await this.teamRepository.save(team);
 
+    await this.join(team, user, userEmail, MemberRole.OWNER);
+
+    return team;
+  }
+
+  async join(team: Team, user: User, userEmail: string, role: MemberRole) {
     const member = new Member(team.id, user.id);
     member.setEmail(userEmail);
-    member.setRole(MemberRole.OWNER);
+    member.setRole(role);
     member.setStatus(MemberStatus.ACTIVE);
     await this.memberRepository.save(member);
 
     user.addTeam(team.id);
     await this.userRepository.save(user);
 
-    return team;
+    return member;
   }
 
   async findTeamMember(userId: string, teamId: string) {

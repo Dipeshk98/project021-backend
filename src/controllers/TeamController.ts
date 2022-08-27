@@ -215,14 +215,12 @@ export class TeamController {
       throw new ApiError('Incorrect code', null, ErrorCode.INCORRECT_CODE);
     }
 
-    const newMember = new Member(req.params.teamId, req.currentUserId);
-    newMember.setStatus(MemberStatus.ACTIVE);
-    newMember.setEmail(req.body.email);
-    newMember.setRole(deleteRes.getRole());
-    await this.memberRepository.save(newMember);
-
-    user.addTeam(team.id);
-    await this.userRepository.save(user);
+    const newMember = await this.teamService.join(
+      team,
+      user,
+      req.body.email,
+      deleteRes.getRole()
+    );
 
     res.json({
       teamId: req.params.teamId,
