@@ -94,6 +94,10 @@ describe('TeamService', () => {
       user.addTeam('team-123');
       await userRepository.save(user);
 
+      const member = new Member('team-123', user.id);
+      member.setStatus(MemberStatus.ACTIVE);
+      await memberRepository.create(member);
+
       await expect(
         teamService.findOnlyIfTeamMember('team-123', user.id)
       ).rejects.toThrow(/Incorrect TeamID/);

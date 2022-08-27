@@ -19,12 +19,8 @@ const userController = new UserController(
   userRepository,
   teamRepository
 );
-const todoController = new TodoController(todoRepository, userRepository);
-const billingController = new BillingController(
-  teamService,
-  billingService,
-  userRepository
-);
+const todoController = new TodoController(teamService, todoRepository);
+const billingController = new BillingController(teamService, billingService);
 const teamController = new TeamController(
   teamService,
   userRepository,

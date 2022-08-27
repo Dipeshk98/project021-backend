@@ -67,7 +67,7 @@ export class TeamController {
   };
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
-    const user = await this.userRepository.findAndVerifyTeam(
+    const user = await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -90,7 +90,7 @@ export class TeamController {
   };
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -107,7 +107,7 @@ export class TeamController {
   };
 
   public listMembers: ParamsTeamIdHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -191,7 +191,12 @@ export class TeamController {
       req.currentUserId
     );
 
-    if (user.isTeamMember(req.params.teamId)) {
+    const member = await this.teamService.findTeamMember(
+      user.id,
+      req.params.teamId
+    );
+
+    if (member) {
       throw new ApiError('Already a member', null, ErrorCode.ALREADY_MEMBER);
     }
 
@@ -228,7 +233,7 @@ export class TeamController {
   };
 
   public editMember: ParamsEditMemberHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -257,7 +262,7 @@ export class TeamController {
   };
 
   public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -276,7 +281,7 @@ export class TeamController {
     }
 
     if (member.getStatus() === MemberStatus.ACTIVE) {
-      const removedUser = await this.userRepository.findAndVerifyTeam(
+      const removedUser = await this.teamService.findAndVerifyTeam(
         req.params.memberId,
         req.params.teamId
       );

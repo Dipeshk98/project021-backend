@@ -2,7 +2,7 @@ import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Todo } from '@/models/Todo';
 import type { TodoRepository } from '@/repositories/TodoRepository';
-import type { UserRepository } from '@/repositories/UserRepository';
+import type { TeamService } from '@/services/TeamService';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 import type {
   BodyTodoHandler,
@@ -11,17 +11,17 @@ import type {
 } from '@/validations/TodoValidation';
 
 export class TodoController {
+  private teamService: TeamService;
+
   private todoRepository: TodoRepository;
 
-  private userRepository: UserRepository;
-
-  constructor(todoRepository: TodoRepository, userRepository: UserRepository) {
+  constructor(teamService: TeamService, todoRepository: TodoRepository) {
+    this.teamService = teamService;
     this.todoRepository = todoRepository;
-    this.userRepository = userRepository;
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -37,7 +37,7 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -53,7 +53,7 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -74,7 +74,7 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -94,7 +94,7 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );

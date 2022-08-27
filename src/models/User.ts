@@ -38,10 +38,6 @@ export class User extends AbstractModel<UserEntity> {
     return this.teamList;
   }
 
-  isTeamMember(teamId: string) {
-    return this.teamList.includes(teamId);
-  }
-
   addTeam(teamId: string) {
     this.teamList.push(teamId);
   }

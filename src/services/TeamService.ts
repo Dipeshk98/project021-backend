@@ -42,6 +42,16 @@ export class TeamService {
     return team;
   }
 
+  async findTeamMember(userId: string, teamId: string) {
+    const member = await this.memberRepository.findByKeys(teamId, userId);
+
+    if (!member || member.getStatus() !== MemberStatus.ACTIVE) {
+      return null;
+    }
+
+    return member;
+  }
+
   async findAndVerifyTeam(
     userId: string,
     teamId: string,
@@ -52,10 +62,9 @@ export class TeamService {
     ]
   ) {
     const user = await this.userRepository.strictFindByUserId(userId);
+    const member = await this.findTeamMember(userId, teamId);
 
-    const member = await this.memberRepository.findByKeys(teamId, userId);
-
-    if (!member || member.getStatus() !== MemberStatus.ACTIVE) {
+    if (!member) {
       throw new ApiError(
         `User ${userId} isn't a team member of ${teamId}`,
         null,
@@ -75,7 +84,7 @@ export class TeamService {
   }
 
   async findOnlyIfTeamMember(teamId: string, userId: string) {
-    await this.userRepository.findAndVerifyTeam(userId, teamId);
+    await this.findAndVerifyTeam(userId, teamId);
 
     const team = await this.teamRepository.findByTeamId(teamId);
 

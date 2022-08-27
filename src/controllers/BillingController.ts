@@ -3,7 +3,6 @@ import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
-import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
 import { Env } from '@/utils/Env';
@@ -16,20 +15,13 @@ export class BillingController {
 
   private billingService: BillingService;
 
-  private userRepository: UserRepository;
-
-  constructor(
-    teamService: TeamService,
-    billingService: BillingService,
-    userRepository: UserRepository
-  ) {
+  constructor(teamService: TeamService, billingService: BillingService) {
     this.teamService = teamService;
     this.billingService = billingService;
-    this.userRepository = userRepository;
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );

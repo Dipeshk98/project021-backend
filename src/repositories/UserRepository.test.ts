@@ -79,31 +79,4 @@ describe('UserRepository', () => {
       expect(user.getTeamList()).toEqual(['team-1', 'team-2', 'team-3']);
     });
   });
-
-  describe('User and Team', () => {
-    it("shouldn't belong to the team by default", async () => {
-      const userId = 'user-123';
-      await userRepository.createWithUserId(userId);
-
-      await expect(
-        userRepository.findAndVerifyTeam(userId, 'team-123')
-      ).rejects.toThrow("isn't a team member");
-    });
-
-    it('should add user to the team', async () => {
-      const userId = 'user-123';
-      const teamId = 'team-123';
-      let user = await userRepository.createWithUserId(userId);
-
-      // Add user to the team
-      assert(user !== null, "user shouldn't be null");
-      user.addTeam(teamId);
-      await userRepository.save(user);
-
-      // Verify user belongs to the team
-      user = await userRepository.findAndVerifyTeam(userId, teamId);
-      assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual('user-123');
-    });
-  });
 });
