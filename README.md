@@ -79,7 +79,13 @@ npm run deploy-prod
 
 (optional) You can try Seed.run for an automatic backend deployment integrated to your GitHub workflow.
 
-## Install dynamodb-admin (optional)
+### SES local server
+
+In local/development environment, the SES service is simulated. So, you can work offline without internet connection. You can visualize the email by opening a browser at http://localhost:8005.
+
+> :warning: When your browser have a tab opened at http://localhost:8005, you need to close the tab before stopping the backend server.
+
+### Install dynamodb-admin (optional)
 
 For better developer experience, you can install `dynamodb-admin`:
 
@@ -100,10 +106,6 @@ Open http://localhost:8001 with your favorite browser and you can visually brows
 All unit tests are located close to the source code in the same folder. For example, a file located at `src/service/` with the name `RandomService.ts` will have a unit test file located at `src/service/RandomService.test.ts`.
 
 The backend also includes integration tests for testing all backend layers including the database. They are located at `test/integration/`.
-
-### Things to know
-
-`serverless-offline-plugin` display a red warning in the console `offline: [object Object]`. It's just a warning from [Serverless Offline Plugin](https://github.com/dherault/serverless-offline/blob/b39e8cf23592ad8bca568566e10c3db3469a951b/src/utils/getHttpApiCorsConfig.js). Hope it'll solve in the next release of `serverless-offline-plugin`.
 
 ### VSCode information (optional)
 
