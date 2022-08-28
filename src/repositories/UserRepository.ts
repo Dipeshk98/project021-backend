@@ -48,4 +48,10 @@ export class UserRepository extends AbstractRepository<User> {
 
     return user;
   }
+
+  async removeTeam(userId: string, teamId: string) {
+    const user = await this.strictFindByUserId(userId);
+    user.removeTeam(teamId);
+    await this.save(user);
+  }
 }

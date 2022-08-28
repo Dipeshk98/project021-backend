@@ -35,6 +35,33 @@ export class TeamService {
     return team;
   }
 
+  async delete(teamId: string) {
+    const memberList = await this.memberRepository.deleteAllMembers(teamId);
+
+    if (!memberList) {
+      throw new ApiError(
+        `Nothing to delete, the team member list was empty`,
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
+
+    // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
+    // eslint-disable-next-line no-restricted-syntax
+    for (const elt of memberList) {
+      if (elt.getStatus() === MemberStatus.ACTIVE) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.userRepository.removeTeam(elt.skId, teamId);
+      }
+    }
+
+    const deleteTeamRes = await this.teamRepository.deleteByTeamId(teamId);
+
+    if (!deleteTeamRes) {
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
+    }
+  }
+
   async join(team: Team, user: User, userEmail: string, role: MemberRole) {
     const member = new Member(team.id, user.id);
     member.setEmail(userEmail);

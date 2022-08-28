@@ -36,8 +36,8 @@ export class MemberRepository extends AbstractRepository<Member> {
     return member;
   }
 
-  async deleteAllMembers(teamId: string) {
-    await this.dbModel.remove(
+  async deleteAllMembers(teamId: string): Promise<Member[] | null> {
+    const list = await this.dbModel.remove(
       {
         PK: `${Member.BEGINS_KEYS}${teamId}`,
       },
@@ -45,6 +45,16 @@ export class MemberRepository extends AbstractRepository<Member> {
         many: true,
       }
     );
+
+    if (!list) {
+      return null;
+    }
+
+    return list.map((elt: any) => {
+      const member = new Member(teamId, Member.removeBeginsKeys(`${elt.SK}`));
+      member.fromEntity(elt);
+      return member;
+    });
   }
 
   findByKeys(teamId: string, userId: string) {

@@ -67,22 +67,12 @@ export class TeamController {
   };
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
-    const user = await this.teamService.findAndVerifyTeam(
+    await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
 
-    user.removeTeam(req.params.teamId);
-    await this.userRepository.save(user);
-
-    await this.memberRepository.deleteAllMembers(req.params.teamId);
-    const deleteTeamRes = await this.teamRepository.deleteByTeamId(
-      req.params.teamId
-    );
-
-    if (!deleteTeamRes) {
-      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
-    }
+    await this.teamService.delete(req.params.teamId);
 
     res.json({
       success: true,
