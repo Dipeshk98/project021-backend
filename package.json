@@ -60,7 +60,7 @@
     "serverless-bundle": "^5.4.0",
     "serverless-dotenv-plugin": "^4.0.2",
     "serverless-offline": "^9.2.3",
-    "serverless-offline-ses": "^0.0.7",
+    "serverless-offline-ses-v2": "^1.0.1",
     "supertest": "^6.2.4",
     "ts-jest": "^28.0.8",
     "typescript": "^4.7.4"
