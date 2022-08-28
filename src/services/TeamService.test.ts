@@ -33,10 +33,10 @@ describe('TeamService', () => {
 
   describe('Basic operation', () => {
     it('should create a new team and add the user as a team member', async () => {
-      const user = new User('user-123');
+      const createdUser = new User('user-123');
       const createdTeam = await teamService.create(
         'team-123',
-        user,
+        createdUser,
         'random@example.com'
       );
 
@@ -44,11 +44,16 @@ describe('TeamService', () => {
       assert(team !== null, "team shouldn't be null");
       expect(team.getDisplayName()).toEqual('team-123');
 
+      const user = await userRepository.findByUserId(createdUser.id);
+      assert(user !== null, "user shouldn't be null");
+      expect(user.getTeamList()).toHaveLength(1);
+      expect(user.getTeamList()[0]).toEqual(createdTeam.id);
+
       const member = await memberRepository.findByKeys(
         createdTeam.id,
         'user-123'
       );
-      assert(member !== null, "todo shouldn't be null");
+      assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('random@example.com');
       expect(member.getRole()).toEqual(MemberRole.OWNER);
       expect(member.getStatus()).toEqual(MemberStatus.ACTIVE);
@@ -157,6 +162,37 @@ describe('TeamService', () => {
       await expect(
         teamService.findAndVerifyTeam('user-123', 'team-123')
       ).rejects.toThrow("isn't a team member");
+    });
+
+    it('should join a team as a member', async () => {
+      const createdUser = await userRepository.createWithUserId('user-123');
+      const createdTeam = await teamRepository.createWithDisplayName(
+        'team-123'
+      );
+
+      await teamService.join(
+        createdTeam,
+        createdUser,
+        'random@example.com',
+        MemberRole.ADMIN
+      );
+
+      const user = await teamService.findAndVerifyTeam(
+        'user-123',
+        createdTeam.id
+      );
+      expect(user.id).toEqual('user-123');
+      expect(user.getTeamList()).toHaveLength(1);
+      expect(user.getTeamList()[0]).toEqual(createdTeam.id);
+
+      const member = await memberRepository.findByKeys(
+        createdTeam.id,
+        'user-123'
+      );
+      assert(member !== null, "member shouldn't be null");
+      expect(member.getEmail()).toEqual('random@example.com');
+      expect(member.getRole()).toEqual(MemberRole.ADMIN);
+      expect(member.getStatus()).toEqual(MemberStatus.ACTIVE);
     });
 
     it('should create a new user, make it a team member but in `PENDING` state', async () => {
