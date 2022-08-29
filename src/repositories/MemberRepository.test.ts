@@ -182,11 +182,13 @@ describe('MemberRepository', () => {
     const teamId = 'team-123';
     const userId = 'user-123';
 
+    let member1: Member;
     let member2: Member;
+    let member3: Member;
 
     beforeEach(async () => {
       // Member 1 in pending
-      const member1 = new Member(teamId);
+      member1 = new Member(teamId);
       member1.setEmail('example1@example.com');
       await memberRepository.save(member1);
 
@@ -196,7 +198,7 @@ describe('MemberRepository', () => {
       await memberRepository.save(member2);
 
       // Member 3 in pending
-      const member3 = new Member(teamId);
+      member3 = new Member(teamId);
       member3.setEmail('example3@example.com');
       await memberRepository.save(member3);
     });
@@ -214,10 +216,16 @@ describe('MemberRepository', () => {
       let list = await memberRepository.findAllByTeamId(teamId);
       expect(list).toHaveLength(3);
 
-      await memberRepository.deleteAllMembers(teamId);
+      const deletedList = await memberRepository.deleteAllMembers(teamId);
 
       list = await memberRepository.findAllByTeamId(teamId);
       expect(list).toHaveLength(0);
+
+      assert(deletedList !== null, "deletedList shouldn't be null");
+      expect(deletedList).toHaveLength(3);
+      expect(deletedList).toEqual(
+        expect.arrayContaining([member1, member2, member3])
+      );
     });
   });
 });
