@@ -152,6 +152,67 @@ describe('TeamService', () => {
       assert(member3 !== null, "member shouldn't be null");
       expect(member3.getEmail()).toEqual('new-random@example.com');
     });
+
+    it('should raise an error when there is no team member to delete', async () => {
+      await expect(teamService.delete('team-123')).rejects.toThrow(
+        /Incorrect TeamID/
+      );
+    });
+
+    it('should raise an error when deleting a team but there is no member. It should not happen because it should have at least the owner', async () => {
+      const team = await teamRepository.createWithDisplayName('team-123');
+
+      await expect(teamService.delete(team.id)).rejects.toThrow(
+        /Nothing to delete/
+      );
+    });
+
+    it('should delete team and its member', async () => {
+      const createdUser = new User('user-1');
+      const createdTeam = await teamService.create(
+        'team-123',
+        createdUser,
+        'random@example.com'
+      );
+
+      const createdPendingMember = new Member(createdTeam.id);
+      await memberRepository.create(createdPendingMember);
+
+      const createdUser2 = new User('user-2');
+      await teamService.join(
+        createdTeam,
+        createdUser2,
+        'random2@example.com',
+        MemberRole.ADMIN
+      );
+
+      expect(createdUser.getTeamList()[0]).toEqual(createdTeam.id);
+
+      await teamService.delete(createdTeam.id);
+
+      const team = await teamRepository.findByTeamId(createdTeam.id);
+      expect(team).toBeNull();
+      const member1 = await memberRepository.findByKeys(
+        createdTeam.id,
+        'user-1'
+      );
+      expect(member1).toBeNull();
+      const member2 = await memberRepository.findByKeys(
+        createdTeam.id,
+        'user-2'
+      );
+      expect(member2).toBeNull();
+      const pendingMember = await memberRepository.findByKeys(
+        createdPendingMember.teamId,
+        createdPendingMember.sk
+      );
+      expect(pendingMember).toBeNull();
+
+      const user = await userRepository.strictFindByUserId('user-1');
+      expect(user.getTeamList()).toHaveLength(0);
+      const user2 = await userRepository.strictFindByUserId('user-2');
+      expect(user2.getTeamList()).toHaveLength(0);
+    });
   });
 
   describe('Team permission', () => {

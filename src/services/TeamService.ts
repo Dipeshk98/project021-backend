@@ -36,6 +36,12 @@ export class TeamService {
   }
 
   async delete(teamId: string) {
+    const deleteTeamRes = await this.teamRepository.deleteByTeamId(teamId);
+
+    if (!deleteTeamRes) {
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
+    }
+
     const memberList = await this.memberRepository.deleteAllMembers(teamId);
 
     if (!memberList) {
@@ -53,12 +59,6 @@ export class TeamService {
         // eslint-disable-next-line no-await-in-loop
         await this.userRepository.removeTeam(elt.skId, teamId);
       }
-    }
-
-    const deleteTeamRes = await this.teamRepository.deleteByTeamId(teamId);
-
-    if (!deleteTeamRes) {
-      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
     }
   }
 
