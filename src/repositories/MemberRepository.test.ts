@@ -170,6 +170,12 @@ describe('MemberRepository', () => {
       );
       expect(updateRes).toBeNull();
     });
+
+    it('should return null when there is member to delete', async () => {
+      const list = await memberRepository.deleteAllMembers('team-123');
+
+      expect(list).toBeNull();
+    });
   });
 
   describe('Batch manipulation', () => {

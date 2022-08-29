@@ -46,7 +46,7 @@ export class MemberRepository extends AbstractRepository<Member> {
       }
     );
 
-    if (!list) {
+    if (!list || (Array.isArray(list) && list.length === 0)) {
       return null;
     }
 
