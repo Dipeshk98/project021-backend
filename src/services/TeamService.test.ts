@@ -155,6 +155,25 @@ describe('TeamService', () => {
   });
 
   describe('Team permission', () => {
+    it('should not find team member with `PENDING` status', async () => {
+      const createdMember = new Member('team-123', 'user-123');
+      await memberRepository.create(createdMember);
+
+      const member = await teamService.findTeamMember('user-123', 'team-123');
+
+      expect(member).toBeNull();
+    });
+
+    it('should find team member with `ACTIVE` status only', async () => {
+      const createdMember = new Member('team-123', 'user-123');
+      createdMember.setStatus(MemberStatus.ACTIVE);
+      await memberRepository.create(createdMember);
+
+      const member = await teamService.findTeamMember('user-123', 'team-123');
+
+      expect(member).not.toBeNull();
+    });
+
     it('should create a new user and should not have a team by default', async () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);

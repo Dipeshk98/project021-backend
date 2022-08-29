@@ -52,6 +52,20 @@ describe('UserRepository', () => {
       ).rejects.toThrow(/Incorrect UserID/);
     });
 
+    it('should remove from the team', async () => {
+      const createdUser = new User('user-123');
+      createdUser.addTeam('team-1');
+      createdUser.addTeam('team-2');
+      createdUser.addTeam('team-3');
+      await userRepository.create(createdUser);
+
+      await userRepository.removeTeam('user-123', 'team-2');
+
+      const user = await userRepository.strictFindByUserId('user-123');
+      assert(user !== null, "user shouldn't be null");
+      expect(user.getTeamList()).toEqual(['team-1', 'team-3']);
+    });
+
     it('should be able to save an non-existing user and be able to get the user from the database', async () => {
       const userId = 'user-123';
       const savedUser = new User(userId);
