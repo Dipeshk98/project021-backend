@@ -3,6 +3,7 @@ import { ErrorCode } from '@/error/ErrorCode';
 import { Todo } from '@/models/Todo';
 import type { TodoRepository } from '@/repositories/TodoRepository';
 import type { TeamService } from '@/services/TeamService';
+import { MemberRole } from '@/types/Member';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 import type {
   BodyTodoHandler,
@@ -39,7 +40,8 @@ export class TodoController {
   public create: BodyTodoHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const todo = new Todo(req.params.teamId);
@@ -76,7 +78,8 @@ export class TodoController {
   public delete: ParamsTodoHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const success = await this.todoRepository.deleteByKeys(
@@ -96,7 +99,8 @@ export class TodoController {
   public update: FullTodoHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const todo = new Todo(req.params.teamId, req.params.id);

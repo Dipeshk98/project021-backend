@@ -5,6 +5,7 @@ import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
+import { MemberRole } from '@/types/Member';
 import { Env } from '@/utils/Env';
 import { getStripe } from '@/utils/Stripe';
 import type { BodyPriceHandler } from '@/validations/BillingValidation';
@@ -23,7 +24,8 @@ export class BillingController {
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const customerId = await this.billingService.createOrRetrieveCustomerId(
@@ -77,7 +79,8 @@ export class BillingController {
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
     const team = await this.teamService.findOnlyIfTeamMember(
       req.params.teamId,
-      req.currentUserId
+      req.currentUserId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const stripeCustomerId = team.getStripeCustomerId();

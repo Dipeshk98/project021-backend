@@ -465,7 +465,7 @@ describe('Team', () => {
       // Send invitation and the user accept it
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
-        role: 'ADMIN',
+        role: 'READ_ONLY',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -485,9 +485,12 @@ describe('Team', () => {
           email: 'user2@example.com',
         });
 
+      // Back to OWNER of the team
+      app.request.currentUserId = '123';
+
       // Edit the role in `ACTIVE` status
       response = await supertest(app).put(`/team/${teamId}/edit/125`).send({
-        role: 'READ_ONLY',
+        role: 'ADMIN',
       });
 
       // Send another invitation without accepting the invitation
@@ -508,7 +511,7 @@ describe('Team', () => {
           expect.objectContaining({
             email: 'user2@example.com',
             memberId: '125',
-            role: MemberRole.READ_ONLY,
+            role: MemberRole.ADMIN,
             status: MemberStatus.ACTIVE,
           }),
           expect.objectContaining({

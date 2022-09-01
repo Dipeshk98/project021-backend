@@ -116,8 +116,16 @@ export class TeamService {
     return user;
   }
 
-  async findOnlyIfTeamMember(teamId: string, userId: string) {
-    await this.findAndVerifyTeam(userId, teamId);
+  async findOnlyIfTeamMember(
+    teamId: string,
+    userId: string,
+    requiredRoles: MemberRole[] = [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+      MemberRole.READ_ONLY,
+    ]
+  ) {
+    await this.findAndVerifyTeam(userId, teamId, requiredRoles);
 
     const team = await this.teamRepository.findByTeamId(teamId);
 

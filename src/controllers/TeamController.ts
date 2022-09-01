@@ -8,7 +8,7 @@ import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { EmailService } from '@/services/EmailService';
 import type { TeamService } from '@/services/TeamService';
-import { MemberStatus } from '@/types/Member';
+import { MemberRole, MemberStatus } from '@/types/Member';
 import type {
   BodyCreateTeamHandler,
   BodyInviteHandler,
@@ -69,7 +69,8 @@ export class TeamController {
   public delete: ParamsTeamIdHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     await this.teamService.delete(req.params.teamId);
@@ -82,7 +83,8 @@ export class TeamController {
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     await this.teamRepository.updateDisplayName(
@@ -134,7 +136,8 @@ export class TeamController {
   public invite: BodyInviteHandler = async (req, res) => {
     const team = await this.teamService.findOnlyIfTeamMember(
       req.params.teamId,
-      req.currentUserId
+      req.currentUserId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const member = new Member(req.params.teamId);
@@ -223,7 +226,8 @@ export class TeamController {
   public editMember: ParamsEditMemberHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const updateRes = await this.memberRepository.updateRoleIfNotOwner(
@@ -252,7 +256,8 @@ export class TeamController {
   public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
     await this.teamService.findAndVerifyTeam(
       req.currentUserId,
-      req.params.teamId
+      req.params.teamId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const member = await this.memberRepository.findByKeys(
