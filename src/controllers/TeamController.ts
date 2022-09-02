@@ -99,7 +99,7 @@ export class TeamController {
   };
 
   public listMembers: ParamsTeamIdHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
+    const { member } = await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -113,6 +113,7 @@ export class TeamController {
         role: elt.getRole(),
         status: elt.getStatus(),
       })),
+      role: member.getRole(),
     });
   };
 
@@ -274,7 +275,7 @@ export class TeamController {
     }
 
     if (member.getStatus() === MemberStatus.ACTIVE) {
-      const removedUser = await this.teamService.findAndVerifyTeam(
+      const { user: removedUser } = await this.teamService.findAndVerifyTeam(
         req.params.memberId,
         req.params.teamId
       );

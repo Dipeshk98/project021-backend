@@ -257,7 +257,7 @@ describe('TeamService', () => {
         MemberRole.ADMIN
       );
 
-      const user = await teamService.findAndVerifyTeam(
+      const { user } = await teamService.findAndVerifyTeam(
         'user-123',
         createdTeam.id
       );
@@ -329,7 +329,7 @@ describe('TeamService', () => {
         'random@example.com'
       );
 
-      const user = await teamService.findAndVerifyTeam(
+      const { user } = await teamService.findAndVerifyTeam(
         'user-123',
         createdTeam.id
       );
@@ -345,9 +345,11 @@ describe('TeamService', () => {
       member.setRole(MemberRole.OWNER);
       await memberRepository.create(member);
 
-      const user = await teamService.findAndVerifyTeam('user-123', 'team-123', [
-        MemberRole.OWNER,
-      ]);
+      const { user } = await teamService.findAndVerifyTeam(
+        'user-123',
+        'team-123',
+        [MemberRole.OWNER]
+      );
       expect(user.id).toEqual('user-123');
     });
 
@@ -360,10 +362,11 @@ describe('TeamService', () => {
       member.setRole(MemberRole.ADMIN);
       await memberRepository.create(member);
 
-      const user = await teamService.findAndVerifyTeam('user-123', 'team-123', [
-        MemberRole.OWNER,
-        MemberRole.ADMIN,
-      ]);
+      const { user } = await teamService.findAndVerifyTeam(
+        'user-123',
+        'team-123',
+        [MemberRole.OWNER, MemberRole.ADMIN]
+      );
       expect(user.id).toEqual('user-123');
     });
   });

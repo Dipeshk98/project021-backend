@@ -113,7 +113,7 @@ export class TeamService {
       );
     }
 
-    return user;
+    return { user, member };
   }
 
   async findOnlyIfTeamMember(

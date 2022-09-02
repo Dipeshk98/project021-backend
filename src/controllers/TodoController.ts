@@ -22,7 +22,7 @@ export class TodoController {
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
+    const { member } = await this.teamService.findAndVerifyTeam(
       req.currentUserId,
       req.params.teamId
     );
@@ -34,6 +34,7 @@ export class TodoController {
         id: elt.id,
         title: elt.getTitle(),
       })),
+      role: member.getRole(),
     });
   };
 
