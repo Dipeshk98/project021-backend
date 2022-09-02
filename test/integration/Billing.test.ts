@@ -10,6 +10,9 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
+import { Member } from '@/models/Member';
+import { memberRepository } from '@/repositories';
+import { MemberRole, MemberStatus } from '@/types/Member';
 import { SubscriptionStatus } from '@/types/StripeTypes';
 import { Env } from '@/utils/Env';
 
@@ -46,6 +49,29 @@ describe('Billing', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should not allow to create a checkout session with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      mockCustomersCreate.mockReturnValue({
+        id: 'RANDOM_STRIPE_CUSTOMER_ID',
+      });
+      mockCheckoutSessionCreate.mockReturnValue({
+        id: 'RANDOM_STRIPE_SESSION_ID',
+      });
+
+      const response = await supertest(app)
+        .post(`/${teamId}/billing/create-checkout-session`)
+        .send({
+          priceId: 'PRICE_ID',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should create a Stripe customer ID for the team and return checkout session ID', async () => {
@@ -130,6 +156,33 @@ describe('Billing', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+    });
+
+    it('should create a checkout session and should not allow to generate a customer portal link with `READ_ONLY` role', async () => {
+      mockCustomersCreate.mockReturnValueOnce({
+        id: 'RANDOM_STRIPE_CUSTOMER_ID',
+      });
+      mockCheckoutSessionCreate.mockReturnValueOnce({
+        id: 'RANDOM_STRIPE_SESSION_ID',
+      });
+
+      let response = await supertest(app)
+        .post(`/${teamId}/billing/create-checkout-session`)
+        .send({
+          priceId: 'PRICE_ID',
+        });
+
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      response = await supertest(app).post(
+        `/${teamId}/billing/customer-portal`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should create a checkout session and generate a customer portal link', async () => {

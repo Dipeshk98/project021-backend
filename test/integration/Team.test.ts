@@ -3,6 +3,8 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
+import { Member } from '@/models/Member';
+import { memberRepository } from '@/repositories';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
 describe('Team', () => {
@@ -76,6 +78,20 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
+    it('should not be able to update the team name with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).put(`/team/${teamId}/name`).send({
+        displayName: 'New Team display name',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
     it('should be able to update the team name', async () => {
       const response = await supertest(app).put(`/team/${teamId}/name`).send({
         displayName: 'New Team display name',
@@ -92,6 +108,18 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should not allow to delete team with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).delete(`/team/${teamId}`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it("should delete team and shouldn't be able to retrieve team member list", async () => {
@@ -158,6 +186,23 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should not allow to send invitation with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should send invitation by sending email with `READ_ONLY` role', async () => {
@@ -352,6 +397,22 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
     });
 
+    it("shouldn't update the role with `READ_ONLY` role", async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/123`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
     it("shouldn't update the role when the member is the owner", async () => {
       const response = await supertest(app)
         .put(`/team/${teamId}/edit/123`)
@@ -448,6 +509,20 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(200);
       expect(response.body.success).toBeTruthy();
+    });
+
+    it('should remove the user when `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).delete(
+        `/team/${teamId}/remove/123`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should remove the user himself from the team', async () => {
