@@ -118,7 +118,7 @@ export class TeamController {
   };
 
   public getSettings: ParamsTeamIdHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team, member } = await this.teamService.findOnlyIfTeamMember(
       req.params.teamId,
       req.currentUserId
     );
@@ -131,11 +131,12 @@ export class TeamController {
       planId: plan.id,
       planName: plan.name,
       hasStripeCustomerId: team.hasStripeCustomerId(),
+      role: member.getRole(),
     });
   };
 
   public invite: BodyInviteHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.findOnlyIfTeamMember(
       req.params.teamId,
       req.currentUserId,
       [MemberRole.OWNER, MemberRole.ADMIN]
@@ -271,6 +272,16 @@ export class TeamController {
         'Incorrect MemberID',
         null,
         ErrorCode.INCORRECT_MEMBER_ID
+      );
+    }
+
+    if (member.getRole() === MemberRole.OWNER) {
+      // By default, the frontend won't display the option to update role for the owner.
+      // If it raises an error, someone try to bypass the frontend? Or is it a bug?
+      throw new ApiError(
+        'Incorrect Member ID or the member has the OWNER ROLE',
+        null,
+        ErrorCode.INCORRECT_DATA
       );
     }
 

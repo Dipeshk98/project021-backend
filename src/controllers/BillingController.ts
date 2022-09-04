@@ -77,7 +77,7 @@ export class BillingController {
   };
 
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.findOnlyIfTeamMember(
       req.params.teamId,
       req.currentUserId,
       [MemberRole.OWNER, MemberRole.ADMIN]

@@ -125,7 +125,11 @@ export class TeamService {
       MemberRole.READ_ONLY,
     ]
   ) {
-    await this.findAndVerifyTeam(userId, teamId, requiredRoles);
+    const { user, member } = await this.findAndVerifyTeam(
+      userId,
+      teamId,
+      requiredRoles
+    );
 
     const team = await this.teamRepository.findByTeamId(teamId);
 
@@ -136,7 +140,8 @@ export class TeamService {
         ErrorCode.INCORRECT_TEAM_ID
       );
     }
-    return team;
+
+    return { user, member, team };
   }
 
   async updateEmailAllTeams(user: User, email: string) {

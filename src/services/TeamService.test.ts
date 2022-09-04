@@ -86,7 +86,7 @@ describe('TeamService', () => {
         'random@example.com'
       );
 
-      const team = await teamService.findOnlyIfTeamMember(
+      const { team } = await teamService.findOnlyIfTeamMember(
         createdTeam.id,
         user.id
       );
