@@ -530,8 +530,8 @@ describe('Team', () => {
         `/team/${teamId}/remove/123`
       );
 
-      expect(response.statusCode).toEqual(200);
-      expect(response.body.success).toBeTruthy();
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
     });
   });
 
