@@ -85,7 +85,7 @@ export class TeamService {
     return member;
   }
 
-  async findAndVerifyTeam(
+  async requireAuth(
     userId: string,
     teamId: string,
     requiredRoles: MemberRole[] = [
@@ -116,7 +116,7 @@ export class TeamService {
     return { user, member };
   }
 
-  async findOnlyIfTeamMember(
+  async requireAuthWithTeam(
     teamId: string,
     userId: string,
     requiredRoles: MemberRole[] = [
@@ -125,7 +125,7 @@ export class TeamService {
       MemberRole.READ_ONLY,
     ]
   ) {
-    const { user, member } = await this.findAndVerifyTeam(
+    const { user, member } = await this.requireAuth(
       userId,
       teamId,
       requiredRoles

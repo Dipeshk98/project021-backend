@@ -67,11 +67,10 @@ export class TeamController {
   };
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     await this.teamService.delete(req.params.teamId);
 
@@ -81,11 +80,10 @@ export class TeamController {
   };
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     await this.teamRepository.updateDisplayName(
       req.params.teamId,
@@ -99,7 +97,7 @@ export class TeamController {
   };
 
   public listMembers: ParamsTeamIdHandler = async (req, res) => {
-    const { member } = await this.teamService.findAndVerifyTeam(
+    const { member } = await this.teamService.requireAuth(
       req.currentUserId,
       req.params.teamId
     );
@@ -118,7 +116,7 @@ export class TeamController {
   };
 
   public getSettings: ParamsTeamIdHandler = async (req, res) => {
-    const { team, member } = await this.teamService.findOnlyIfTeamMember(
+    const { team, member } = await this.teamService.requireAuthWithTeam(
       req.params.teamId,
       req.currentUserId
     );
@@ -136,7 +134,7 @@ export class TeamController {
   };
 
   public invite: BodyInviteHandler = async (req, res) => {
-    const { team } = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.requireAuthWithTeam(
       req.params.teamId,
       req.currentUserId,
       [MemberRole.OWNER, MemberRole.ADMIN]
@@ -226,11 +224,10 @@ export class TeamController {
   };
 
   public editMember: ParamsEditMemberHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const updateRes = await this.memberRepository.updateRoleIfNotOwner(
       req.params.teamId,
@@ -256,11 +253,10 @@ export class TeamController {
   };
 
   public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const member = await this.memberRepository.findByKeys(
       req.params.teamId,
@@ -286,7 +282,7 @@ export class TeamController {
     }
 
     if (member.getStatus() === MemberStatus.ACTIVE) {
-      const { user: removedUser } = await this.teamService.findAndVerifyTeam(
+      const { user: removedUser } = await this.teamService.requireAuth(
         req.params.memberId,
         req.params.teamId
       );

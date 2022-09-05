@@ -22,7 +22,7 @@ export class TodoController {
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    const { member } = await this.teamService.findAndVerifyTeam(
+    const { member } = await this.teamService.requireAuth(
       req.currentUserId,
       req.params.teamId
     );
@@ -39,11 +39,10 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
@@ -56,10 +55,7 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId);
 
     const todo = await this.todoRepository.findByKeys(
       req.params.teamId,
@@ -77,11 +73,10 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const success = await this.todoRepository.deleteByKeys(
       req.params.teamId,
@@ -98,11 +93,10 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const todo = new Todo(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);

@@ -61,7 +61,7 @@ describe('TeamService', () => {
 
     it("should throw an exception when the user doesn't exist", async () => {
       await expect(
-        teamService.findOnlyIfTeamMember('team-123', 'user-123')
+        teamService.requireAuthWithTeam('team-123', 'user-123')
       ).rejects.toThrow(/Incorrect UserID/);
     });
 
@@ -74,7 +74,7 @@ describe('TeamService', () => {
       );
 
       await expect(
-        teamService.findOnlyIfTeamMember('team-123', user.id)
+        teamService.requireAuthWithTeam('team-123', user.id)
       ).rejects.toThrow(/isn't a team member of/);
     });
 
@@ -86,7 +86,7 @@ describe('TeamService', () => {
         'random@example.com'
       );
 
-      const { team } = await teamService.findOnlyIfTeamMember(
+      const { team } = await teamService.requireAuthWithTeam(
         createdTeam.id,
         user.id
       );
@@ -104,7 +104,7 @@ describe('TeamService', () => {
       await memberRepository.create(member);
 
       await expect(
-        teamService.findOnlyIfTeamMember('team-123', user.id)
+        teamService.requireAuthWithTeam('team-123', user.id)
       ).rejects.toThrow(/Incorrect TeamID/);
     });
 
@@ -240,7 +240,7 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       await expect(
-        teamService.findAndVerifyTeam('user-123', 'team-123')
+        teamService.requireAuth('user-123', 'team-123')
       ).rejects.toThrow("isn't a team member");
     });
 
@@ -257,7 +257,7 @@ describe('TeamService', () => {
         MemberRole.ADMIN
       );
 
-      const { user } = await teamService.findAndVerifyTeam(
+      const { user } = await teamService.requireAuth(
         'user-123',
         createdTeam.id
       );
@@ -284,7 +284,7 @@ describe('TeamService', () => {
       await memberRepository.create(member);
 
       await expect(
-        teamService.findAndVerifyTeam('user-123', 'team-123')
+        teamService.requireAuth('user-123', 'team-123')
       ).rejects.toThrow("isn't a team member");
     });
 
@@ -298,7 +298,7 @@ describe('TeamService', () => {
       await memberRepository.create(member);
 
       await expect(
-        teamService.findAndVerifyTeam('user-123', 'team-123', [
+        teamService.requireAuth('user-123', 'team-123', [
           MemberRole.OWNER,
           MemberRole.ADMIN,
         ])
@@ -315,9 +315,7 @@ describe('TeamService', () => {
       await memberRepository.create(member);
 
       await expect(
-        teamService.findAndVerifyTeam('user-123', 'team-123', [
-          MemberRole.OWNER,
-        ])
+        teamService.requireAuth('user-123', 'team-123', [MemberRole.OWNER])
       ).rejects.toThrow('are not able to perform the action');
     });
 
@@ -329,7 +327,7 @@ describe('TeamService', () => {
         'random@example.com'
       );
 
-      const { user } = await teamService.findAndVerifyTeam(
+      const { user } = await teamService.requireAuth(
         'user-123',
         createdTeam.id
       );
@@ -345,11 +343,9 @@ describe('TeamService', () => {
       member.setRole(MemberRole.OWNER);
       await memberRepository.create(member);
 
-      const { user } = await teamService.findAndVerifyTeam(
-        'user-123',
-        'team-123',
-        [MemberRole.OWNER]
-      );
+      const { user } = await teamService.requireAuth('user-123', 'team-123', [
+        MemberRole.OWNER,
+      ]);
       expect(user.id).toEqual('user-123');
     });
 
@@ -362,11 +358,10 @@ describe('TeamService', () => {
       member.setRole(MemberRole.ADMIN);
       await memberRepository.create(member);
 
-      const { user } = await teamService.findAndVerifyTeam(
-        'user-123',
-        'team-123',
-        [MemberRole.OWNER, MemberRole.ADMIN]
-      );
+      const { user } = await teamService.requireAuth('user-123', 'team-123', [
+        MemberRole.OWNER,
+        MemberRole.ADMIN,
+      ]);
       expect(user.id).toEqual('user-123');
     });
   });

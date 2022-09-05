@@ -22,11 +22,10 @@ export class BillingController {
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
-    await this.teamService.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
-    );
+    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const customerId = await this.billingService.createOrRetrieveCustomerId(
       req.params.teamId
@@ -77,7 +76,7 @@ export class BillingController {
   };
 
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
-    const { team } = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.requireAuthWithTeam(
       req.params.teamId,
       req.currentUserId,
       [MemberRole.OWNER, MemberRole.ADMIN]
