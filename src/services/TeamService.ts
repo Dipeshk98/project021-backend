@@ -85,7 +85,7 @@ export class TeamService {
     return member;
   }
 
-  async requireAuth(
+  async requiredAuth(
     userId: string,
     teamId: string,
     requiredRoles: MemberRole[] = [
@@ -116,7 +116,7 @@ export class TeamService {
     return { user, member };
   }
 
-  async requireAuthWithTeam(
+  async requiredAuthWithTeam(
     teamId: string,
     userId: string,
     requiredRoles: MemberRole[] = [
@@ -125,7 +125,7 @@ export class TeamService {
       MemberRole.READ_ONLY,
     ]
   ) {
-    const { user, member } = await this.requireAuth(
+    const { user, member } = await this.requiredAuth(
       userId,
       teamId,
       requiredRoles

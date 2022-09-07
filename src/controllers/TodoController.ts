@@ -22,7 +22,7 @@ export class TodoController {
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    const { member } = await this.teamService.requireAuth(
+    const { member } = await this.teamService.requiredAuth(
       req.currentUserId,
       req.params.teamId
     );
@@ -39,7 +39,7 @@ export class TodoController {
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
@@ -55,7 +55,7 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.teamService.requireAuth(req.currentUserId, req.params.teamId);
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId);
 
     const todo = await this.todoRepository.findByKeys(
       req.params.teamId,
@@ -73,7 +73,7 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
@@ -93,7 +93,7 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.teamService.requireAuth(req.currentUserId, req.params.teamId, [
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
       MemberRole.OWNER,
       MemberRole.ADMIN,
     ]);
