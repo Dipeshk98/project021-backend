@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
 import { Member } from '@/models/Member';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { MemberRepository } from './MemberRepository';
 
@@ -135,17 +135,60 @@ describe('MemberRepository', () => {
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('new-random@example.com');
     });
+
+    it('should update the team member role to `ADMIN`', async () => {
+      const teamId = 'team-123';
+      const userId = 'user-123';
+      const savedMember = new Member(teamId, userId);
+      savedMember.setRole(MemberRole.READ_ONLY);
+      savedMember.setEmail('random@example.com');
+      await memberRepository.save(savedMember);
+
+      await memberRepository.updateRoleIfNotOwner(
+        teamId,
+        userId,
+        MemberRole.ADMIN
+      );
+
+      const member = await memberRepository.findByKeys(teamId, userId);
+      assert(member !== null, "member shouldn't be null");
+      expect(member.getRole()).toEqual(MemberRole.ADMIN);
+    });
+
+    it("shouldn't update the team member role when he is an `OWNER`", async () => {
+      const teamId = 'team-123';
+      const userId = 'user-123';
+      const savedMember = new Member(teamId, userId);
+      savedMember.setRole(MemberRole.OWNER);
+      savedMember.setEmail('random@example.com');
+      await memberRepository.save(savedMember);
+
+      const updateRes = await memberRepository.updateRoleIfNotOwner(
+        teamId,
+        userId,
+        MemberRole.READ_ONLY
+      );
+      expect(updateRes).toBeNull();
+    });
+
+    it('should return null when there is member to delete', async () => {
+      const list = await memberRepository.deleteAllMembers('team-123');
+
+      expect(list).toBeNull();
+    });
   });
 
   describe('Batch manipulation', () => {
     const teamId = 'team-123';
     const userId = 'user-123';
 
+    let member1: Member;
     let member2: Member;
+    let member3: Member;
 
     beforeEach(async () => {
       // Member 1 in pending
-      const member1 = new Member(teamId);
+      member1 = new Member(teamId);
       member1.setEmail('example1@example.com');
       await memberRepository.save(member1);
 
@@ -155,7 +198,7 @@ describe('MemberRepository', () => {
       await memberRepository.save(member2);
 
       // Member 3 in pending
-      const member3 = new Member(teamId);
+      member3 = new Member(teamId);
       member3.setEmail('example3@example.com');
       await memberRepository.save(member3);
     });
@@ -173,10 +216,16 @@ describe('MemberRepository', () => {
       let list = await memberRepository.findAllByTeamId(teamId);
       expect(list).toHaveLength(3);
 
-      await memberRepository.deleteAllMembers(teamId);
+      const deletedList = await memberRepository.deleteAllMembers(teamId);
 
       list = await memberRepository.findAllByTeamId(teamId);
       expect(list).toHaveLength(0);
+
+      assert(deletedList !== null, "deletedList shouldn't be null");
+      expect(deletedList).toHaveLength(3);
+      expect(deletedList).toEqual(
+        expect.arrayContaining([member1, member2, member3])
+      );
     });
   });
 });

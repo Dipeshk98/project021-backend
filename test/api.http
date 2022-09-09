@@ -106,7 +106,8 @@ POST http://localhost:4000/team/{{teamId}}/invite HTTP/1.1
 content-type: application/json
 
 {
-  "email": "test3@gmail.com"
+  "email": "test3@gmail.com",
+  "role": "ADMIN"
 }
 
 ### Get Join info
@@ -133,3 +134,14 @@ content-type: application/json
 @teamId = {{profile.response.body.$.teamList[0].id}}
 DELETE http://localhost:4000/team/{{teamId}}/remove/8c27d077-fd80-4cda-9b49-b4745d10037d HTTP/1.1
 content-type: application/json
+
+### Edit member
+# `8c27d077-fd80-4cda-9b49-b4745d10037d` is the default user in local environment
+# The value is from the environment variable named `COGNITO_USER_ID_LOCAL`
+@teamId = {{profile.response.body.$.teamList[0].id}}
+PUT http://localhost:4000/team/{{teamId}}/edit/8c27d077-fd80-4cda-9b49-b4745d10037d HTTP/1.1
+content-type: application/json
+
+{
+  "role": "READ_ONLY"
+}

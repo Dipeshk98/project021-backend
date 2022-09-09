@@ -2,6 +2,9 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
+import { Member } from '@/models/Member';
+import { memberRepository } from '@/repositories';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 describe('Todo', () => {
   let teamId: string;
@@ -32,6 +35,22 @@ describe('Todo', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("shouldn't create todo with `READ_ONLY` role", async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app)
+        .post(`/${teamId}/todo/create`)
+        .send({
+          title: 'Todo title',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should create a todo with the correct title', async () => {
@@ -89,6 +108,18 @@ describe('Todo', () => {
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TODO_ID);
     });
 
+    it("shouldn't be able to delete with `READ_ONLY` role", async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).delete(`/${teamId}/todo/123`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
     it('should create a todo and be able to delete the newly created todo', async () => {
       let response = await supertest(app).post(`/${teamId}/todo/create`).send({
         title: 'Todo title',
@@ -132,6 +163,20 @@ describe('Todo', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.INCORRECT_TODO_ID);
+    });
+
+    it("shouldn't be able to update a todo with `READ_ONLY` role", async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).put(`/${teamId}/todo/123`).send({
+        title: 'New title',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it('should create a todo and be able to update the newly created todo title', async () => {

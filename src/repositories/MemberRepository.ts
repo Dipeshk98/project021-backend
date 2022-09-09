@@ -1,7 +1,7 @@
 import type { Table } from 'dynamodb-onetable';
 
 import { Member } from '@/models/Member';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
 
@@ -16,10 +16,9 @@ export class MemberRepository extends AbstractRepository<Member> {
     return this.delete(member);
   }
 
-  deleteOnlyInPending(teamId: string, verificationCode: string) {
+  async deleteOnlyInPending(teamId: string, verificationCode: string) {
     const member = new Member(teamId, verificationCode);
-
-    return this.dbModel.remove(member.keys(), {
+    const entity = await this.dbModel.remove(member.keys(), {
       exists: true,
       throw: false,
       // eslint-disable-next-line no-template-curly-in-string
@@ -28,10 +27,17 @@ export class MemberRepository extends AbstractRepository<Member> {
         status: MemberStatus.PENDING,
       },
     });
+
+    if (!entity) {
+      return null;
+    }
+
+    member.fromEntity(entity);
+    return member;
   }
 
-  async deleteAllMembers(teamId: string) {
-    await this.dbModel.remove(
+  async deleteAllMembers(teamId: string): Promise<Member[] | null> {
+    const list = await this.dbModel.remove(
       {
         PK: `${Member.BEGINS_KEYS}${teamId}`,
       },
@@ -39,6 +45,16 @@ export class MemberRepository extends AbstractRepository<Member> {
         many: true,
       }
     );
+
+    if (!list || (Array.isArray(list) && list.length === 0)) {
+      return null;
+    }
+
+    return list.map((elt: any) => {
+      const member = new Member(teamId, Member.removeBeginsKeys(`${elt.SK}`));
+      member.fromEntity(elt);
+      return member;
+    });
   }
 
   findByKeys(teamId: string, userId: string) {
@@ -64,5 +80,29 @@ export class MemberRepository extends AbstractRepository<Member> {
     const member = new Member(teamId, userId);
 
     await this.dbModel.update({ ...member.keys(), email });
+  }
+
+  async updateRoleIfNotOwner(teamId: string, userId: string, role: MemberRole) {
+    const member = new Member(teamId, userId);
+    // `update` method from `dynamodb-onetable` library can also return `undefined` with the `throw` set to false.
+    // The typing from the library is incorrect, need to add `undefined` manually
+    const entity = await this.dbModel.update(
+      { ...member.keys(), role },
+      {
+        throw: false,
+        // eslint-disable-next-line no-template-curly-in-string
+        where: '${role} <> @{role}',
+        substitutions: {
+          role: MemberRole.OWNER,
+        },
+      }
+    );
+
+    if (!entity) {
+      return null;
+    }
+
+    member.fromEntity(entity);
+    return member;
   }
 }

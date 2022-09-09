@@ -6,7 +6,7 @@ import type { User } from '@/models/User';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 export class TeamService {
   private teamRepository: TeamRepository;
@@ -30,19 +30,106 @@ export class TeamService {
     team.setDisplayName(displayName);
     await this.teamRepository.save(team);
 
+    await this.join(team, user, userEmail, MemberRole.OWNER);
+
+    return team;
+  }
+
+  async delete(teamId: string) {
+    const deleteTeamRes = await this.teamRepository.deleteByTeamId(teamId);
+
+    if (!deleteTeamRes) {
+      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
+    }
+
+    const memberList = await this.memberRepository.deleteAllMembers(teamId);
+
+    if (!memberList) {
+      throw new ApiError(
+        `Nothing to delete, the team member list was empty`,
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
+
+    // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
+    // eslint-disable-next-line no-restricted-syntax
+    for (const elt of memberList) {
+      if (elt.getStatus() === MemberStatus.ACTIVE) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.userRepository.removeTeam(elt.skId, teamId);
+      }
+    }
+  }
+
+  async join(team: Team, user: User, userEmail: string, role: MemberRole) {
     const member = new Member(team.id, user.id);
-    member.setStatus(MemberStatus.ACTIVE);
     member.setEmail(userEmail);
+    member.setRole(role);
+    member.setStatus(MemberStatus.ACTIVE);
     await this.memberRepository.save(member);
 
     user.addTeam(team.id);
     await this.userRepository.save(user);
 
-    return team;
+    return member;
   }
 
-  async findOnlyIfTeamMember(teamId: string, userId: string) {
-    await this.userRepository.findAndVerifyTeam(userId, teamId);
+  async findTeamMember(userId: string, teamId: string) {
+    const member = await this.memberRepository.findByKeys(teamId, userId);
+
+    if (!member || member.getStatus() !== MemberStatus.ACTIVE) {
+      return null;
+    }
+
+    return member;
+  }
+
+  async requiredAuth(
+    userId: string,
+    teamId: string,
+    requiredRoles: MemberRole[] = [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+      MemberRole.READ_ONLY,
+    ]
+  ) {
+    const user = await this.userRepository.strictFindByUserId(userId);
+    const member = await this.findTeamMember(userId, teamId);
+
+    if (!member) {
+      throw new ApiError(
+        `User ${userId} isn't a team member of ${teamId}`,
+        null,
+        ErrorCode.NOT_MEMBER
+      );
+    }
+
+    if (!requiredRoles.includes(member.getRole())) {
+      throw new ApiError(
+        `The user role ${member.getRole()} are not able to perform the action`,
+        null,
+        ErrorCode.INCORRECT_PERMISSION
+      );
+    }
+
+    return { user, member };
+  }
+
+  async requiredAuthWithTeam(
+    teamId: string,
+    userId: string,
+    requiredRoles: MemberRole[] = [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+      MemberRole.READ_ONLY,
+    ]
+  ) {
+    const { user, member } = await this.requiredAuth(
+      userId,
+      teamId,
+      requiredRoles
+    );
 
     const team = await this.teamRepository.findByTeamId(teamId);
 
@@ -53,7 +140,8 @@ export class TeamService {
         ErrorCode.INCORRECT_TEAM_ID
       );
     }
-    return team;
+
+    return { user, member, team };
   }
 
   async updateEmailAllTeams(user: User, email: string) {

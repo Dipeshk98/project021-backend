@@ -8,14 +8,15 @@ import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { EmailService } from '@/services/EmailService';
 import type { TeamService } from '@/services/TeamService';
-import { MemberStatus } from '@/types/MemberStatus';
+import { MemberRole, MemberStatus } from '@/types/Member';
 import type {
   BodyCreateTeamHandler,
   BodyInviteHandler,
   BodyTeamNameHandler,
   FullJoinHandler,
+  ParamsEditMemberHandler,
   ParamsJoinHandler,
-  ParamsRemoveHandler,
+  ParamsRemoveMemberHandler,
   ParamsTeamIdHandler,
 } from '@/validations/TeamValidation';
 
@@ -66,22 +67,12 @@ export class TeamController {
   };
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
-    const user = await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
-    user.removeTeam(req.params.teamId);
-    await this.userRepository.save(user);
-
-    await this.memberRepository.deleteAllMembers(req.params.teamId);
-    const deleteTeamRes = await this.teamRepository.deleteByTeamId(
-      req.params.teamId
-    );
-
-    if (!deleteTeamRes) {
-      throw new ApiError('Incorrect TeamID', null, ErrorCode.INCORRECT_TEAM_ID);
-    }
+    await this.teamService.delete(req.params.teamId);
 
     res.json({
       success: true,
@@ -89,10 +80,10 @@ export class TeamController {
   };
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     await this.teamRepository.updateDisplayName(
       req.params.teamId,
@@ -106,7 +97,7 @@ export class TeamController {
   };
 
   public listMembers: ParamsTeamIdHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    const { member } = await this.teamService.requiredAuth(
       req.currentUserId,
       req.params.teamId
     );
@@ -117,13 +108,15 @@ export class TeamController {
       list: list.map((elt) => ({
         memberId: elt.skId,
         email: elt.getEmail(),
+        role: elt.getRole(),
         status: elt.getStatus(),
       })),
+      role: member.getRole(),
     });
   };
 
   public getSettings: ParamsTeamIdHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team, member } = await this.teamService.requiredAuthWithTeam(
       req.params.teamId,
       req.currentUserId
     );
@@ -136,17 +129,20 @@ export class TeamController {
       planId: plan.id,
       planName: plan.name,
       hasStripeCustomerId: team.hasStripeCustomerId(),
+      role: member.getRole(),
     });
   };
 
   public invite: BodyInviteHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.requiredAuthWithTeam(
       req.params.teamId,
-      req.currentUserId
+      req.currentUserId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const member = new Member(req.params.teamId);
     member.setEmail(req.body.email);
+    member.setRole(req.body.role);
     await this.memberRepository.save(member);
 
     await this.emailService.send(
@@ -156,8 +152,9 @@ export class TeamController {
 
     res.json({
       teamId: team.id,
+      email: member.getEmail(),
+      role: member.getRole(),
       status: member.getStatus(),
-      email: req.body.email,
     });
   };
 
@@ -187,7 +184,12 @@ export class TeamController {
       req.currentUserId
     );
 
-    if (user.isTeamMember(req.params.teamId)) {
+    const member = await this.teamService.findTeamMember(
+      user.id,
+      req.params.teamId
+    );
+
+    if (member) {
       throw new ApiError('Already a member', null, ErrorCode.ALREADY_MEMBER);
     }
 
@@ -206,26 +208,55 @@ export class TeamController {
       throw new ApiError('Incorrect code', null, ErrorCode.INCORRECT_CODE);
     }
 
-    user.addTeam(team.id);
-    await this.userRepository.save(user);
-
-    const newMember = new Member(req.params.teamId, req.currentUserId);
-    newMember.setStatus(MemberStatus.ACTIVE);
-    newMember.setEmail(req.body.email);
-    await this.memberRepository.save(newMember);
+    const newMember = await this.teamService.join(
+      team,
+      user,
+      req.body.email,
+      deleteRes.getRole()
+    );
 
     res.json({
       teamId: req.params.teamId,
-      status: newMember.getStatus(),
       email: req.body.email,
+      role: newMember.getRole(),
+      status: newMember.getStatus(),
     });
   };
 
-  public remove: ParamsRemoveHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
+  public editMember: ParamsEditMemberHandler = async (req, res) => {
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
+
+    const updateRes = await this.memberRepository.updateRoleIfNotOwner(
+      req.params.teamId,
+      req.params.memberId,
+      req.body.role
     );
+
+    if (!updateRes) {
+      // By default, the frontend won't display the option to update role for the owner.
+      // If it raises an error, someone try to bypass the frontend? Or is it a bug?
+      throw new ApiError(
+        'Incorrect Member ID or the member has the OWNER ROLE',
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
+
+    res.json({
+      teamId: req.params.teamId,
+      memberId: req.params.memberId,
+      role: req.body.role,
+    });
+  };
+
+  public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const member = await this.memberRepository.findByKeys(
       req.params.teamId,
@@ -240,8 +271,18 @@ export class TeamController {
       );
     }
 
+    if (member.getRole() === MemberRole.OWNER) {
+      // By default, the frontend won't display the option to update role for the owner.
+      // If it raises an error, someone try to bypass the frontend? Or is it a bug?
+      throw new ApiError(
+        'Incorrect Member ID or the member has the OWNER ROLE',
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
+
     if (member.getStatus() === MemberStatus.ACTIVE) {
-      const removedUser = await this.userRepository.findAndVerifyTeam(
+      const { user: removedUser } = await this.teamService.requiredAuth(
         req.params.memberId,
         req.params.teamId
       );

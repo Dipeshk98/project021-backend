@@ -49,17 +49,9 @@ export class UserRepository extends AbstractRepository<User> {
     return user;
   }
 
-  async findAndVerifyTeam(userId: string, teamId: string) {
+  async removeTeam(userId: string, teamId: string) {
     const user = await this.strictFindByUserId(userId);
-
-    if (!user.isTeamMember(teamId)) {
-      throw new ApiError(
-        `User ${userId} isn't a team member of ${teamId}`,
-        null,
-        ErrorCode.NOT_MEMBER
-      );
-    }
-
-    return user;
+    user.removeTeam(teamId);
+    await this.save(user);
   }
 }

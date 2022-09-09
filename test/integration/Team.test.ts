@@ -3,7 +3,9 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/error/ErrorCode';
-import { MemberStatus } from '@/types/MemberStatus';
+import { Member } from '@/models/Member';
+import { memberRepository } from '@/repositories';
+import { MemberRole, MemberStatus } from '@/types/Member';
 
 describe('Team', () => {
   let teamId: string;
@@ -76,6 +78,20 @@ describe('Team', () => {
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
+    it('should not be able to update the team name with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).put(`/team/${teamId}/name`).send({
+        displayName: 'New Team display name',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
     it('should be able to update the team name', async () => {
       const response = await supertest(app).put(`/team/${teamId}/name`).send({
         displayName: 'New Team display name',
@@ -92,6 +108,18 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it('should not allow to delete team with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).delete(`/team/${teamId}`);
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
     });
 
     it("should delete team and shouldn't be able to retrieve team member list", async () => {
@@ -129,32 +157,90 @@ describe('Team', () => {
 
       expect(response.statusCode).toEqual(400);
       expect(response.body.errors).toEqual(
-        expect.arrayContaining([{ param: 'email', type: 'invalid_type' }])
+        expect.arrayContaining([
+          { param: 'role', type: 'invalid_type' },
+          { param: 'email', type: 'invalid_type' },
+        ])
+      );
+    });
+
+    it('should return an error when the role is not the enum', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'RANDOM',
+        });
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'role', type: 'invalid_enum_value' }])
       );
     });
 
     it("shouldn't invite team member and return an error because the user isn't a team member", async () => {
       const response = await supertest(app).post(`/team/123/invite`).send({
         email: 'example@example.com',
+        role: 'ADMIN',
       });
 
       expect(response.statusCode).toEqual(500);
       expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
     });
 
-    it('should send invitation by sending email', async () => {
+    it('should not allow to send invitation with `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
       const response = await supertest(app)
         .post(`/team/${teamId}/invite`)
         .send({
           email: 'example@example.com',
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
+    it('should send invitation by sending email with `READ_ONLY` role', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'READ_ONLY',
         });
 
       expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.READ_ONLY);
       expect(response.body.status).toEqual(MemberStatus.PENDING);
 
       // Verify if the email is sent
       expect(mockSendMail).toHaveBeenCalled();
-      expect(mockSendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'example@example.com',
+        })
+      );
+    });
+
+    it('should send invitation by sending email with `ADMIN` role', async () => {
+      const response = await supertest(app)
+        .post(`/team/${teamId}/invite`)
+        .send({
+          email: 'example@example.com',
+          role: 'ADMIN',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.ADMIN);
+      expect(response.body.status).toEqual(MemberStatus.PENDING);
+
+      // Verify if the email is sent
+      expect(mockSendMail).toHaveBeenCalled();
+      expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'example@example.com',
         })
@@ -189,6 +275,7 @@ describe('Team', () => {
     it('should return team information', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'example@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -217,6 +304,7 @@ describe('Team', () => {
     it("shouldn't join team and return an error because the user is already a member.", async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'example@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -251,6 +339,7 @@ describe('Team', () => {
     it('should send invitation by sending email and a second user join the team', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -271,7 +360,88 @@ describe('Team', () => {
         });
 
       expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual(MemberRole.ADMIN);
       expect(response.body.status).toEqual(MemberStatus.ACTIVE);
+    });
+  });
+
+  describe('Edit team member', () => {
+    it("should return an error when the role doesn't exist", async () => {
+      const response = await supertest(app).put(`/team/123/edit/123`).send({
+        role: 'RANDOM',
+      });
+
+      expect(response.statusCode).toEqual(400);
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([{ param: 'role', type: 'invalid_enum_value' }])
+      );
+    });
+
+    it("shouldn't update team member role and return an error because the user isn't a team member", async () => {
+      const response = await supertest(app).put(`/team/123/edit/123`).send({
+        role: 'ADMIN',
+      });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.NOT_MEMBER);
+    });
+
+    it("shouldn't update team member role and return an error with incorrect member id", async () => {
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/INCORRECT`)
+        .send({
+          role: 'ADMIN',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+    });
+
+    it("shouldn't update the role with `READ_ONLY` role", async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/123`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
+    it("shouldn't update the role when the member is the owner", async () => {
+      const response = await supertest(app)
+        .put(`/team/${teamId}/edit/123`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+    });
+
+    it('should add a new user in team and edit his role to `READ_ONLY`', async () => {
+      let response = await supertest(app).post(`/team/${teamId}/invite`).send({
+        email: 'user2@example.com',
+        role: 'ADMIN',
+      });
+
+      const verificationCode = mockSendMail.mock.calls[0][0].text.match(
+        /&verificationCode=(\S+)/
+      )[1]; // \S+ gets all characters until a whitespace, tab, new line, etc.
+
+      response = await supertest(app)
+        .put(`/team/${teamId}/edit/${verificationCode}`)
+        .send({
+          role: 'READ_ONLY',
+        });
+
+      expect(response.statusCode).toEqual(200);
+      expect(response.body.role).toEqual('READ_ONLY');
     });
   });
 
@@ -295,6 +465,7 @@ describe('Team', () => {
     it("should send invitation and remove invitation in 'PENDING' status", async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -311,6 +482,7 @@ describe('Team', () => {
     it('should add a new user in team and remove it from the team', async () => {
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -339,13 +511,27 @@ describe('Team', () => {
       expect(response.body.success).toBeTruthy();
     });
 
+    it('should remove the user when `READ_ONLY` role', async () => {
+      const member = new Member(teamId, '123');
+      member.setStatus(MemberStatus.ACTIVE);
+      member.setRole(MemberRole.READ_ONLY);
+      await memberRepository.update(member);
+
+      const response = await supertest(app).delete(
+        `/team/${teamId}/remove/123`
+      );
+
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_PERMISSION);
+    });
+
     it('should remove the user himself from the team', async () => {
       const response = await supertest(app).delete(
         `/team/${teamId}/remove/123`
       );
 
-      expect(response.statusCode).toEqual(200);
-      expect(response.body.success).toBeTruthy();
+      expect(response.statusCode).toEqual(500);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
     });
   });
 
@@ -354,6 +540,7 @@ describe('Team', () => {
       // Send invitation and the user accept it
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'READ_ONLY',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -373,9 +560,18 @@ describe('Team', () => {
           email: 'user2@example.com',
         });
 
-      // Send another invitation without any other steps
+      // Back to OWNER of the team
+      app.request.currentUserId = '123';
+
+      // Edit the role in `ACTIVE` status
+      response = await supertest(app).put(`/team/${teamId}/edit/125`).send({
+        role: 'ADMIN',
+      });
+
+      // Send another invitation without accepting the invitation
       response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user3@example.com',
+        role: 'ADMIN',
       });
 
       response = await supertest(app).get(`/team/${teamId}/list-members`);
@@ -384,15 +580,18 @@ describe('Team', () => {
           expect.objectContaining({
             email: 'example@example.com',
             memberId: '123',
+            role: MemberRole.OWNER,
             status: MemberStatus.ACTIVE,
           }),
           expect.objectContaining({
             email: 'user2@example.com',
             memberId: '125',
+            role: MemberRole.ADMIN,
             status: MemberStatus.ACTIVE,
           }),
           expect.objectContaining({
             email: 'user3@example.com',
+            role: MemberRole.ADMIN,
             status: MemberStatus.PENDING,
           }),
         ])
@@ -403,6 +602,7 @@ describe('Team', () => {
       // Send invitation and the user accept it. But, it'll be removed
       let response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user2@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode = mockSendMail.mock.calls[0][0].text.match(
@@ -425,6 +625,7 @@ describe('Team', () => {
       // Send another invitation and the user accept it. But, it won't be removed.
       response = await supertest(app).post(`/team/${teamId}/invite`).send({
         email: 'user3@example.com',
+        role: 'ADMIN',
       });
 
       const verificationCode2 = mockSendMail.mock.calls[1][0].text.match(

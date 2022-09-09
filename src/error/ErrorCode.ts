@@ -8,6 +8,7 @@ export enum ErrorCode {
   INCORRECT_MEMBER_ID = 'incorrect_member_id',
   NOT_MEMBER = 'not_member', // User isn't a team member
   ALREADY_MEMBER = 'already_member', // User is already a team member
+  INCORRECT_PERMISSION = 'incorrect_permission', // User don't have permission to perfect the action
   INCORRECT_CODE = 'incorrect_code', // Incorrect verification code
   INCORRECT_STRIPE_SIGNATURE = 'incorrect_stripe_signature', // Incoming webhook error
 }

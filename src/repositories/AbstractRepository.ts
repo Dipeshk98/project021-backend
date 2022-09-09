@@ -20,7 +20,7 @@ export class AbstractRepository<T extends AbstractModel<PrimaryKeys>> {
   async get(model: T) {
     const entity = await this.dbModel.get(model.keys());
 
-    if (entity == null) {
+    if (!entity) {
       return null;
     }
 

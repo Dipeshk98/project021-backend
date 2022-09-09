@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { validateRequest } from '@/middlewares/Validation';
+import { MemberRole } from '@/types/Member';
 
 export const bodyCreateTeamValidate = validateRequest({
   body: z.object({
@@ -36,6 +37,7 @@ export const bodyInviteValidate = validateRequest({
   }),
   body: z.object({
     email: z.string().nonempty().email(),
+    role: z.nativeEnum(MemberRole),
   }),
 });
 
@@ -62,11 +64,23 @@ export const fullJoinValidate = validateRequest({
 
 export type FullJoinHandler = typeof fullJoinValidate;
 
-export const paramsRemoveValidate = validateRequest({
+export const fullEditMemberValidate = validateRequest({
+  params: z.object({
+    teamId: z.string().nonempty(),
+    memberId: z.string().nonempty(),
+  }),
+  body: z.object({
+    role: z.nativeEnum(MemberRole),
+  }),
+});
+
+export type ParamsEditMemberHandler = typeof fullEditMemberValidate;
+
+export const paramsRemoveMemberValidate = validateRequest({
   params: z.object({
     teamId: z.string().nonempty(),
     memberId: z.string().nonempty(),
   }),
 });
 
-export type ParamsRemoveHandler = typeof paramsRemoveValidate;
+export type ParamsRemoveMemberHandler = typeof paramsRemoveMemberValidate;

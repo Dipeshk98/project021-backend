@@ -38,6 +38,7 @@ export const schema = {
       PK: { type: String },
       SK: { type: String },
       email: { type: String },
+      role: { type: String, enum: ['OWNER', 'ADMIN', 'READ_ONLY'] }, // Please don't forget to update types/Member.ts file
       status: { type: String, enum: ['ACTIVE', 'PENDING'] },
     },
     Todo: {

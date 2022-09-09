@@ -3,9 +3,9 @@ import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
-import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
+import { MemberRole } from '@/types/Member';
 import { Env } from '@/utils/Env';
 import { getStripe } from '@/utils/Stripe';
 import type { BodyPriceHandler } from '@/validations/BillingValidation';
@@ -16,23 +16,16 @@ export class BillingController {
 
   private billingService: BillingService;
 
-  private userRepository: UserRepository;
-
-  constructor(
-    teamService: TeamService,
-    billingService: BillingService,
-    userRepository: UserRepository
-  ) {
+  constructor(teamService: TeamService, billingService: BillingService) {
     this.teamService = teamService;
     this.billingService = billingService;
-    this.userRepository = userRepository;
   }
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const customerId = await this.billingService.createOrRetrieveCustomerId(
       req.params.teamId
@@ -83,9 +76,10 @@ export class BillingController {
   };
 
   public createCustomerPortalLink: ParamsTeamIdHandler = async (req, res) => {
-    const team = await this.teamService.findOnlyIfTeamMember(
+    const { team } = await this.teamService.requiredAuthWithTeam(
       req.params.teamId,
-      req.currentUserId
+      req.currentUserId,
+      [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
     const stripeCustomerId = team.getStripeCustomerId();

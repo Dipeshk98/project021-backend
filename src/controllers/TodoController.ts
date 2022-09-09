@@ -2,7 +2,8 @@ import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { Todo } from '@/models/Todo';
 import type { TodoRepository } from '@/repositories/TodoRepository';
-import type { UserRepository } from '@/repositories/UserRepository';
+import type { TeamService } from '@/services/TeamService';
+import { MemberRole } from '@/types/Member';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 import type {
   BodyTodoHandler,
@@ -11,17 +12,17 @@ import type {
 } from '@/validations/TodoValidation';
 
 export class TodoController {
+  private teamService: TeamService;
+
   private todoRepository: TodoRepository;
 
-  private userRepository: UserRepository;
-
-  constructor(todoRepository: TodoRepository, userRepository: UserRepository) {
+  constructor(teamService: TeamService, todoRepository: TodoRepository) {
+    this.teamService = teamService;
     this.todoRepository = todoRepository;
-    this.userRepository = userRepository;
   }
 
   public list: ParamsTeamIdHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
+    const { member } = await this.teamService.requiredAuth(
       req.currentUserId,
       req.params.teamId
     );
@@ -33,14 +34,15 @@ export class TodoController {
         id: elt.id,
         title: elt.getTitle(),
       })),
+      role: member.getRole(),
     });
   };
 
   public create: BodyTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const todo = new Todo(req.params.teamId);
     todo.setTitle(req.body.title);
@@ -53,10 +55,7 @@ export class TodoController {
   };
 
   public read: ParamsTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId);
 
     const todo = await this.todoRepository.findByKeys(
       req.params.teamId,
@@ -74,10 +73,10 @@ export class TodoController {
   };
 
   public delete: ParamsTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const success = await this.todoRepository.deleteByKeys(
       req.params.teamId,
@@ -94,10 +93,10 @@ export class TodoController {
   };
 
   public update: FullTodoHandler = async (req, res) => {
-    await this.userRepository.findAndVerifyTeam(
-      req.currentUserId,
-      req.params.teamId
-    );
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      MemberRole.OWNER,
+      MemberRole.ADMIN,
+    ]);
 
     const todo = new Todo(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);
