@@ -16,7 +16,7 @@ describe('EmailService', () => {
       await emailService.send(new TestEmailTemplate(), 'user@example.com');
 
       expect(mockSendMail).toHaveBeenCalled();
-      expect(mockSendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'user@example.com',
           subject: 'Test email subject',

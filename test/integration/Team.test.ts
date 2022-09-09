@@ -219,7 +219,7 @@ describe('Team', () => {
 
       // Verify if the email is sent
       expect(mockSendMail).toHaveBeenCalled();
-      expect(mockSendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'example@example.com',
         })
@@ -240,7 +240,7 @@ describe('Team', () => {
 
       // Verify if the email is sent
       expect(mockSendMail).toHaveBeenCalled();
-      expect(mockSendMail).toBeCalledWith(
+      expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'example@example.com',
         })
