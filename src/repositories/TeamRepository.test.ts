@@ -19,6 +19,12 @@ describe('TeamRepository', () => {
       expect(team).toBeNull();
     });
 
+    it('should raise an error when updating the display name for non existing team', async () => {
+      await expect(
+        teamRepository.updateDisplayName('team-123', 'team-123')
+      ).rejects.toThrow('The conditional request failed');
+    });
+
     it('should create a new team, update the display name and be able to get the team from the database', async () => {
       const createdTeam = await teamRepository.createWithDisplayName(
         'team-123'
@@ -77,6 +83,16 @@ describe('TeamRepository', () => {
 
       const team = await teamRepository.findByTeamId(createdTeam.id);
       expect(team).toBeNull();
+    });
+
+    it('should raise an error when updating the subscription for non existing team', async () => {
+      await expect(
+        teamRepository.updateSubscription('team-123', {
+          id: 'subscription-id',
+          productId: 'product-id',
+          status: 'PENDING',
+        })
+      ).rejects.toThrow('The conditional request failed');
     });
 
     it('should create a new team, update the subscription and be able to get the team from the database', async () => {

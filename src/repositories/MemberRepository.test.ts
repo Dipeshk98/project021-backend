@@ -118,6 +118,12 @@ describe('MemberRepository', () => {
       expect(list).toHaveLength(0);
     });
 
+    it('should raise an error when updating the email for non existing member', async () => {
+      await expect(
+        memberRepository.updateEmail('team-123', 'user-123', 'random@example')
+      ).rejects.toThrow('The conditional request failed');
+    });
+
     it('should update the team member email', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
@@ -134,6 +140,16 @@ describe('MemberRepository', () => {
       const member = await memberRepository.findByKeys(teamId, userId);
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('new-random@example.com');
+    });
+
+    it('should raise an error when updating role for non existing member', async () => {
+      const updateRes = await memberRepository.updateRoleIfNotOwner(
+        'team-123',
+        'user-123',
+        MemberRole.OWNER
+      );
+
+      expect(updateRes).toBeNull();
     });
 
     it('should update the team member role to `ADMIN`', async () => {

@@ -9,9 +9,6 @@ jspm_packages
 .dynamodb
 dynalite
 
-# SES output
-ses-output
-
 # Webpack
 .webpack
 

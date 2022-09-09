@@ -34,6 +34,10 @@ export class User extends AbstractModel<UserEntity> {
     return this.firstSignIn;
   }
 
+  setFirstSignIn(date: Date) {
+    this.firstSignIn = date;
+  }
+
   getTeamList() {
     return this.teamList;
   }

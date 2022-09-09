@@ -19,6 +19,14 @@ describe('UserRepository', () => {
       expect(user).toBeNull();
     });
 
+    it('should not create the same user twice', async () => {
+      await userRepository.createWithUserId('user-123');
+
+      await expect(userRepository.createWithUserId('user-123')).rejects.toThrow(
+        'Conditional create failed'
+      );
+    });
+
     it('should create a new user and be able to get the user from the database', async () => {
       await userRepository.createWithUserId('user-123');
 
