@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import { RequestError } from '@/error/RequestError';
-import { captureException, captureMessage } from '@/utils/Logging';
+import { logger } from '@/utils/Logger';
 
 /**
  * Handling 404 error not found.
@@ -13,7 +13,7 @@ export const handler404 = (
   res: Response,
   _next: NextFunction
 ) => {
-  captureMessage(ErrorCode.NOT_FOUND);
+  logger.error(ErrorCode.NOT_FOUND);
   res.status(404).json({ errors: ErrorCode.NOT_FOUND });
 };
 
@@ -31,10 +31,10 @@ export const errorHandler = (
       errors: err.errorList,
     });
   } else if (err instanceof ApiError) {
-    captureException(err);
+    logger.error(err);
     res.status(500).json({ errors: err.publicErrorCode });
   } else {
-    captureException(err);
+    logger.error(err);
     res.status(500).json({ errors: ErrorCode.INTERNAL_SERVER_ERROR });
   }
 };
