@@ -1,14 +1,14 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayEvent, Context } from 'aws-lambda';
 import type { Request } from 'express';
 import serverlessHttp from 'serverless-http';
 
 import { app } from './app';
 import { ApiError } from './error/ApiError';
 import { Env } from './utils/Env';
+import { withRequest } from './utils/Logger';
 
-// Wrap `serverless-http` around Express.js
-export const handler = serverlessHttp(app, {
-  request(req: Request, context: APIGatewayProxyEvent) {
+const serverlessHandler = serverlessHttp(app, {
+  request(req: Request, context: APIGatewayEvent) {
     // authProvider will be defined if the route is protected by the default aws_iam API gateway authorizer.
     let authProvider =
       context.requestContext.authorizer?.iam?.cognitoIdentity?.amr?.[2];
@@ -30,3 +30,11 @@ export const handler = serverlessHttp(app, {
     }
   },
 });
+
+export const handler = async (event: APIGatewayEvent, context: Context) => {
+  withRequest(event, context);
+
+  const result = await serverlessHandler(event, context);
+
+  return result;
+};

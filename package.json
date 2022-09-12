@@ -22,6 +22,8 @@
     "helmet": "^5.1.1",
     "nanoid": "^3.3.4",
     "nodemailer": "^6.7.8",
+    "pino": "^8.5.0",
+    "pino-lambda": "^4.1.0",
     "serverless-http": "^3.0.2",
     "stripe": "^8.222.0",
     "ulid": "^2.3.0",
