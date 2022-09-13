@@ -302,7 +302,7 @@ describe('Billing', () => {
         .send(payloadString);
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_STRIPE_RESULT);
     });
 
     it('should process checkout.session.completed and not enable the user PRO subscription when in pending status', async () => {
