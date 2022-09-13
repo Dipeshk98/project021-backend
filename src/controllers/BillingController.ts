@@ -42,19 +42,7 @@ export class BillingController {
 
     const event = this.billingService.verifyWebhook(req.body, sig);
 
-    // FYI, here is the explanation why we need these Stripe events:
-    // https://github.com/stripe/stripe-firebase-extensions/issues/146
-    if (
-      event.type === 'customer.subscription.created' ||
-      event.type === 'customer.subscription.updated' ||
-      event.type === 'customer.subscription.deleted'
-    ) {
-      await this.billingService.processSubscriptionEvent(event);
-    } else if (event.type === 'checkout.session.completed') {
-      await this.billingService.processCheckoutEvent(event);
-    } else {
-      throw new ApiError('Stripe are calling with unexpected events');
-    }
+    await this.billingService.processEvent(event);
 
     res.json({ received: true });
   };

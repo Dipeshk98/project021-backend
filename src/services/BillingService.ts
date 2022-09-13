@@ -4,12 +4,7 @@ import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { ISubscription } from '@/types/StripeTypes';
-import {
-  StripeCheckoutEvent,
-  StripeCustomer,
-  StripeSubscriptionEvent,
-  SubscriptionStatus,
-} from '@/types/StripeTypes';
+import { SubscriptionStatus } from '@/types/StripeTypes';
 import type { IBillingPlanEnv } from '@/utils/BillingPlan';
 import { BillingPlan } from '@/utils/BillingPlan';
 import { Env } from '@/utils/Env';
@@ -54,6 +49,82 @@ export class BillingService {
     }
 
     return event;
+  }
+
+  async processEvent(event: Stripe.Event) {
+    // FYI, here is the explanation why we need these Stripe events:
+    // https://github.com/stripe/stripe-firebase-extensions/issues/146
+    if (
+      event.type === 'customer.subscription.created' ||
+      event.type === 'customer.subscription.updated' ||
+      event.type === 'customer.subscription.deleted'
+    ) {
+      const subscription = event.data.object as Stripe.Subscription;
+
+      await this.retrieveSubscriptionAndUpdate(subscription.id);
+    } else if (event.type === 'checkout.session.completed') {
+      const checkoutSessionEvent = event.data.object as Stripe.Checkout.Session;
+      const subscriptionId = checkoutSessionEvent.subscription;
+
+      if (
+        checkoutSessionEvent.mode !== 'subscription' ||
+        typeof subscriptionId !== 'string'
+      ) {
+        throw new ApiError(
+          'Stripe are calling with unexpected checkout session mode',
+          null,
+          ErrorCode.INCORRECT_STRIPE_RESULT
+        );
+      }
+
+      await this.retrieveSubscriptionAndUpdate(subscriptionId);
+    } else {
+      throw new ApiError(
+        'Stripe are calling with unexpected events',
+        null,
+        ErrorCode.INCORRECT_STRIPE_RESULT
+      );
+    }
+  }
+
+  private async retrieveSubscriptionAndUpdate(subscriptionId: string) {
+    // `customer.subscription.updated` can be called `before customer.subscription.created`
+    // what is why we need to retrieve subscription to get the latest version
+    const subscription = await this.paymentSdk.subscriptions.retrieve(
+      subscriptionId
+    );
+    const itemData = subscription.items.data[0];
+
+    if (typeof subscription.customer !== 'string' || itemData === undefined) {
+      throw new ApiError(
+        'Incorrect Stripe Subscription format',
+        null,
+        ErrorCode.INCORRECT_STRIPE_RESULT
+      );
+    }
+
+    const { product } = itemData.plan;
+    const customer = await this.paymentSdk.customers.retrieve(
+      subscription.customer
+    );
+
+    if (
+      customer.deleted === true ||
+      customer.metadata.teamId === undefined ||
+      typeof product !== 'string'
+    ) {
+      throw new ApiError(
+        'Incorrect Stripe Customer or Stripe product format',
+        null,
+        ErrorCode.INCORRECT_STRIPE_RESULT
+      );
+    }
+
+    await this.teamRepository.updateSubscription(customer.metadata.teamId, {
+      id: subscription.id,
+      productId: product,
+      status: subscription.status,
+    });
   }
 
   async createOrRetrieveCustomerId(teamId: string) {
@@ -106,46 +177,6 @@ export class BillingService {
     } catch (ex: any) {
       throw new ApiError('Impossible to create Stripe checkout session', ex);
     }
-  }
-
-  async processSubscriptionEvent(event: Stripe.Event) {
-    // `customer.subscription.updated` can be called `before customer.subscription.created`
-    // what is why we need to retrieve subscription to get the latest version
-    let subscription = StripeSubscriptionEvent.parse(event.data.object);
-    const subscriptionRetrieved = await this.paymentSdk.subscriptions.retrieve(
-      subscription.id
-    );
-    subscription = StripeSubscriptionEvent.parse(subscriptionRetrieved);
-
-    const stripeCustomer = await this.paymentSdk.customers.retrieve(
-      subscription.customer
-    );
-    const customer = StripeCustomer.parse(stripeCustomer);
-
-    await this.teamRepository.updateSubscription(customer.metadata.teamId, {
-      id: subscription.id,
-      productId: subscription.plan.product,
-      status: subscription.status,
-    });
-  }
-
-  async processCheckoutEvent(event: Stripe.Event) {
-    const checkout = StripeCheckoutEvent.parse(event.data.object);
-    const subscriptionRetrieved = await this.paymentSdk.subscriptions.retrieve(
-      checkout.subscription
-    );
-    const subscription = StripeSubscriptionEvent.parse(subscriptionRetrieved);
-
-    const stripeCustomer = await this.paymentSdk.customers.retrieve(
-      subscription.customer
-    );
-    const customer = StripeCustomer.parse(stripeCustomer);
-
-    await this.teamRepository.updateSubscription(customer.metadata.teamId, {
-      id: subscription.id,
-      productId: subscription.plan.product,
-      status: subscription.status,
-    });
   }
 
   getPlanFromSubscription(subscription?: ISubscription) {
