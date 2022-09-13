@@ -5,15 +5,17 @@ type IPricing = {
   name: string;
 };
 
-// Billing Plan for one environment
-type IBillingPlanEnv = {
-  [k: string]: {
-    free: IPricing;
-    [k: string]: IPricing;
-  };
+export type IBillingPlanEnv = {
+  free: IPricing;
+  [k: string]: IPricing;
 };
 
-export const BillingPlan: IBillingPlanEnv = {
+// Billing Plan for one environment
+type IBillingPlan = {
+  [k: string]: IBillingPlanEnv;
+};
+
+export const BillingPlan: IBillingPlan = {
   dev: {
     free: {
       id: 'FREE',

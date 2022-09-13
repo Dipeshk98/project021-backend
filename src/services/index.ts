@@ -3,6 +3,7 @@ import {
   teamRepository,
   userRepository,
 } from '@/repositories';
+import { getStripe } from '@/utils/Stripe';
 
 import { BillingService } from './BillingService';
 import { EmailService } from './EmailService';
@@ -16,7 +17,7 @@ const teamService = new TeamService(
   userRepository,
   memberRepository
 );
-const billingService = new BillingService(teamRepository);
+const billingService = new BillingService(teamRepository, getStripe());
 const emailService = new EmailService();
 
 export { billingService, emailService, teamService };

@@ -1,13 +1,10 @@
 import type { RequestHandler } from 'express';
-import type Stripe from 'stripe';
 
 import { ApiError } from '@/error/ApiError';
 import { ErrorCode } from '@/error/ErrorCode';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
 import { MemberRole } from '@/types/Member';
-import { Env } from '@/utils/Env';
-import { getStripe } from '@/utils/Stripe';
 import type { BodyPriceHandler } from '@/validations/BillingValidation';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 
@@ -42,21 +39,8 @@ export class BillingController {
 
   public webhook: RequestHandler = async (req, res) => {
     const sig = req.headers['stripe-signature']!;
-    let event: Stripe.Event;
 
-    try {
-      event = getStripe().webhooks.constructEvent(
-        req.body,
-        sig,
-        Env.getValue('STRIPE_WEBHOOK_SECRET', true)
-      );
-    } catch (ex: any) {
-      throw new ApiError(
-        'Incorrect Stripe webhook signature',
-        ex,
-        ErrorCode.INCORRECT_STRIPE_SIGNATURE
-      );
-    }
+    const event = this.billingService.verifyWebhook(req.body, sig);
 
     // FYI, here is the explanation why we need these Stripe events:
     // https://github.com/stripe/stripe-firebase-extensions/issues/146
@@ -95,13 +79,12 @@ export class BillingController {
       );
     }
 
-    const portalSession = await getStripe().billingPortal.sessions.create({
-      customer: stripeCustomerId,
-      return_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/settings`,
-    });
+    const url = await this.billingService.createCustomerPortalLink(
+      stripeCustomerId
+    );
 
     res.send({
-      url: portalSession.url,
+      url,
     });
   };
 }

@@ -10,15 +10,50 @@ import {
   StripeSubscriptionEvent,
   SubscriptionStatus,
 } from '@/types/StripeTypes';
+import type { IBillingPlanEnv } from '@/utils/BillingPlan';
 import { BillingPlan } from '@/utils/BillingPlan';
 import { Env } from '@/utils/Env';
-import { getStripe } from '@/utils/Stripe';
 
 export class BillingService {
   private teamRepository: TeamRepository;
 
-  constructor(teamRepository: TeamRepository) {
+  private paymentSdk: Stripe;
+
+  private billingPlanEnv: IBillingPlanEnv;
+
+  constructor(teamRepository: TeamRepository, stripe: Stripe) {
     this.teamRepository = teamRepository;
+    this.paymentSdk = stripe;
+
+    const billingPlanEnv = BillingPlan[Env.getValue('BILLING_PLAN_ENV')];
+
+    if (!billingPlanEnv) {
+      throw new ApiError(
+        "BILLING_PLAN_ENV environment variable isn't defined correctly"
+      );
+    }
+
+    this.billingPlanEnv = billingPlanEnv;
+  }
+
+  verifyWebhook(body: string | Buffer, sig: string | string[]) {
+    let event: Stripe.Event;
+
+    try {
+      event = this.paymentSdk.webhooks.constructEvent(
+        body,
+        sig,
+        Env.getValue('STRIPE_WEBHOOK_SECRET', true)
+      );
+    } catch (ex: any) {
+      throw new ApiError(
+        'Incorrect Stripe webhook signature',
+        ex,
+        ErrorCode.INCORRECT_STRIPE_SIGNATURE
+      );
+    }
+
+    return event;
   }
 
   async createOrRetrieveCustomerId(teamId: string) {
@@ -35,7 +70,7 @@ export class BillingService {
       return customerId;
     }
 
-    const stripeCustomer = await getStripe().customers.create({
+    const stripeCustomer = await this.paymentSdk.customers.create({
       metadata: {
         teamId: team.id,
       },
@@ -47,11 +82,9 @@ export class BillingService {
     return stripeCustomer.id;
   }
 
-  // TODO: Remove getStripe and make it a class attribute instead of injecting directly from import
-  // eslint-disable-next-line class-methods-use-this
   async createCheckoutSession(customerId: string, priceId: string) {
     try {
-      return await getStripe().checkout.sessions.create({
+      return await this.paymentSdk.checkout.sessions.create({
         mode: 'subscription',
         payment_method_types: ['card'],
         customer: customerId,
@@ -79,12 +112,12 @@ export class BillingService {
     // `customer.subscription.updated` can be called `before customer.subscription.created`
     // what is why we need to retrieve subscription to get the latest version
     let subscription = StripeSubscriptionEvent.parse(event.data.object);
-    const subscriptionRetrieved = await getStripe().subscriptions.retrieve(
+    const subscriptionRetrieved = await this.paymentSdk.subscriptions.retrieve(
       subscription.id
     );
     subscription = StripeSubscriptionEvent.parse(subscriptionRetrieved);
 
-    const stripeCustomer = await getStripe().customers.retrieve(
+    const stripeCustomer = await this.paymentSdk.customers.retrieve(
       subscription.customer
     );
     const customer = StripeCustomer.parse(stripeCustomer);
@@ -98,12 +131,12 @@ export class BillingService {
 
   async processCheckoutEvent(event: Stripe.Event) {
     const checkout = StripeCheckoutEvent.parse(event.data.object);
-    const subscriptionRetrieved = await getStripe().subscriptions.retrieve(
+    const subscriptionRetrieved = await this.paymentSdk.subscriptions.retrieve(
       checkout.subscription
     );
     const subscription = StripeSubscriptionEvent.parse(subscriptionRetrieved);
 
-    const stripeCustomer = await getStripe().customers.retrieve(
+    const stripeCustomer = await this.paymentSdk.customers.retrieve(
       subscription.customer
     );
     const customer = StripeCustomer.parse(stripeCustomer);
@@ -115,29 +148,28 @@ export class BillingService {
     });
   }
 
-  // TODO: Should become a static method or move this function into User? Open to suggestion
-  // eslint-disable-next-line class-methods-use-this
   getPlanFromSubscription(subscription?: ISubscription) {
-    const billingEnv = BillingPlan[Env.getValue('BILLING_PLAN_ENV')];
-
-    if (!billingEnv) {
-      throw new ApiError(
-        "BILLING_PLAN_ENV environment variable isn't defined correctly"
-      );
-    }
-
     if (!subscription) {
       // Subscription isn't defined, it means the user is at free tier.
-      return billingEnv.free;
+      return this.billingPlanEnv.free;
     }
 
-    const pricing = billingEnv[subscription.productId];
+    const pricing = this.billingPlanEnv[subscription.productId];
 
     // List of Stripe Subscription statuses: https://stripe.com/docs/billing/subscriptions/overview#subscription-statuses
     if (pricing && subscription?.status === SubscriptionStatus.ACTIVE) {
       return pricing;
     }
 
-    return billingEnv.free;
+    return this.billingPlanEnv.free;
+  }
+
+  async createCustomerPortalLink(customerId: string) {
+    const portalSession = await this.paymentSdk.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/settings`,
+    });
+
+    return portalSession.url;
   }
 }
