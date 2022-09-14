@@ -8,4 +8,5 @@ export type ISubscription = {
 // Non-exhaustive attributes for Stripe Subscription status.
 export enum SubscriptionStatus {
   ACTIVE = 'active',
+  PENDING = 'pending',
 }
