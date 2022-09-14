@@ -302,15 +302,21 @@ describe('Billing', () => {
         .send(payloadString);
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INTERNAL_SERVER_ERROR);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_STRIPE_RESULT);
     });
 
     it('should process checkout.session.completed and not enable the user PRO subscription when in pending status', async () => {
       mockSubscriptionsRetrieve.mockReturnValueOnce({
         id: 'RANDOM_ID',
-        status: 'pending',
-        plan: {
-          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        status: SubscriptionStatus.PENDING,
+        items: {
+          data: [
+            {
+              plan: {
+                product: 'prod_STRIPE_PRODUCT',
+              },
+            },
+          ],
         },
         customer: 'RANDOM_STRIPE_CUSTOMER_ID',
       });
@@ -328,6 +334,7 @@ describe('Billing', () => {
           object: {
             customer: 'cus_STRIPE_CUSTOMER_ID',
             subscription: 'sub_STRIPE_SUBSCRIPTION',
+            mode: 'subscription',
           },
         },
         type: 'checkout.session.completed',
@@ -358,8 +365,14 @@ describe('Billing', () => {
       mockSubscriptionsRetrieve.mockReturnValueOnce({
         id: 'RANDOM_ID',
         status: SubscriptionStatus.ACTIVE,
-        plan: {
-          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        items: {
+          data: [
+            {
+              plan: {
+                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+              },
+            },
+          ],
         },
         customer: 'RANDOM_STRIPE_CUSTOMER_ID',
       });
@@ -377,6 +390,7 @@ describe('Billing', () => {
           object: {
             customer: 'cus_STRIPE_CUSTOMER_ID',
             subscription: 'sub_STRIPE_SUBSCRIPTION',
+            mode: 'subscription',
           },
         },
         type: 'checkout.session.completed',
@@ -407,8 +421,14 @@ describe('Billing', () => {
       const subscription = {
         id: 'RANDOM_ID',
         status: 'deleted',
-        plan: {
-          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        items: {
+          data: [
+            {
+              plan: {
+                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+              },
+            },
+          ],
         },
         customer: 'RANDOM_STRIPE_CUSTOMER_ID',
       };
@@ -454,18 +474,30 @@ describe('Billing', () => {
     it('should process customer.subscription.created and customer.subscription.updated', async () => {
       const subscriptionCreated = {
         id: 'RANDOM_ID',
-        status: 'pending',
-        plan: {
-          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        status: SubscriptionStatus.PENDING,
+        items: {
+          data: [
+            {
+              plan: {
+                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+              },
+            },
+          ],
         },
         customer: 'RANDOM_STRIPE_CUSTOMER_ID',
       };
 
       const subscriptionUpdated = {
         id: 'RANDOM_ID',
-        status: 'active',
-        plan: {
-          product: 'prod_L9qynlbBRMmJi7', // Stripe `product id` located at BillingPlan.ts file
+        status: SubscriptionStatus.ACTIVE,
+        items: {
+          data: [
+            {
+              plan: {
+                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+              },
+            },
+          ],
         },
         customer: 'RANDOM_STRIPE_CUSTOMER_ID',
       };

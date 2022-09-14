@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { Env } from '@/utils/Env';
 
 export const originalStripe = new Stripe(Env.getValue('STRIPE_SECRET_KEY'), {
-  apiVersion: '2020-08-27',
+  apiVersion: '2022-08-01',
   telemetry: false,
 });
 

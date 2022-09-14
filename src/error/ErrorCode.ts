@@ -11,4 +11,6 @@ export enum ErrorCode {
   INCORRECT_PERMISSION = 'incorrect_permission', // User don't have permission to perfect the action
   INCORRECT_CODE = 'incorrect_code', // Incorrect verification code
   INCORRECT_STRIPE_SIGNATURE = 'incorrect_stripe_signature', // Incoming webhook error
+  INCORRECT_STRIPE_EVENT = 'incorrect_stripe_event', // Incorrect Stripe event format
+  INCORRECT_STRIPE_RESULT = 'incorrect_stripe_result', // Incorrect returned result from Stripe
 }
