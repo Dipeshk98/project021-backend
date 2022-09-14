@@ -16,11 +16,15 @@ export class BillingService {
 
   private billingPlanEnv: IBillingPlanEnv;
 
-  constructor(teamRepository: TeamRepository, stripe: Stripe) {
+  constructor(
+    teamRepository: TeamRepository,
+    stripe: Stripe,
+    billingEnv: string
+  ) {
     this.teamRepository = teamRepository;
     this.paymentSdk = stripe;
 
-    const billingPlanEnv = BillingPlan[Env.getValue('BILLING_PLAN_ENV')];
+    const billingPlanEnv = BillingPlan[billingEnv];
 
     if (!billingPlanEnv) {
       throw new ApiError(
@@ -153,30 +157,26 @@ export class BillingService {
     return stripeCustomer.id;
   }
 
-  async createCheckoutSession(customerId: string, priceId: string) {
-    try {
-      return await this.paymentSdk.checkout.sessions.create({
-        mode: 'subscription',
-        payment_method_types: ['card'],
-        customer: customerId,
-        line_items: [
-          {
-            price: priceId,
-            // For metered billing, do not pass quantity
-            quantity: 1,
-          },
-        ],
-        // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
-        // the actual Session ID is returned in the query parameter when your customer
-        // is redirected to the success page.
-        success_url: `${Env.getValue(
-          'FRONTEND_DOMAIN_URL'
-        )}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/upgrade`,
-      });
-    } catch (ex: any) {
-      throw new ApiError('Impossible to create Stripe checkout session', ex);
-    }
+  createCheckoutSession(customerId: string, priceId: string) {
+    return this.paymentSdk.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      customer: customerId,
+      line_items: [
+        {
+          price: priceId,
+          // For metered billing, do not pass quantity
+          quantity: 1,
+        },
+      ],
+      // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
+      // the actual Session ID is returned in the query parameter when your customer
+      // is redirected to the success page.
+      success_url: `${Env.getValue(
+        'FRONTEND_DOMAIN_URL'
+      )}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${Env.getValue('FRONTEND_DOMAIN_URL')}/dashboard/upgrade`,
+    });
   }
 
   getPlanFromSubscription(subscription?: ISubscription) {
@@ -188,7 +188,7 @@ export class BillingService {
     const pricing = this.billingPlanEnv[subscription.productId];
 
     // List of Stripe Subscription statuses: https://stripe.com/docs/billing/subscriptions/overview#subscription-statuses
-    if (pricing && subscription?.status === SubscriptionStatus.ACTIVE) {
+    if (pricing && subscription.status === SubscriptionStatus.ACTIVE) {
       return pricing;
     }
 
