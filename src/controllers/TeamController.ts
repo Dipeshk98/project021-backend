@@ -241,7 +241,7 @@ export class TeamController {
       throw new ApiError(
         'Incorrect Member ID or the member has the OWNER ROLE',
         null,
-        ErrorCode.INCORRECT_DATA
+        ErrorCode.INCORRECT_MEMBER_ID
       );
     }
 
