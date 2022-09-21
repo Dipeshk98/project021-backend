@@ -394,7 +394,7 @@ describe('Team', () => {
         });
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_MEMBER_ID);
     });
 
     it("shouldn't update the role with `READ_ONLY` role", async () => {
@@ -421,7 +421,7 @@ describe('Team', () => {
         });
 
       expect(response.statusCode).toEqual(500);
-      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_DATA);
+      expect(response.body.errors).toEqual(ErrorCode.INCORRECT_MEMBER_ID);
     });
 
     it('should add a new user in team and edit his role to `READ_ONLY`', async () => {

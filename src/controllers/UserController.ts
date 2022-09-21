@@ -34,9 +34,14 @@ export class UserController {
       await this.teamService.create('New Team', user, req.query.email);
     }
 
-    const teamList = await this.teamRepository.findAllByTeamIdList(
+    const dbTeamList = await this.teamRepository.findAllByTeamIdList(
       user.getTeamList()
     );
+
+    const teamList = dbTeamList.map((team) => ({
+      id: team.id,
+      displayName: team.getDisplayName(),
+    }));
 
     res.json({
       id: user.id,
