@@ -10,9 +10,10 @@ Nextless.js backend code for the REST Api. The code comes up with a Todo applica
 
 Run the following command on your local environment after cloning the project:
 
-```
+```sh
 cd my-project-name-backend
 npm install
+code . # Open VSCode with command line or open it manually. Please make sure that the file `package.json` is at the root of the project in VSCode. `package.json` should NOT be in a subfolder.
 ```
 
 Then, you can run locally in development mode with live reload:
@@ -76,6 +77,8 @@ You can deploy to production with the following command:
 ```
 npm run deploy-prod
 ```
+
+It's exactly the same command `npm run deploy-prod` when you want to update the backend after making changes: whether it's a code or configuration change.
 
 (optional) You can try Seed.run for an automatic backend deployment integrated to your GitHub workflow.
 
