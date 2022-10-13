@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import serverlessHttp from 'serverless-http';
 
 import { app } from './app';
-import { ApiError } from './error/ApiError';
+import { ApiError } from './errors/ApiError';
 import { Env } from './utils/Env';
 import { withRequest } from './utils/Logger';
 

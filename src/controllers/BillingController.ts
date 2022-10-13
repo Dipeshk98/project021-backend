@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 
-import { ApiError } from '@/error/ApiError';
-import { ErrorCode } from '@/error/ErrorCode';
+import { ApiError } from '@/errors/ApiError';
+import { ErrorCode } from '@/errors/ErrorCode';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
 import { MemberRole } from '@/types/Member';

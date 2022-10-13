@@ -1,5 +1,5 @@
-import { ApiError } from '@/error/ApiError';
-import { ErrorCode } from '@/error/ErrorCode';
+import { ApiError } from '@/errors/ApiError';
+import { ErrorCode } from '@/errors/ErrorCode';
 import { Todo } from '@/models/Todo';
 import type { TodoRepository } from '@/repositories/TodoRepository';
 import type { TeamService } from '@/services/TeamService';

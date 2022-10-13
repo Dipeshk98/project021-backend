@@ -26,7 +26,7 @@ Open http://localhost:4000 with your favorite browser to see your project. You s
 
 If you want to test the backend without the front, you can use `Postman` but what I suggest instead is to use `humao.rest-client` VSCode extension. It helps to run HTTP request in your VSCode.
 
-Located at `test/api.http`, it's a file where you can run requests directly in `humao.rest-client`. All supported requests are provided. So, you can test all the request directly in your VSCode.
+Located at `tests/api.http`, it's a file where you can run requests directly in `humao.rest-client`. All supported requests are provided. So, you can test all the request directly in your VSCode.
 
 ### File structure, most important folder
 
@@ -56,7 +56,7 @@ Located at `test/api.http`, it's a file where you can run requests directly in `
 │   ├── types                               # Types for TypeScript
 │   ├── utils                               # Utilities
 │   └── validations                         # Incoming request validator with Zod
-└── test                                    # Test folder
+└── tests                                    # Test folder
     └── integration                         # Integration tests
 ```
 
@@ -108,7 +108,7 @@ Open http://localhost:8001 with your favorite browser and you can visually brows
 
 All unit tests are located close to the source code in the same folder. For example, a file located at `src/service/` with the name `RandomService.ts` will have a unit test file located at `src/service/RandomService.test.ts`.
 
-The backend also includes integration tests for testing all backend layers including the database. They are located at `test/integration/`.
+The backend also includes integration tests for testing all backend layers including the database. They are located at `tests/integration/`.
 
 ### VSCode information (optional)
 

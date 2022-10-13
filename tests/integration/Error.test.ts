@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 
 import { app } from '@/app';
-import { ErrorCode } from '@/error/ErrorCode';
+import { ErrorCode } from '@/errors/ErrorCode';
 
 describe('Error', () => {
   describe('Page not found', () => {
