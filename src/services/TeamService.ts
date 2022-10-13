@@ -1,5 +1,5 @@
-import { ApiError } from '@/error/ApiError';
-import { ErrorCode } from '@/error/ErrorCode';
+import { ApiError } from '@/errors/ApiError';
+import { ErrorCode } from '@/errors/ErrorCode';
 import { Member } from '@/models/Member';
 import { Team } from '@/models/Team';
 import type { User } from '@/models/User';

@@ -2,7 +2,7 @@ import { mockSendMail } from '__mocks__/nodemailer';
 import supertest from 'supertest';
 
 import { app } from '@/app';
-import { ErrorCode } from '@/error/ErrorCode';
+import { ErrorCode } from '@/errors/ErrorCode';
 import { Member } from '@/models/Member';
 import { memberRepository } from '@/repositories';
 import { MemberRole, MemberStatus } from '@/types/Member';

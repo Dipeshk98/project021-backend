@@ -1,8 +1,20 @@
+/* eslint-disable class-methods-use-this */
+
 import { mockSendMail } from '__mocks__/nodemailer';
 
-import { TestEmailTemplate } from '@/emails/TestEmailTemplate';
+import { AbstractEmailTemplate } from '@/emails/AbstractEmailTemplate';
 
 import { EmailService } from './EmailService';
+
+class TestEmailTemplate extends AbstractEmailTemplate {
+  public buildSubject(): string {
+    return `Test email subject`;
+  }
+
+  public buildText(): string {
+    return `Test email text`;
+  }
+}
 
 describe('EmailService', () => {
   let emailService: EmailService;
