@@ -31,6 +31,7 @@ custom:
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
+    reloadHandler: true
     noTimeout: true
     noAuth: ${self:custom.noAuth.${self:custom.stage}}
 
