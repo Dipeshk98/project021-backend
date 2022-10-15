@@ -31,7 +31,7 @@ custom:
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
-    reloadHandler: true
+    reloadHandler: true # Set to false when running E2E testing
     noTimeout: true
     noAuth: ${self:custom.noAuth.${self:custom.stage}}
 
