@@ -369,7 +369,7 @@ describe('Billing', () => {
           data: [
             {
               plan: {
-                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+                product: 'test_MQPRO',
               },
             },
           ],
@@ -425,7 +425,7 @@ describe('Billing', () => {
           data: [
             {
               plan: {
-                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+                product: 'test_MQPRO',
               },
             },
           ],
@@ -479,7 +479,7 @@ describe('Billing', () => {
           data: [
             {
               plan: {
-                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+                product: 'test_MQPRO',
               },
             },
           ],
@@ -494,7 +494,7 @@ describe('Billing', () => {
           data: [
             {
               plan: {
-                product: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+                product: 'test_MQPRO',
               },
             },
           ],

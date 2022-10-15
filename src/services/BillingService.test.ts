@@ -41,7 +41,7 @@ describe('BillingService', () => {
     let billingService: BillingService;
 
     beforeEach(() => {
-      billingService = new BillingService(teamRepository, stripe, 'dev');
+      billingService = new BillingService(teamRepository, stripe, 'test');
     });
 
     it('should return the free plan when the productId is incorrect', () => {
@@ -62,7 +62,7 @@ describe('BillingService', () => {
     it('should return the free plan when the status is not active', () => {
       const plan = billingService.getPlanFromSubscription({
         id: 'RANDOM_SUBSCRIPTION_ID',
-        productId: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+        productId: 'test_MQPRO',
         status: SubscriptionStatus.PENDING,
       });
 
@@ -72,7 +72,7 @@ describe('BillingService', () => {
     it('should return the PRO plan when the subscription is active', () => {
       const plan = billingService.getPlanFromSubscription({
         id: 'RANDOM_SUBSCRIPTION_ID',
-        productId: 'prod_MQV5G6bV1mdV6Z', // Stripe `product id` located at BillingPlan.ts file
+        productId: 'test_MQPRO',
         status: SubscriptionStatus.ACTIVE,
       });
 

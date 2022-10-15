@@ -35,6 +35,20 @@ export const BillingPlan: IBillingPlan = {
     },
     // You can add more product id by following the same format
   },
+  test: {
+    free: {
+      id: 'FREE',
+      name: 'Free',
+    },
+    test_MQPRO: {
+      id: 'PRO',
+      name: 'Pro',
+    },
+    test_MQENTERPRISE: {
+      id: 'ENTERPRISE',
+      name: 'Enterprise',
+    },
+  },
   prod: {
     free: {
       id: 'FREE',
