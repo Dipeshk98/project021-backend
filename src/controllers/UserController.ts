@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
 import type { TeamService } from '@/services/TeamService';
@@ -27,6 +29,14 @@ export class UserController {
    * Retrieve User information or create a new User, it happens when the user signs in for the first time.
    */
   public getProfile: ParamsEmailHandler = async (req, res) => {
+    const prisma = new PrismaClient();
+    await prisma.user.create({
+      data: {
+        providerId: req.currentUserId,
+        email: 'test2@gmail.com',
+      },
+    });
+
     const user = await this.userRepository.findOrCreate(req.currentUserId);
 
     if (user.getTeamList().length === 0) {
