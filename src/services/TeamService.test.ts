@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
 import { Member } from '@/models/Member';
-import { User } from '@/models/User';
+import { UserModel } from '@/models/User';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { UserRepository } from '@/repositories/UserRepository';
@@ -33,7 +33,7 @@ describe('TeamService', () => {
 
   describe('Basic operation', () => {
     it('should create a new team and add the user as a team member', async () => {
-      const createdUser = new User('user-123');
+      const createdUser = new UserModel('user-123');
       const createdTeam = await teamService.create(
         'team-123',
         createdUser,
@@ -95,7 +95,7 @@ describe('TeamService', () => {
     });
 
     it("shouldn't happen: the user belongs to a team but the team doesn't exist", async () => {
-      const user = new User('user-123');
+      const user = new UserModel('user-123');
       user.addTeam('team-123');
       await userRepository.save(user);
 
@@ -109,7 +109,7 @@ describe('TeamService', () => {
     });
 
     it('should update the user email in all teams', async () => {
-      const user = new User('user-123');
+      const user = new UserModel('user-123');
       const team1 = await teamService.create(
         'team-1',
         user,
@@ -168,7 +168,7 @@ describe('TeamService', () => {
     });
 
     it('should delete team and its member', async () => {
-      const createdUser = new User('user-1');
+      const createdUser = new UserModel('user-1');
       const createdTeam = await teamService.create(
         'team-123',
         createdUser,
@@ -178,7 +178,7 @@ describe('TeamService', () => {
       const createdPendingMember = new Member(createdTeam.id);
       await memberRepository.create(createdPendingMember);
 
-      const createdUser2 = new User('user-2');
+      const createdUser2 = new UserModel('user-2');
       await teamService.join(
         createdTeam,
         createdUser2,
@@ -320,7 +320,7 @@ describe('TeamService', () => {
     });
 
     it('should create a new user with a new team and verify membership and permission', async () => {
-      const createdUser = new User('user-123');
+      const createdUser = new UserModel('user-123');
       const createdTeam = await teamService.create(
         'team-display-name',
         createdUser,

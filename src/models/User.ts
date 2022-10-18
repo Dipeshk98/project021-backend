@@ -1,10 +1,7 @@
-import { AbstractModel } from './AbstractModel';
-import type { UserEntity } from './Schema';
+import type { User } from '@prisma/client';
 
-export class User extends AbstractModel<UserEntity> {
-  static PREFIX_KEYS = 'USER#';
-
-  public readonly id: string;
+export class UserModel {
+  public readonly providerId: string;
 
   private firstSignIn: Date;
 
@@ -15,19 +12,10 @@ export class User extends AbstractModel<UserEntity> {
    * @constructor
    * @param id - The ID of the user.
    */
-  constructor(id: string) {
-    super();
-    this.id = id;
+  constructor(providerId: string) {
+    this.providerId = providerId;
     this.firstSignIn = new Date();
     this.teamList = [];
-  }
-
-  get pk() {
-    return `${User.PREFIX_KEYS}${this.id}`;
-  }
-
-  get sk() {
-    return `${User.PREFIX_KEYS}${this.id}`;
   }
 
   getFirstSignIn() {
@@ -52,15 +40,14 @@ export class User extends AbstractModel<UserEntity> {
 
   toEntity() {
     return {
-      ...this.keys(),
+      providerId: this.providerId,
       firstSignIn: this.firstSignIn,
       teamList: this.teamList,
     };
   }
 
-  fromEntity(entity: UserEntity) {
-    if (entity.firstSignIn) this.firstSignIn = new Date(entity.firstSignIn);
-
-    if (entity.teamList) this.teamList = entity.teamList;
+  fromEntity(entity: User) {
+    this.firstSignIn = entity.firstSignIn;
+    this.teamList = entity.teamList;
   }
 }

@@ -185,7 +185,7 @@ export class TeamController {
     );
 
     const member = await this.teamService.findTeamMember(
-      user.id,
+      user.providerId,
       req.params.teamId
     );
 

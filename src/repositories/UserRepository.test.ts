@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
-import { User } from '@/models/User';
+import { UserModel } from '@/models/User';
 
 import { UserRepository } from './UserRepository';
 
@@ -61,7 +61,7 @@ describe('UserRepository', () => {
     });
 
     it('should remove from the team', async () => {
-      const createdUser = new User('user-123');
+      const createdUser = new UserModel('user-123');
       createdUser.addTeam('team-1');
       createdUser.addTeam('team-2');
       createdUser.addTeam('team-3');
@@ -76,7 +76,7 @@ describe('UserRepository', () => {
 
     it('should be able to save an non-existing user and be able to get the user from the database', async () => {
       const userId = 'user-123';
-      const savedUser = new User(userId);
+      const savedUser = new UserModel(userId);
       await userRepository.save(savedUser);
 
       const user = await userRepository.findByUserId(userId);
@@ -89,7 +89,7 @@ describe('UserRepository', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const savedUser = new User(userId);
+      const savedUser = new UserModel(userId);
       savedUser.addTeam('team-1');
       savedUser.addTeam('team-2');
       savedUser.addTeam('team-3');

@@ -1,18 +1,60 @@
-import type { Table } from 'dynamodb-onetable';
-
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { User } from '@/models/User';
+import { UserModel } from '@/models/User';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class UserRepository extends AbstractRepository<User> {
-  constructor(dbTable: Table) {
-    super(dbTable, 'User');
+export class UserRepository extends AbstractRepository {
+  async create(model: UserModel) {
+    await this.dbClient.user.create({
+      data: model.toEntity(),
+    });
+  }
+
+  async get(model: UserModel) {
+    const entity = await this.dbClient.user.findUnique({
+      where: {
+        providerId: model.providerId,
+      },
+    });
+
+    if (!entity) {
+      return null;
+    }
+
+    model.fromEntity(entity);
+    return model;
+  }
+
+  async save(model: UserModel) {
+    await this.dbClient.user.upsert({
+      create: model.toEntity(),
+      update: model.toEntity(),
+      where: {
+        providerId: model.providerId,
+      },
+    });
+  }
+
+  update(model: UserModel) {
+    return this.dbClient.user.update({
+      data: model.toEntity(),
+      where: {
+        providerId: model.providerId,
+      },
+    });
+  }
+
+  delete(model: UserModel) {
+    return this.dbClient.user.delete({
+      where: {
+        providerId: model.providerId,
+      },
+    });
   }
 
   async createWithUserId(userId: string) {
-    const user = new User(userId);
+    const user = new UserModel(userId);
 
     await this.create(user);
 
@@ -20,7 +62,7 @@ export class UserRepository extends AbstractRepository<User> {
   }
 
   findByUserId(userId: string) {
-    const user = new User(userId);
+    const user = new UserModel(userId);
 
     return this.get(user);
   }

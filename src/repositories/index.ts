@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+
 import { getDBTable } from '@/models/DBTable';
 
 import { MemberRepository } from './MemberRepository';
@@ -6,10 +8,11 @@ import { TodoRepository } from './TodoRepository';
 import { UserRepository } from './UserRepository';
 
 const dbTable = getDBTable();
+const prisma = new PrismaClient();
 
 const memberRepository = new MemberRepository(dbTable);
 const teamRepository = new TeamRepository(dbTable);
 const todoRepository = new TodoRepository(dbTable);
-const userRepository = new UserRepository(dbTable);
+const userRepository = new UserRepository(prisma);
 
 export { memberRepository, teamRepository, todoRepository, userRepository };

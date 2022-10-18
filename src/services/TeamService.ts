@@ -2,7 +2,7 @@ import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { Member } from '@/models/Member';
 import { Team } from '@/models/Team';
-import type { User } from '@/models/User';
+import type { UserModel } from '@/models/User';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
@@ -25,7 +25,7 @@ export class TeamService {
     this.memberRepository = memberRepository;
   }
 
-  async create(displayName: string, user: User, userEmail: string) {
+  async create(displayName: string, user: UserModel, userEmail: string) {
     const team = new Team();
     team.setDisplayName(displayName);
     await this.teamRepository.save(team);
@@ -62,8 +62,8 @@ export class TeamService {
     }
   }
 
-  async join(team: Team, user: User, userEmail: string, role: MemberRole) {
-    const member = new Member(team.id, user.id);
+  async join(team: Team, user: UserModel, userEmail: string, role: MemberRole) {
+    const member = new Member(team.id, user.providerId);
     member.setEmail(userEmail);
     member.setRole(role);
     member.setStatus(MemberStatus.ACTIVE);
@@ -144,14 +144,14 @@ export class TeamService {
     return { user, member, team };
   }
 
-  async updateEmailAllTeams(user: User, email: string) {
+  async updateEmailAllTeams(user: UserModel, email: string) {
     const teamList = user.getTeamList();
 
     // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
     // eslint-disable-next-line no-restricted-syntax
     for (const elt of teamList) {
       // eslint-disable-next-line no-await-in-loop
-      await this.memberRepository.updateEmail(elt, user.id, email);
+      await this.memberRepository.updateEmail(elt, user.providerId, email);
     }
   }
 }
