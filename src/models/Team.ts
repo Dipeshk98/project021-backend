@@ -1,20 +1,16 @@
-import { ulid } from 'ulid';
+import type { Team } from '@prisma/client';
+import ObjectID from 'bson-objectid';
 
 import type { ISubscription } from '@/types/StripeTypes';
 
-import { AbstractModel } from './AbstractModel';
-import type { TeamEntity } from './Schema';
-
-export class Team extends AbstractModel<TeamEntity> {
-  static BEGINS_KEYS = 'TEAM#';
-
+export class TeamModel {
   public readonly id: string;
 
-  private displayName?: string;
+  private displayName = 'New Team';
 
-  private stripeCustomerId?: string;
+  private stripeCustomerId: string | null = null;
 
-  private subscription?: ISubscription;
+  private subscription: ISubscription | null = null;
 
   /**
    * Constructor for Team class.
@@ -22,21 +18,11 @@ export class Team extends AbstractModel<TeamEntity> {
    * @param id - The ID of the team.
    */
   constructor(id?: string) {
-    super();
-
     if (id) {
       this.id = id;
     } else {
-      this.id = ulid();
+      this.id = ObjectID().str;
     }
-  }
-
-  get pk() {
-    return `${Team.BEGINS_KEYS}${this.id}`;
-  }
-
-  get sk() {
-    return `${Team.BEGINS_KEYS}${this.id}`;
   }
 
   setDisplayName(name: string) {
@@ -65,34 +51,29 @@ export class Team extends AbstractModel<TeamEntity> {
 
   toEntity() {
     return {
-      ...this.keys(),
+      id: this.id,
       displayName: this.displayName,
       stripeCustomerId: this.stripeCustomerId,
-      subscription: this.subscription,
+      subscriptionId: this.subscription?.id,
+      subscriptionProductId: this.subscription?.productId,
+      subscriptionStatus: this.subscription?.status,
     };
   }
 
-  fromEntity(entity: TeamEntity) {
-    if (entity.displayName) this.displayName = entity.displayName;
-
-    if (entity.stripeCustomerId)
-      this.stripeCustomerId = entity.stripeCustomerId;
+  fromEntity(entity: Team) {
+    this.displayName = entity.displayName;
+    this.stripeCustomerId = entity.stripeCustomerId;
 
     if (
-      entity.subscription &&
-      entity.subscription.id &&
-      entity.subscription.productId &&
-      entity.subscription.status
+      entity.subscriptionId &&
+      entity.subscriptionProductId &&
+      entity.subscriptionStatus
     ) {
       this.subscription = {
-        id: entity.subscription.id,
-        productId: entity.subscription.productId,
-        status: entity.subscription.status,
+        id: entity.subscriptionId,
+        productId: entity.subscriptionProductId,
+        status: entity.subscriptionStatus,
       };
     }
-  }
-
-  static removeBeginsKeys(pk: string) {
-    return pk.replace(Team.BEGINS_KEYS, '');
   }
 }

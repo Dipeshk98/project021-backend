@@ -1,14 +1,14 @@
-import type { Team } from '@/models/Team';
+import type { TeamModel } from '@/models/Team';
 import { Env } from '@/utils/Env';
 
 import { AbstractEmailTemplate } from './AbstractEmailTemplate';
 
 export class TeamInviteEmailTemplate extends AbstractEmailTemplate {
-  private team: Team;
+  private team: TeamModel;
 
   private verificationCode: string;
 
-  constructor(team: Team, verificationCode: string) {
+  constructor(team: TeamModel, verificationCode: string) {
     super();
     this.team = team;
     this.verificationCode = verificationCode;

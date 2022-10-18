@@ -16,3 +16,12 @@ model User {
   firstSignIn DateTime
   teamList    String[]
 }
+
+model Team {
+  id                    String  @id @default(auto()) @map("_id") @db.ObjectId
+  displayName           String
+  stripeCustomerId      String?
+  subscriptionId        String?
+  subscriptionProductId String?
+  subscriptionStatus    String?
+}

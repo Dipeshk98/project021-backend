@@ -1,11 +1,11 @@
-import { Team } from '@/models/Team';
+import { TeamModel } from '@/models/Team';
 
 import { TeamInviteEmailTemplate } from './TeamInviteEmailTemplate';
 
 describe('TeamInviteEmail', () => {
   describe('Build Email', () => {
     it('should contain the team name in the email subject', () => {
-      const team = new Team('team-123');
+      const team = new TeamModel('team-123');
       team.setDisplayName('team-name-123');
 
       const template = new TeamInviteEmailTemplate(team, 'verification-123');
@@ -14,7 +14,7 @@ describe('TeamInviteEmail', () => {
     });
 
     it('should contain the link in the email body', () => {
-      const team = new Team('team-123');
+      const team = new TeamModel('team-123');
       team.setDisplayName('team-name-123');
 
       const template = new TeamInviteEmailTemplate(team, 'verification-123');

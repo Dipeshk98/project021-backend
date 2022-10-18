@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
-import { Team } from '@/models/Team';
+import { TeamModel } from '@/models/Team';
 
 import { TeamRepository } from './TeamRepository';
 
@@ -39,7 +39,7 @@ describe('TeamRepository', () => {
     });
 
     it('should be able to save an non-existing team and be able to get the team from the database', async () => {
-      const savedTeam = new Team();
+      const savedTeam = new TeamModel();
       savedTeam.setDisplayName('team-123');
       await teamRepository.save(savedTeam);
 
@@ -54,7 +54,7 @@ describe('TeamRepository', () => {
         'team-123'
       );
 
-      const savedTeam = new Team(createdTeam.id);
+      const savedTeam = new TeamModel(createdTeam.id);
       savedTeam.setDisplayName('new-team-123');
       savedTeam.setStripeCustomerId('stripe-customer-id');
       await teamRepository.save(savedTeam);

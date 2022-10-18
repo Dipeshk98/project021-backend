@@ -1,7 +1,7 @@
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { Member } from '@/models/Member';
-import { Team } from '@/models/Team';
+import { TeamModel } from '@/models/Team';
 import type { UserModel } from '@/models/User';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
@@ -26,7 +26,7 @@ export class TeamService {
   }
 
   async create(displayName: string, user: UserModel, userEmail: string) {
-    const team = new Team();
+    const team = new TeamModel();
     team.setDisplayName(displayName);
     await this.teamRepository.save(team);
 
@@ -62,7 +62,7 @@ export class TeamService {
     }
   }
 
-  async join(team: Team, user: UserModel, userEmail: string, role: MemberRole) {
+  async join(team: TeamModel, user: UserModel, userEmail: string, role: MemberRole) {
     const member = new Member(team.id, user.providerId);
     member.setEmail(userEmail);
     member.setRole(role);
