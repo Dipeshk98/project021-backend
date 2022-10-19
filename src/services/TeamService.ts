@@ -1,6 +1,6 @@
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import { TeamModel } from '@/models/Team';
 import type { UserModel } from '@/models/User';
 import type { MemberRepository } from '@/repositories/MemberRepository';
@@ -62,8 +62,13 @@ export class TeamService {
     }
   }
 
-  async join(team: TeamModel, user: UserModel, userEmail: string, role: MemberRole) {
-    const member = new Member(team.id, user.providerId);
+  async join(
+    team: TeamModel,
+    user: UserModel,
+    userEmail: string,
+    role: MemberRole
+  ) {
+    const member = new MemberModel(team.id, user.providerId);
     member.setEmail(userEmail);
     member.setRole(role);
     member.setStatus(MemberStatus.ACTIVE);

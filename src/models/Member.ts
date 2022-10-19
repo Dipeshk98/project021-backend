@@ -1,13 +1,9 @@
+import type { Member } from '@prisma/client';
 import { nanoid } from 'nanoid';
 
 import { MemberRole, MemberStatus } from '@/types/Member';
 
-import { AbstractModel } from './AbstractModel';
-import type { MemberEntity } from './Schema';
-
-export class Member extends AbstractModel<MemberEntity> {
-  static BEGINS_KEYS = 'MEMBER#';
-
+export class MemberModel {
   public readonly teamId: string;
 
   public readonly skId: string;
@@ -16,7 +12,7 @@ export class Member extends AbstractModel<MemberEntity> {
 
   private status = MemberStatus.PENDING;
 
-  private email?: string;
+  private email = '';
 
   /**
    * Constructor for Member class.
@@ -25,7 +21,6 @@ export class Member extends AbstractModel<MemberEntity> {
    * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
    */
   constructor(teamId: string, userId?: string) {
-    super();
     this.teamId = teamId;
 
     if (userId) {
@@ -34,14 +29,6 @@ export class Member extends AbstractModel<MemberEntity> {
       // In pending status, we use the skId for verification code
       this.skId = nanoid(30);
     }
-  }
-
-  get pk() {
-    return `${Member.BEGINS_KEYS}${this.teamId}`;
-  }
-
-  get sk() {
-    return `${Member.BEGINS_KEYS}${this.skId}`;
   }
 
   getTeamId() {
@@ -74,22 +61,17 @@ export class Member extends AbstractModel<MemberEntity> {
 
   toEntity() {
     return {
-      ...this.keys(),
-      email: this.email,
+      teamId: this.teamId,
+      skId: this.skId,
       role: this.role,
       status: this.status,
+      email: this.email,
     };
   }
 
-  fromEntity(entity: MemberEntity) {
-    if (entity.email) this.email = entity.email;
-
-    if (entity.role) this.role = MemberRole[entity.role];
-
-    if (entity.status) this.status = MemberStatus[entity.status];
-  }
-
-  static removeBeginsKeys(pk: string) {
-    return pk.replace(Member.BEGINS_KEYS, '');
+  fromEntity(entity: Member) {
+    this.role = MemberRole[entity.role];
+    this.status = MemberStatus[entity.status];
+    this.email = entity.email;
   }
 }

@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { MemberRepository } from './MemberRepository';
@@ -23,7 +23,7 @@ describe('MemberRepository', () => {
     it('should create a team member when saving a non-existing one and and be able to get the member from the database', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
@@ -36,7 +36,7 @@ describe('MemberRepository', () => {
     it('should create a todo when saving a non-existing one and update when saving again', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
@@ -61,7 +61,7 @@ describe('MemberRepository', () => {
     it('should add a new team member and delete the newly created team member', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       await memberRepository.save(savedMember);
 
       const deleteResult = await memberRepository.deleteByKeys(teamId, userId);
@@ -83,7 +83,7 @@ describe('MemberRepository', () => {
     it("shouldn't be able to delete when the status isn't in pending", async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setStatus(MemberStatus.ACTIVE);
       await memberRepository.save(savedMember);
 
@@ -100,7 +100,7 @@ describe('MemberRepository', () => {
     it('should be able to delete the team member in pending status', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       await memberRepository.save(savedMember);
 
       const deleteResult = await memberRepository.deleteOnlyInPending(
@@ -127,7 +127,7 @@ describe('MemberRepository', () => {
     it('should update the team member email', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
@@ -155,7 +155,7 @@ describe('MemberRepository', () => {
     it('should update the team member role to `ADMIN`', async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setRole(MemberRole.READ_ONLY);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
@@ -174,7 +174,7 @@ describe('MemberRepository', () => {
     it("shouldn't update the team member role when he is an `OWNER`", async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
-      const savedMember = new Member(teamId, userId);
+      const savedMember = new MemberModel(teamId, userId);
       savedMember.setRole(MemberRole.OWNER);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
@@ -198,23 +198,23 @@ describe('MemberRepository', () => {
     const teamId = 'team-123';
     const userId = 'user-123';
 
-    let member1: Member;
-    let member2: Member;
-    let member3: Member;
+    let member1: MemberModel;
+    let member2: MemberModel;
+    let member3: MemberModel;
 
     beforeEach(async () => {
       // Member 1 in pending
-      member1 = new Member(teamId);
+      member1 = new MemberModel(teamId);
       member1.setEmail('example1@example.com');
       await memberRepository.save(member1);
 
       // Member 2 in active
-      member2 = new Member(teamId, userId);
+      member2 = new MemberModel(teamId, userId);
       member2.setEmail('example2@example.com');
       await memberRepository.save(member2);
 
       // Member 3 in pending
-      member3 = new Member(teamId);
+      member3 = new MemberModel(teamId);
       member3.setEmail('example3@example.com');
       await memberRepository.save(member3);
     });

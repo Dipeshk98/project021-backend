@@ -14,7 +14,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@prisma/client": "^4.4.0",
+    "@prisma/client": "^4.5.0",
     "aws-sdk": "^2.1233.0",
     "bson-objectid": "^2.0.3",
     "cors": "^2.8.5",
@@ -60,7 +60,7 @@
     "mongodb-memory-server": "^8.9.3",
     "node-mocks-http": "^1.11.0",
     "prettier": "^2.7.1",
-    "prisma": "^4.4.0",
+    "prisma": "^4.5.0",
     "rimraf": "^3.0.2",
     "serverless": "^3.23.0",
     "serverless-bundle": "^5.5.0",

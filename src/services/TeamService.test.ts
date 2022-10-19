@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import { UserModel } from '@/models/User';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
@@ -99,7 +99,7 @@ describe('TeamService', () => {
       user.addTeam('team-123');
       await userRepository.save(user);
 
-      const member = new Member('team-123', user.id);
+      const member = new MemberModel('team-123', user.id);
       member.setStatus(MemberStatus.ACTIVE);
       await memberRepository.create(member);
 
@@ -175,7 +175,7 @@ describe('TeamService', () => {
         'random@example.com'
       );
 
-      const createdPendingMember = new Member(createdTeam.id);
+      const createdPendingMember = new MemberModel(createdTeam.id);
       await memberRepository.create(createdPendingMember);
 
       const createdUser2 = new UserModel('user-2');
@@ -217,7 +217,7 @@ describe('TeamService', () => {
 
   describe('Team permission', () => {
     it('should not find team member with `PENDING` status', async () => {
-      const createdMember = new Member('team-123', 'user-123');
+      const createdMember = new MemberModel('team-123', 'user-123');
       await memberRepository.create(createdMember);
 
       const member = await teamService.findTeamMember('user-123', 'team-123');
@@ -226,7 +226,7 @@ describe('TeamService', () => {
     });
 
     it('should find team member with `ACTIVE` status only', async () => {
-      const createdMember = new Member('team-123', 'user-123');
+      const createdMember = new MemberModel('team-123', 'user-123');
       createdMember.setStatus(MemberStatus.ACTIVE);
       await memberRepository.create(createdMember);
 
@@ -279,7 +279,7 @@ describe('TeamService', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const member = new Member('team-123', userId);
+      const member = new MemberModel('team-123', userId);
       member.setStatus(MemberStatus.PENDING);
       await memberRepository.create(member);
 
@@ -292,7 +292,7 @@ describe('TeamService', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const member = new Member('team-123', userId);
+      const member = new MemberModel('team-123', userId);
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.create(member);
@@ -309,7 +309,7 @@ describe('TeamService', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const member = new Member('team-123', userId);
+      const member = new MemberModel('team-123', userId);
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.ADMIN);
       await memberRepository.create(member);
@@ -338,7 +338,7 @@ describe('TeamService', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const member = new Member('team-123', userId);
+      const member = new MemberModel('team-123', userId);
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.OWNER);
       await memberRepository.create(member);
@@ -353,7 +353,7 @@ describe('TeamService', () => {
       const userId = 'user-123';
       await userRepository.createWithUserId(userId);
 
-      const member = new Member('team-123', userId);
+      const member = new MemberModel('team-123', userId);
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.ADMIN);
       await memberRepository.create(member);

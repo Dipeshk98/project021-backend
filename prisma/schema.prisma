@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
 }
 
 datasource db {
@@ -24,4 +25,26 @@ model Team {
   subscriptionId        String?
   subscriptionProductId String?
   subscriptionStatus    String?
+}
+
+model Member {
+  id     String           @id @default(auto()) @map("_id") @db.ObjectId
+  teamId String
+  skId   String
+  email  String
+  role   Role
+  status InvitationStatus
+
+  @@unique([teamId, skId], name: "teamSkId")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  READ_ONLY
+}
+
+enum InvitationStatus {
+  ACTIVE
+  PENDING
 }

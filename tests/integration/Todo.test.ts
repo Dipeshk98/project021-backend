@@ -2,7 +2,7 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import { memberRepository } from '@/repositories';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
@@ -38,7 +38,7 @@ describe('Todo', () => {
     });
 
     it("shouldn't create todo with `READ_ONLY` role", async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -109,7 +109,7 @@ describe('Todo', () => {
     });
 
     it("shouldn't be able to delete with `READ_ONLY` role", async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -166,7 +166,7 @@ describe('Todo', () => {
     });
 
     it("shouldn't be able to update a todo with `READ_ONLY` role", async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);

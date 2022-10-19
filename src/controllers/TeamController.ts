@@ -1,7 +1,7 @@
 import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
@@ -140,7 +140,7 @@ export class TeamController {
       [MemberRole.OWNER, MemberRole.ADMIN]
     );
 
-    const member = new Member(req.params.teamId);
+    const member = new MemberModel(req.params.teamId);
     member.setEmail(req.body.email);
     member.setRole(req.body.role);
     await this.memberRepository.save(member);

@@ -3,7 +3,7 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { Member } from '@/models/Member';
+import { MemberModel } from '@/models/Member';
 import { memberRepository } from '@/repositories';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
@@ -79,7 +79,7 @@ describe('Team', () => {
     });
 
     it('should not be able to update the team name with `READ_ONLY` role', async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -111,7 +111,7 @@ describe('Team', () => {
     });
 
     it('should not allow to delete team with `READ_ONLY` role', async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -189,7 +189,7 @@ describe('Team', () => {
     });
 
     it('should not allow to send invitation with `READ_ONLY` role', async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -398,7 +398,7 @@ describe('Team', () => {
     });
 
     it("shouldn't update the role with `READ_ONLY` role", async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
@@ -512,7 +512,7 @@ describe('Team', () => {
     });
 
     it('should remove the user when `READ_ONLY` role', async () => {
-      const member = new Member(teamId, '123');
+      const member = new MemberModel(teamId, '123');
       member.setStatus(MemberStatus.ACTIVE);
       member.setRole(MemberRole.READ_ONLY);
       await memberRepository.update(member);
