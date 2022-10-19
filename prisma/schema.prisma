@@ -38,6 +38,12 @@ model Member {
   @@unique([teamId, skId], name: "teamSkId")
 }
 
+model Todo {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId String
+  title   String
+}
+
 enum Role {
   OWNER
   ADMIN

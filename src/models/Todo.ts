@@ -1,16 +1,12 @@
-import { ulid } from 'ulid';
+import type { Todo } from '@prisma/client';
+import ObjectID from 'bson-objectid';
 
-import { AbstractModel } from './AbstractModel';
-import type { TodoEntity } from './Schema';
-
-export class Todo extends AbstractModel<TodoEntity> {
-  static BEGINS_KEYS = 'TODO#';
-
+export class TodoModel {
   public readonly ownerId: string;
 
   public readonly id: string;
 
-  private title?: string;
+  private title: string = '';
 
   /**
    * Constructor for Todo class.
@@ -19,22 +15,13 @@ export class Todo extends AbstractModel<TodoEntity> {
    * @param id - The ID of the todo.
    */
   constructor(ownerId: string, id?: string) {
-    super();
     this.ownerId = ownerId;
 
     if (id) {
       this.id = id;
     } else {
-      this.id = ulid();
+      this.id = ObjectID().str;
     }
-  }
-
-  get pk() {
-    return `${Todo.BEGINS_KEYS}${this.ownerId}`;
-  }
-
-  get sk() {
-    return `${Todo.BEGINS_KEYS}${this.id}`;
   }
 
   setTitle(title: string) {
@@ -47,16 +34,13 @@ export class Todo extends AbstractModel<TodoEntity> {
 
   toEntity() {
     return {
-      ...this.keys(),
+      id: this.id,
+      ownerId: this.ownerId,
       title: this.title,
     };
   }
 
-  fromEntity(entity: TodoEntity) {
-    if (entity.title) this.title = entity.title;
-  }
-
-  static removeBeginsKeys(pk: string) {
-    return pk.replace(Todo.BEGINS_KEYS, '');
+  fromEntity(entity: Todo) {
+    this.title = entity.title;
   }
 }

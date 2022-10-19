@@ -1,6 +1,6 @@
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { Todo } from '@/models/Todo';
+import { TodoModel } from '@/models/Todo';
 import type { TodoRepository } from '@/repositories/TodoRepository';
 import type { TeamService } from '@/services/TeamService';
 import { MemberRole } from '@/types/Member';
@@ -44,7 +44,7 @@ export class TodoController {
       MemberRole.ADMIN,
     ]);
 
-    const todo = new Todo(req.params.teamId);
+    const todo = new TodoModel(req.params.teamId);
     todo.setTitle(req.body.title);
     await this.todoRepository.save(todo);
 
@@ -98,7 +98,7 @@ export class TodoController {
       MemberRole.ADMIN,
     ]);
 
-    const todo = new Todo(req.params.teamId, req.params.id);
+    const todo = new TodoModel(req.params.teamId, req.params.id);
     todo.setTitle(req.body.title);
     const success = await this.todoRepository.update(todo);
 

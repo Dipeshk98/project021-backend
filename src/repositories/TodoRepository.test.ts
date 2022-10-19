@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { getDBTable } from '@/models/DBTable';
-import { Todo } from '@/models/Todo';
+import { TodoModel } from '@/models/Todo';
 
 import { TodoRepository } from './TodoRepository';
 
@@ -22,7 +22,7 @@ describe('UserRepository', () => {
     it('should create a todo when saving a non-existing one and and be able to get the todo from the database', async () => {
       const userId = 'user-123';
       const todoId = 'todo-123';
-      const savedTodo = new Todo(userId, todoId);
+      const savedTodo = new TodoModel(userId, todoId);
       savedTodo.setTitle('todo-title-123');
       await todoRepository.save(savedTodo);
 
@@ -34,7 +34,7 @@ describe('UserRepository', () => {
     it('should create a todo when saving a non-existing one and update when saving again', async () => {
       const userId = 'user-123';
       const todoId = 'todo-123';
-      const savedTodo = new Todo(userId, todoId);
+      const savedTodo = new TodoModel(userId, todoId);
       savedTodo.setTitle('todo-title-123');
       await todoRepository.save(savedTodo);
 
@@ -56,7 +56,7 @@ describe('UserRepository', () => {
     });
 
     it('should create a new team and delete the newly created team', async () => {
-      const savedTodo = new Todo('user-123', 'todo-123');
+      const savedTodo = new TodoModel('user-123', 'todo-123');
       await todoRepository.save(savedTodo);
 
       const deleteResult = await todoRepository.deleteByKeys(
@@ -74,15 +74,15 @@ describe('UserRepository', () => {
 
     it('should return all todos from one user', async () => {
       const userId = 'user-123';
-      const todo1 = new Todo(userId);
+      const todo1 = new TodoModel(userId);
       todo1.setTitle('todo-user-1');
       await todoRepository.save(todo1);
 
-      const todo2 = new Todo(userId);
+      const todo2 = new TodoModel(userId);
       todo2.setTitle('todo-user-2');
       await todoRepository.save(todo2);
 
-      const todo3 = new Todo(userId);
+      const todo3 = new TodoModel(userId);
       todo3.setTitle('todo-user-3');
       await todoRepository.save(todo3);
 
@@ -100,21 +100,21 @@ describe('UserRepository', () => {
       const userId3 = 'user-3';
 
       // Create 2 todos for User 1
-      const todo11 = new Todo(userId1);
+      const todo11 = new TodoModel(userId1);
       todo11.setTitle('todo-user-1-1');
       await todoRepository.save(todo11);
 
-      const todo12 = new Todo(userId1);
+      const todo12 = new TodoModel(userId1);
       todo12.setTitle('todo-user-1-2');
       await todoRepository.save(todo12);
 
       // Create 1 todo for User 2
-      const todo21 = new Todo(userId2);
+      const todo21 = new TodoModel(userId2);
       todo21.setTitle('todo-user-2-1');
       await todoRepository.save(todo21);
 
       // No todo for User 3 by creating one and remove it
-      const todo31 = new Todo(userId3);
+      const todo31 = new TodoModel(userId3);
       todo31.setTitle('todo-user-3-1');
       await todoRepository.save(todo31);
       await todoRepository.deleteByKeys(userId3, todo31.id);
