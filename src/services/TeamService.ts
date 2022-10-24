@@ -54,12 +54,12 @@ export class TeamService {
 
     // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
     // eslint-disable-next-line no-restricted-syntax
-    for (const elt of memberList) {
-      if (elt.getStatus() === MemberStatus.ACTIVE) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.userRepository.removeTeam(elt.skId, teamId);
-      }
-    }
+    // for (const elt of memberList) {
+    //   if (elt.getStatus() === MemberStatus.ACTIVE) {
+    //     // eslint-disable-next-line no-await-in-loop
+    //     await this.userRepository.removeTeam(elt.skId, teamId);
+    //   }
+    // }
   }
 
   async join(

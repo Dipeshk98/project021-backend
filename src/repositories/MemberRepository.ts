@@ -33,6 +33,19 @@ export class MemberRepository extends AbstractRepository {
     return model;
   }
 
+  async save(model: MemberModel) {
+    await this.dbClient.member.upsert({
+      create: model.toEntity(),
+      update: model.toEntity(),
+      where: {
+        teamSkId: {
+          teamId: model.teamId,
+          skId: model.skId,
+        },
+      },
+    });
+  }
+
   deleteByKeys(teamId: string, userId: string) {
     const member = new MemberModel(teamId, userId);
 

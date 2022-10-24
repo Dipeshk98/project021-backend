@@ -27,6 +27,16 @@ export class TeamRepository extends AbstractRepository {
     return model;
   }
 
+  async save(model: TeamModel) {
+    await this.dbClient.team.upsert({
+      create: model.toEntity(),
+      update: model.toEntity(),
+      where: {
+        id: model.id,
+      },
+    });
+  }
+
   delete(model: TeamModel) {
     return this.dbClient.team.delete({
       where: {

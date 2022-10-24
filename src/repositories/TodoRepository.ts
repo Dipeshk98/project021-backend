@@ -18,8 +18,27 @@ export class TodoRepository extends AbstractRepository {
     return model;
   }
 
+  async save(model: TodoModel) {
+    await this.dbClient.todo.upsert({
+      create: model.toEntity(),
+      update: model.toEntity(),
+      where: {
+        id: model.id,
+      },
+    });
+  }
+
   delete(model: TodoModel) {
     return this.dbClient.todo.delete({
+      where: {
+        id: model.id,
+      },
+    });
+  }
+
+  update(model: TodoModel) {
+    return this.dbClient.todo.update({
+      data: model.toEntity(),
       where: {
         id: model.id,
       },

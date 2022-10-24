@@ -179,7 +179,7 @@ export class BillingService {
     });
   }
 
-  getPlanFromSubscription(subscription?: ISubscription) {
+  getPlanFromSubscription(subscription: ISubscription | null) {
     if (!subscription) {
       // Subscription isn't defined, it means the user is at free tier.
       return this.billingPlanEnv.free;
