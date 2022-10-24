@@ -1,38 +1,31 @@
-import { DynamoDB } from 'aws-sdk';
+import { PrismaClient } from '@prisma/client';
 
 import { Env } from './Env';
 
-let dbClient: DynamoDB.DocumentClient | null = null;
+let dbClient: PrismaClient | null = null;
 
 /**
  * Singleton for the connection to DynamoDB.
  */
 export const getDBClient = () => {
   if (!dbClient) {
-    let dynamodbOptions = {};
-    const mockDynamodbEndpoint = Env.getValue('MOCK_DYNAMODB_ENDPOINT', false);
+    let prismaOptions = {};
 
-    if (mockDynamodbEndpoint) {
-      dynamodbOptions = {
-        region: 'local',
-        endpoint: mockDynamodbEndpoint,
-        sslEnabled: false,
-      };
-    } else if (Env.getValue('IS_OFFLINE', false)) {
-      dynamodbOptions = {
-        region: 'localhost',
-        endpoint: 'http://localhost:8000',
+    if (Env.getValue('IS_TESTING', false)) {
+      prismaOptions = {
+        datasources: {
+          db: {
+            // eslint-disable-next-line no-underscore-dangle
+            url: global.__MONGO_URI__.replace(
+              '/?replicaSet=',
+              '/nextless?replicaSet='
+            ),
+          },
+        },
       };
     }
 
-    dbClient = new DynamoDB.DocumentClient({
-      ...dynamodbOptions,
-      httpOptions: {
-        // Make the debugging easier if there is an error with DynamoDB by setting http timeout
-        connectTimeout: 1000,
-        timeout: 1000,
-      },
-    });
+    dbClient = new PrismaClient(prismaOptions);
   }
 
   return dbClient;
