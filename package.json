@@ -11,7 +11,8 @@
     "lint": "eslint --ext .js,.ts .",
     "build-types": "tsc --noEmit --pretty",
     "test": "jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^4.5.0",
