@@ -5,7 +5,7 @@ import { UserModel } from '@/models/User';
 
 import { AbstractRepository } from './AbstractRepository';
 
-class DummyTestRepository extends AbstractRepository<UserModel> {}
+class DummyTestRepository extends AbstractRepository {}
 
 describe('AbstractRepository', () => {
   let dummyTestRepository: DummyTestRepository;

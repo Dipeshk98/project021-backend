@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'jest-dynalite',
+  preset: '@shelf/jest-mongodb',
   testMatch: ['**/*.test.{js,ts}'],
   transform: {
     '^.+\\.ts$': ['ts-jest'],
@@ -28,5 +28,6 @@ module.exports = {
       statements: 60,
     },
   },
+  watchPathIgnorePatterns: ['<rootDir>/globalConfig.json'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.serverless/'],
 };

@@ -1,6 +1,6 @@
+import { PrismaClient } from '@prisma/client';
 import assert from 'assert';
 
-import { getDBTable } from '@/models/DBTable';
 import { UserModel } from '@/models/User';
 
 import { UserRepository } from './UserRepository';
@@ -9,7 +9,20 @@ describe('UserRepository', () => {
   let userRepository: UserRepository;
 
   beforeEach(() => {
-    userRepository = new UserRepository(getDBTable());
+    const prisma = new PrismaClient({
+      datasources: {
+        db: {
+          // @ts-ignore
+          // eslint-disable-next-line no-underscore-dangle
+          url: global.__MONGO_URI__.replace(
+            '/?replicaSet=',
+            '/nextless?replicaSet='
+          ),
+        },
+      },
+    });
+
+    userRepository = new UserRepository(prisma);
   });
 
   describe('Basic operation', () => {
@@ -33,14 +46,14 @@ describe('UserRepository', () => {
       const user = await userRepository.findByUserId('user-123');
 
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual('user-123');
+      expect(user.providerId).toEqual('user-123');
     });
 
     it("should create a new user with `findOrCreate` because the user don't exist", async () => {
       const user = await userRepository.findOrCreate('user-123');
 
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual('user-123');
+      expect(user.providerId).toEqual('user-123');
     });
 
     it("shouldn't create a new user using `findOrCreate` method", async () => {
@@ -50,7 +63,7 @@ describe('UserRepository', () => {
       userRepository.createWithUserId = jest.fn();
       user = await userRepository.findOrCreate(userId);
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual('user-123');
+      expect(user.providerId).toEqual('user-123');
       expect(userRepository.createWithUserId).not.toHaveBeenCalled();
     });
 
@@ -82,7 +95,7 @@ describe('UserRepository', () => {
       const user = await userRepository.findByUserId(userId);
 
       assert(user !== null, "user shouldn't be null");
-      expect(user.id).toEqual('user-123');
+      expect(user.providerId).toEqual('user-123');
     });
 
     it('should able to save an existing user', async () => {
