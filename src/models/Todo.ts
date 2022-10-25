@@ -1,5 +1,5 @@
 import type { Todo } from '@prisma/client';
-import ObjectID from 'bson-objectid';
+import { ObjectId } from 'bson';
 
 export class TodoModel {
   public readonly id: string;
@@ -20,7 +20,7 @@ export class TodoModel {
     if (id) {
       this.id = id;
     } else {
-      this.id = ObjectID().str;
+      this.id = new ObjectId().toString();
     }
   }
 

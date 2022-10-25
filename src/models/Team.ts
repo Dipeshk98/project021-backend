@@ -1,5 +1,5 @@
 import type { Team } from '@prisma/client';
-import ObjectID from 'bson-objectid';
+import { ObjectId } from 'bson';
 
 import type { ISubscription } from '@/types/StripeTypes';
 
@@ -21,7 +21,7 @@ export class TeamModel {
     if (id) {
       this.id = id;
     } else {
-      this.id = ObjectID().str;
+      this.id = new ObjectId().toString();
     }
   }
 
