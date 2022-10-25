@@ -129,6 +129,5 @@ package:
 plugins:
   - serverless-dotenv-plugin
   - serverless-bundle
-  - '@nearst/serverless-dynalite'
   - serverless-offline-ses-v2
   - serverless-offline

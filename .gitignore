@@ -5,10 +5,6 @@ jspm_packages
 # Serverless
 .serverless
 
-# Dynamodb
-.dynamodb
-dynalite
-
 # Webpack
 .webpack
 
