@@ -2,9 +2,9 @@ import type { Todo } from '@prisma/client';
 import ObjectID from 'bson-objectid';
 
 export class TodoModel {
-  public readonly ownerId: string;
-
   public readonly id: string;
+
+  public ownerId: string;
 
   private title: string = '';
 
@@ -34,13 +34,13 @@ export class TodoModel {
 
   toEntity() {
     return {
-      id: this.id,
       ownerId: this.ownerId,
       title: this.title,
     };
   }
 
   fromEntity(entity: Todo) {
+    this.ownerId = entity.ownerId;
     this.title = entity.title;
   }
 }

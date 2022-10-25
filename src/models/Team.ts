@@ -51,7 +51,6 @@ export class TeamModel {
 
   toEntity() {
     return {
-      id: this.id,
       displayName: this.displayName,
       stripeCustomerId: this.stripeCustomerId,
       subscriptionId: this.subscription?.id,
