@@ -34,7 +34,7 @@ export const errorHandler = (
     logger.error(err);
     res.status(500).json({ errors: err.publicErrorCode });
   } else {
-    logger.error(err);
+    console.log(err);
     res.status(500).json({ errors: ErrorCode.INTERNAL_SERVER_ERROR });
   }
 };

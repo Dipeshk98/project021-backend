@@ -34,6 +34,7 @@ export class TodoModel {
 
   toEntity() {
     return {
+      id: this.id,
       ownerId: this.ownerId,
       title: this.title,
     };
