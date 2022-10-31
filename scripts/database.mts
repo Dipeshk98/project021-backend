@@ -1,8 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies,no-console */
-const { MongoMemoryReplSet } = require('mongodb-memory-server');
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
+
+let mongodb: MongoMemoryReplSet | null = null;
 
 (async () => {
-  const mongodb = new MongoMemoryReplSet({
+  mongodb = new MongoMemoryReplSet({
     instanceOpts: [
       {
         port: 27017,
@@ -17,5 +19,13 @@ const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
   await mongodb.start();
 
-  console.log(mongodb.getUri());
+  console.log(`MongoDB endpoint: ${mongodb.getUri()}`);
 })();
+
+process.on('SIGINT', () => {
+  if (mongodb) {
+    mongodb.stop();
+  }
+
+  process.exit();
+});
