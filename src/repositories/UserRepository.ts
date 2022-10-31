@@ -7,15 +7,13 @@ import { AbstractRepository } from './AbstractRepository';
 export class UserRepository extends AbstractRepository {
   async create(model: UserModel) {
     await this.dbClient.user.create({
-      data: model.toEntity(),
+      data: model.toCreateEntity(),
     });
   }
 
   async get(model: UserModel) {
     const entity = await this.dbClient.user.findUnique({
-      where: {
-        providerId: model.providerId,
-      },
+      where: model.keys(),
     });
 
     if (!entity) {
@@ -28,28 +26,22 @@ export class UserRepository extends AbstractRepository {
 
   async save(model: UserModel) {
     await this.dbClient.user.upsert({
-      create: model.toEntity(),
+      create: model.toCreateEntity(),
       update: model.toEntity(),
-      where: {
-        providerId: model.providerId,
-      },
+      where: model.keys(),
     });
   }
 
   update(model: UserModel) {
     return this.dbClient.user.update({
       data: model.toEntity(),
-      where: {
-        providerId: model.providerId,
-      },
+      where: model.keys(),
     });
   }
 
   delete(model: UserModel) {
     return this.dbClient.user.delete({
-      where: {
-        providerId: model.providerId,
-      },
+      where: model.keys(),
     });
   }
 

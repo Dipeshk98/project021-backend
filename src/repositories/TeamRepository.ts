@@ -8,15 +8,13 @@ import { AbstractRepository } from './AbstractRepository';
 export class TeamRepository extends AbstractRepository {
   async create(model: TeamModel) {
     await this.dbClient.team.create({
-      data: model.toEntity(),
+      data: model.toCreateEntity(),
     });
   }
 
   async get(model: TeamModel) {
     const entity = await this.dbClient.team.findUnique({
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
 
     if (!entity) {
@@ -29,19 +27,15 @@ export class TeamRepository extends AbstractRepository {
 
   async save(model: TeamModel) {
     await this.dbClient.team.upsert({
-      create: model.toEntity(),
+      create: model.toCreateEntity(),
       update: model.toEntity(),
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
   }
 
   delete(model: TeamModel) {
     return this.dbClient.team.delete({
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
   }
 

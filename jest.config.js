@@ -27,6 +27,5 @@ module.exports = {
       statements: 60,
     },
   },
-  watchPathIgnorePatterns: ['<rootDir>/globalConfig.json'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.serverless/'],
 };

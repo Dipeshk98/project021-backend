@@ -49,9 +49,21 @@ export class TeamModel {
     return this.subscription;
   }
 
-  toEntity() {
+  keys() {
     return {
       id: this.id,
+    };
+  }
+
+  toCreateEntity() {
+    return {
+      ...this.keys(),
+      ...this.toEntity(),
+    };
+  }
+
+  toEntity() {
+    return {
       displayName: this.displayName,
       stripeCustomerId: this.stripeCustomerId,
       subscriptionId: this.subscription?.id,

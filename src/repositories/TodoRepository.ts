@@ -5,9 +5,7 @@ import { AbstractRepository } from './AbstractRepository';
 export class TodoRepository extends AbstractRepository {
   async get(model: TodoModel) {
     const entity = await this.dbClient.todo.findUnique({
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
 
     if (!entity) {
@@ -20,28 +18,22 @@ export class TodoRepository extends AbstractRepository {
 
   async save(model: TodoModel) {
     await this.dbClient.todo.upsert({
-      create: model.toEntity(),
+      create: model.toCreateEntity(),
       update: model.toEntity(),
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
   }
 
   delete(model: TodoModel) {
     return this.dbClient.todo.delete({
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
   }
 
   update(model: TodoModel) {
     return this.dbClient.todo.update({
       data: model.toEntity(),
-      where: {
-        id: model.id,
-      },
+      where: model.keys(),
     });
   }
 

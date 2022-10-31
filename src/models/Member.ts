@@ -59,10 +59,24 @@ export class MemberModel {
     return this.email;
   }
 
+  keys() {
+    return {
+      teamSkId: {
+        teamId: this.teamId,
+        skId: this.skId,
+      },
+    };
+  }
+
+  toCreateEntity() {
+    return {
+      ...this.keys().teamSkId,
+      ...this.toEntity(),
+    };
+  }
+
   toEntity() {
     return {
-      teamId: this.teamId,
-      skId: this.skId,
       role: this.role,
       status: this.status,
       email: this.email,

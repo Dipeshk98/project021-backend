@@ -1,3 +1,6 @@
+import type { Member } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
 import { MemberModel } from '@/models/Member';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
@@ -6,23 +9,13 @@ import { AbstractRepository } from './AbstractRepository';
 export class MemberRepository extends AbstractRepository {
   delete(model: MemberModel) {
     return this.dbClient.member.delete({
-      where: {
-        teamSkId: {
-          teamId: model.teamId,
-          skId: model.skId,
-        },
-      },
+      where: model.keys(),
     });
   }
 
   async get(model: MemberModel) {
     const entity = await this.dbClient.member.findUnique({
-      where: {
-        teamSkId: {
-          teamId: model.teamId,
-          skId: model.skId,
-        },
-      },
+      where: model.keys(),
     });
 
     if (!entity) {
@@ -35,14 +28,9 @@ export class MemberRepository extends AbstractRepository {
 
   async save(model: MemberModel) {
     await this.dbClient.member.upsert({
-      create: model.toEntity(),
+      create: model.toCreateEntity(),
       update: model.toEntity(),
-      where: {
-        teamSkId: {
-          teamId: model.teamId,
-          skId: model.skId,
-        },
-      },
+      where: model.keys(),
     });
   }
 
@@ -118,22 +106,31 @@ export class MemberRepository extends AbstractRepository {
 
   async updateRoleIfNotOwner(teamId: string, userId: string, role: MemberRole) {
     const member = new MemberModel(teamId, userId);
-    // `update` method from `dynamodb-onetable` library can also return `undefined` with the `throw` set to false.
-    // The typing from the library is incorrect, need to add `undefined` manually
-    const entity = await this.dbClient.member.update({
-      data: {
-        role,
-      },
-      where: {
-        teamSkId: {
-          teamId,
-          skId: userId,
+    let entity: Member | null = null;
+
+    try {
+      entity = await this.dbClient.member.update({
+        data: {
+          role,
         },
-        role: {
-          not: MemberRole.OWNER,
+        where: {
+          teamSkId: {
+            teamId,
+            skId: userId,
+          },
+          role: {
+            not: MemberRole.OWNER,
+          },
         },
-      },
-    });
+      });
+    } catch (ex: any) {
+      if (
+        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
+        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+      ) {
+        throw ex;
+      }
+    }
 
     if (!entity) {
       return null;

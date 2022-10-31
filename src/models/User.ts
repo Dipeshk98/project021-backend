@@ -38,9 +38,21 @@ export class UserModel {
     this.teamList = this.teamList.filter((elt) => elt !== teamId);
   }
 
-  toEntity() {
+  keys() {
     return {
       providerId: this.providerId,
+    };
+  }
+
+  toCreateEntity() {
+    return {
+      ...this.keys(),
+      ...this.toEntity(),
+    };
+  }
+
+  toEntity() {
+    return {
       firstSignIn: this.firstSignIn,
       teamList: this.teamList,
     };

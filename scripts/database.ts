@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies,no-console */
-
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
 (async () => {

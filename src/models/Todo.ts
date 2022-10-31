@@ -32,9 +32,21 @@ export class TodoModel {
     return this.title;
   }
 
-  toEntity() {
+  keys() {
     return {
       id: this.id,
+    };
+  }
+
+  toCreateEntity() {
+    return {
+      ...this.keys(),
+      ...this.toEntity(),
+    };
+  }
+
+  toEntity() {
+    return {
       ownerId: this.ownerId,
       title: this.title,
     };
