@@ -1,9 +1,7 @@
-import type { PrimaryKeys } from './Schema';
-
 /**
  * All database models are extended from AbstractModel
  */
-export abstract class AbstractModel<T extends PrimaryKeys> {
+export abstract class AbstractModel<T> {
   /**
    * DynamoDB Partition key.
    */

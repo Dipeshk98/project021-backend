@@ -121,7 +121,6 @@ functions:
 resources:
   # Cognito Identity Pool Policy
   - ${file(./aws-resources/cognito-policy.yml)}
-  - ${file(./aws-resources/dynamodb.${opt:stage, 'offline'}.yml), ''}
 
 package:
   individually: true
