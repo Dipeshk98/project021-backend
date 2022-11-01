@@ -46,11 +46,24 @@ export class TodoRepository extends AbstractRepository {
     return entity;
   }
 
-  update(model: TodoModel) {
-    return this.dbClient.todo.update({
-      data: model.toEntity(),
-      where: model.keys(),
-    });
+  async update(model: TodoModel) {
+    let entity: Todo | null = null;
+
+    try {
+      entity = await this.dbClient.todo.update({
+        data: model.toEntity(),
+        where: model.keys(),
+      });
+    } catch (ex: any) {
+      if (
+        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
+        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+      ) {
+        throw ex;
+      }
+    }
+
+    return entity;
   }
 
   findByKeys(userId: string, id: string) {

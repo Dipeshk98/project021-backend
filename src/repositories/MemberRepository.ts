@@ -13,6 +13,26 @@ export class MemberRepository extends AbstractRepository {
     });
   }
 
+  async update(model: MemberModel) {
+    let entity: Member | null = null;
+
+    try {
+      entity = await this.dbClient.member.update({
+        data: model.toEntity(),
+        where: model.keys(),
+      });
+    } catch (ex: any) {
+      if (
+        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
+        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+      ) {
+        throw ex;
+      }
+    }
+
+    return entity;
+  }
+
   async delete(model: MemberModel) {
     let entity: Member | null = null;
 
