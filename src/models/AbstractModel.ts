@@ -3,36 +3,23 @@
  */
 export abstract class AbstractModel<T> {
   /**
-   * DynamoDB Partition key.
+   * Returns Primary keys.
    */
-  abstract get pk(): string;
+  abstract keys(): object;
 
   /**
-   * DynamoDB Sort key.
+   * Returns Prisma model with Primary keys.
    */
-  abstract get sk(): string;
+  abstract toCreateEntity(): object;
 
   /**
-   * Returns DynamoDB Primary key.
-   * @returns keys - Primary key.
-   * @return PK - Partition key.
-   * @return SK - Sort key.
+   * Convert to Prisma model without Primary keys.
    */
-  public keys() {
-    return {
-      PK: this.pk,
-      SK: this.sk,
-    };
-  }
+  abstract toEntity(): object;
 
   /**
-   * Convert to DynamoDB item.
-   */
-  abstract toEntity(): T;
-
-  /**
-   * Map DynamoDB item to class attributes.
-   * @param item - The item returned by DynamoDB which need to convert to class attributes.
+   * Map Prisma model to class attributes.
+   * @param item - The item returned by Prisma which need to convert to class attributes.
    */
   abstract fromEntity(item: T): void;
 }

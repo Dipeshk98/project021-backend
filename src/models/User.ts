@@ -1,6 +1,8 @@
 import type { User } from '@prisma/client';
 
-export class UserModel {
+import { AbstractModel } from './AbstractModel';
+
+export class UserModel extends AbstractModel<User> {
   public readonly providerId: string;
 
   private firstSignIn: Date;
@@ -13,6 +15,7 @@ export class UserModel {
    * @param id - The ID of the user.
    */
   constructor(providerId: string) {
+    super();
     this.providerId = providerId;
     this.firstSignIn = new Date();
     this.teamList = [];

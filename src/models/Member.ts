@@ -3,7 +3,9 @@ import { nanoid } from 'nanoid';
 
 import { MemberRole, MemberStatus } from '@/types/Member';
 
-export class MemberModel {
+import { AbstractModel } from './AbstractModel';
+
+export class MemberModel extends AbstractModel<Member> {
   public readonly teamId: string;
 
   public readonly skId: string;
@@ -21,6 +23,7 @@ export class MemberModel {
    * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
    */
   constructor(teamId: string, userId?: string) {
+    super();
     this.teamId = teamId;
 
     if (userId) {

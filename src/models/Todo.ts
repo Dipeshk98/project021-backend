@@ -1,7 +1,9 @@
 import type { Todo } from '@prisma/client';
 import { ObjectId } from 'bson';
 
-export class TodoModel {
+import { AbstractModel } from './AbstractModel';
+
+export class TodoModel extends AbstractModel<Todo> {
   public readonly id: string;
 
   public ownerId: string;
@@ -15,6 +17,7 @@ export class TodoModel {
    * @param id - The ID of the todo.
    */
   constructor(ownerId: string, id?: string) {
+    super();
     this.ownerId = ownerId;
 
     if (id) {

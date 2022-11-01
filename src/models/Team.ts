@@ -3,7 +3,9 @@ import { ObjectId } from 'bson';
 
 import type { ISubscription } from '@/types/StripeTypes';
 
-export class TeamModel {
+import { AbstractModel } from './AbstractModel';
+
+export class TeamModel extends AbstractModel<Team> {
   public readonly id: string;
 
   private displayName = 'New Team';
@@ -18,6 +20,8 @@ export class TeamModel {
    * @param id - The ID of the team.
    */
   constructor(id?: string) {
+    super();
+
     if (id) {
       this.id = id;
     } else {
