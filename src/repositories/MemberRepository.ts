@@ -7,6 +7,12 @@ import { MemberRole, MemberStatus } from '@/types/Member';
 import { AbstractRepository } from './AbstractRepository';
 
 export class MemberRepository extends AbstractRepository {
+  async create(model: MemberModel) {
+    await this.dbClient.member.create({
+      data: model.toCreateEntity(),
+    });
+  }
+
   async delete(model: MemberModel) {
     let entity: Member | null = null;
 
