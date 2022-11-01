@@ -1,4 +1,5 @@
 import type { Team } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { TeamModel } from '@/models/Team';
 import type { ISubscription } from '@/types/StripeTypes';
@@ -33,10 +34,23 @@ export class TeamRepository extends AbstractRepository {
     });
   }
 
-  delete(model: TeamModel) {
-    return this.dbClient.team.delete({
-      where: model.keys(),
-    });
+  async delete(model: TeamModel) {
+    let entity: Team | null = null;
+
+    try {
+      entity = await this.dbClient.team.delete({
+        where: model.keys(),
+      });
+    } catch (ex: any) {
+      if (
+        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
+        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+      ) {
+        throw ex;
+      }
+    }
+
+    return entity;
   }
 
   async createWithDisplayName(displayName: string) {

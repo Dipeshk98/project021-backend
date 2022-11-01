@@ -28,10 +28,10 @@ export class TodoRepository extends AbstractRepository {
   }
 
   async delete(model: TodoModel) {
-    let deleteResult: Todo | null = null;
+    let entity: Todo | null = null;
 
     try {
-      deleteResult = await this.dbClient.todo.delete({
+      entity = await this.dbClient.todo.delete({
         where: model.keys(),
       });
     } catch (ex: any) {
@@ -43,7 +43,7 @@ export class TodoRepository extends AbstractRepository {
       }
     }
 
-    return deleteResult;
+    return entity;
   }
 
   update(model: TodoModel) {
