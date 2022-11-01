@@ -32,6 +32,7 @@ const serverlessHandler = serverlessHttp(app, {
 });
 
 export const handler = async (event: APIGatewayEvent, context: Context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   withRequest(event, context);
 
   const result = await serverlessHandler(event, context);

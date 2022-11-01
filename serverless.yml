@@ -12,10 +12,6 @@ custom:
   region: ${opt:region, 'us-east-1'}
   # Name of the SST app that's deploying our infrastructure
   sstApp: ${self:custom.stage}-${self:service}-infra
-  tableName:
-    offline: ${self:service}
-    staging: !ImportValue '${self:custom.sstApp}-TableName'
-    prod: !ImportValue '${self:custom.sstApp}-TableName'
   nodeEnv:
     offline: 'development'
     staging: 'production'
@@ -28,6 +24,14 @@ custom:
   bundle:
     linting: false
     excludeFiles: "**/*.test.ts"
+    externals:
+      - "@prisma/client"
+    copyFiles:
+      - from: "prisma/schema.prisma"
+        to: "./"
+    packagerOptions:
+      scripts:
+        - prisma generate && rimraf node_modules/@prisma/engines/** && rimraf node_modules/prisma/libquery_engine-[^rhel]*
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
@@ -80,7 +84,6 @@ provider:
           Resource: "*"
 
   environment:
-    TABLE_NAME: ${self:custom.tableName.${self:custom.stage}}
     STAGE: ${self:custom.stage}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     NODE_ENV: ${self:custom.nodeEnv.${self:custom.stage}}

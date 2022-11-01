@@ -1,3 +1,6 @@
+import type { Todo } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
 import { TodoModel } from '@/models/Todo';
 
 import { AbstractRepository } from './AbstractRepository';
@@ -24,10 +27,23 @@ export class TodoRepository extends AbstractRepository {
     });
   }
 
-  delete(model: TodoModel) {
-    return this.dbClient.todo.delete({
-      where: model.keys(),
-    });
+  async delete(model: TodoModel) {
+    let deleteResult: Todo | null = null;
+
+    try {
+      deleteResult = await this.dbClient.todo.delete({
+        where: model.keys(),
+      });
+    } catch (ex: any) {
+      if (
+        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
+        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+      ) {
+        throw ex;
+      }
+    }
+
+    return deleteResult;
   }
 
   update(model: TodoModel) {
