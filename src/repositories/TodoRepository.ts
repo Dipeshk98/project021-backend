@@ -1,6 +1,6 @@
 import type { PrismaClient, Todo } from '@prisma/client';
 
-import { TodoModel } from '@/models/Todo';
+import { TodoModel } from '@/models/TodoModel';
 
 import { AbstractRepository } from './AbstractRepository';
 

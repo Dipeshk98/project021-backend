@@ -1,4 +1,4 @@
-import { TeamModel } from '@/models/Team';
+import { TeamModel } from '@/models/TeamModel';
 
 import { TeamInviteEmailTemplate } from './TeamInviteEmailTemplate';
 

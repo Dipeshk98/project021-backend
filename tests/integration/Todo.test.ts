@@ -2,7 +2,7 @@ import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { MemberModel } from '@/models/Member';
+import { MemberModel } from '@/models/MemberModel';
 import { memberRepository } from '@/repositories';
 import { MemberRole, MemberStatus } from '@/types/Member';
 

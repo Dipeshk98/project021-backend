@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { UserModel } from '@/models/User';
+import { UserModel } from '@/models/UserModel';
 import { getDBClient } from '@/utils/DBClient';
 
 import { UserRepository } from './UserRepository';

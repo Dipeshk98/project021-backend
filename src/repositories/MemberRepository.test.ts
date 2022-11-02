@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { MemberModel } from '@/models/Member';
+import { MemberModel } from '@/models/MemberModel';
 import { MemberRole, MemberStatus } from '@/types/Member';
 import { getDBClient } from '@/utils/DBClient';
 

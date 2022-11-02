@@ -1,6 +1,6 @@
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { TodoModel } from '@/models/Todo';
+import { TodoModel } from '@/models/TodoModel';
 import type { TodoRepository } from '@/repositories/TodoRepository';
 import type { TeamService } from '@/services/TeamService';
 import { MemberRole } from '@/types/Member';

@@ -2,7 +2,7 @@ import type { PrismaClient, User } from '@prisma/client';
 
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { UserModel } from '@/models/User';
+import { UserModel } from '@/models/UserModel';
 
 import { AbstractRepository } from './AbstractRepository';
 

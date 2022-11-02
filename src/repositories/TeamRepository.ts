@@ -1,6 +1,6 @@
 import type { PrismaClient, Team } from '@prisma/client';
 
-import { TeamModel } from '@/models/Team';
+import { TeamModel } from '@/models/TeamModel';
 import type { ISubscription } from '@/types/StripeTypes';
 
 import { AbstractRepository } from './AbstractRepository';

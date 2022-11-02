@@ -1,8 +1,8 @@
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { MemberModel } from '@/models/Member';
-import { TeamModel } from '@/models/Team';
-import type { UserModel } from '@/models/User';
+import { MemberModel } from '@/models/MemberModel';
+import { TeamModel } from '@/models/TeamModel';
+import type { UserModel } from '@/models/UserModel';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';

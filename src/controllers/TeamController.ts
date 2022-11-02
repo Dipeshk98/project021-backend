@@ -1,7 +1,7 @@
 import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
-import { MemberModel } from '@/models/Member';
+import { MemberModel } from '@/models/MemberModel';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';

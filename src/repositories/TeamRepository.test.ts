@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { TeamModel } from '@/models/Team';
+import { TeamModel } from '@/models/TeamModel';
 import { getDBClient } from '@/utils/DBClient';
 
 import { TeamRepository } from './TeamRepository';

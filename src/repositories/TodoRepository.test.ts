@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { TodoModel } from '@/models/Todo';
+import { TodoModel } from '@/models/TodoModel';
 import { getDBClient } from '@/utils/DBClient';
 
 import { TodoRepository } from './TodoRepository';

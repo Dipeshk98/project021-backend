@@ -1,7 +1,7 @@
 import assert from 'assert';
 
-import { MemberModel } from '@/models/Member';
-import { UserModel } from '@/models/User';
+import { MemberModel } from '@/models/MemberModel';
+import { UserModel } from '@/models/UserModel';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { UserRepository } from '@/repositories/UserRepository';

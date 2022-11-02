@@ -1,6 +1,6 @@
 import type { Member, PrismaClient } from '@prisma/client';
 
-import { MemberModel } from '@/models/Member';
+import { MemberModel } from '@/models/MemberModel';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
