@@ -1,48 +1,14 @@
+import type { PrismaClient, User } from '@prisma/client';
+
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { UserModel } from '@/models/User';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class UserRepository extends AbstractRepository {
-  async create(model: UserModel) {
-    await this.dbClient.user.create({
-      data: model.toCreateEntity(),
-    });
-  }
-
-  async get(model: UserModel) {
-    const entity = await this.dbClient.user.findUnique({
-      where: model.keys(),
-    });
-
-    if (!entity) {
-      return null;
-    }
-
-    model.fromEntity(entity);
-    return model;
-  }
-
-  async save(model: UserModel) {
-    await this.dbClient.user.upsert({
-      create: model.toCreateEntity(),
-      update: model.toEntity(),
-      where: model.keys(),
-    });
-  }
-
-  update(model: UserModel) {
-    return this.dbClient.user.update({
-      data: model.toEntity(),
-      where: model.keys(),
-    });
-  }
-
-  delete(model: UserModel) {
-    return this.dbClient.user.delete({
-      where: model.keys(),
-    });
+export class UserRepository extends AbstractRepository<User, UserModel> {
+  constructor(dbClient: PrismaClient) {
+    super(dbClient, 'user');
   }
 
   async createWithUserId(userId: string) {

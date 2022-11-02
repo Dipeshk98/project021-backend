@@ -1,76 +1,13 @@
-import type { Member } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import type { Member, PrismaClient } from '@prisma/client';
 
 import { MemberModel } from '@/models/Member';
 import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class MemberRepository extends AbstractRepository {
-  async create(model: MemberModel) {
-    await this.dbClient.member.create({
-      data: model.toCreateEntity(),
-    });
-  }
-
-  async update(model: MemberModel) {
-    let entity: Member | null = null;
-
-    try {
-      entity = await this.dbClient.member.update({
-        data: model.toEntity(),
-        where: model.keys(),
-      });
-    } catch (ex: any) {
-      if (
-        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
-        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
-      ) {
-        throw ex;
-      }
-    }
-
-    return entity;
-  }
-
-  async delete(model: MemberModel) {
-    let entity: Member | null = null;
-
-    try {
-      entity = await this.dbClient.member.delete({
-        where: model.keys(),
-      });
-    } catch (ex: any) {
-      if (
-        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
-        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
-      ) {
-        throw ex;
-      }
-    }
-
-    return entity;
-  }
-
-  async get(model: MemberModel) {
-    const entity = await this.dbClient.member.findUnique({
-      where: model.keys(),
-    });
-
-    if (!entity) {
-      return null;
-    }
-
-    model.fromEntity(entity);
-    return model;
-  }
-
-  async save(model: MemberModel) {
-    await this.dbClient.member.upsert({
-      create: model.toCreateEntity(),
-      update: model.toEntity(),
-      where: model.keys(),
-    });
+export class MemberRepository extends AbstractRepository<Member, MemberModel> {
+  constructor(dbClient: PrismaClient) {
+    super(dbClient, 'member');
   }
 
   deleteByKeys(teamId: string, userId: string) {
@@ -83,7 +20,7 @@ export class MemberRepository extends AbstractRepository {
     const member = new MemberModel(teamId, verificationCode);
     let entity: Member | null = null;
 
-    try {
+    await this.catchNotFound(async () => {
       entity = await this.dbClient.member.delete({
         where: {
           teamSkId: {
@@ -93,14 +30,7 @@ export class MemberRepository extends AbstractRepository {
           status: MemberStatus.PENDING,
         },
       });
-    } catch (ex: any) {
-      if (
-        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
-        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
-      ) {
-        throw ex;
-      }
-    }
+    });
 
     if (!entity) {
       return null;
@@ -172,7 +102,7 @@ export class MemberRepository extends AbstractRepository {
     const member = new MemberModel(teamId, userId);
     let entity: Member | null = null;
 
-    try {
+    await this.catchNotFound(async () => {
       entity = await this.dbClient.member.update({
         data: {
           role,
@@ -187,14 +117,7 @@ export class MemberRepository extends AbstractRepository {
           },
         },
       });
-    } catch (ex: any) {
-      if (
-        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
-        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
-      ) {
-        throw ex;
-      }
-    }
+    });
 
     if (!entity) {
       return null;

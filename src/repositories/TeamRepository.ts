@@ -1,56 +1,13 @@
-import type { Team } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import type { PrismaClient, Team } from '@prisma/client';
 
 import { TeamModel } from '@/models/Team';
 import type { ISubscription } from '@/types/StripeTypes';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class TeamRepository extends AbstractRepository {
-  async create(model: TeamModel) {
-    await this.dbClient.team.create({
-      data: model.toCreateEntity(),
-    });
-  }
-
-  async get(model: TeamModel) {
-    const entity = await this.dbClient.team.findUnique({
-      where: model.keys(),
-    });
-
-    if (!entity) {
-      return null;
-    }
-
-    model.fromEntity(entity);
-    return model;
-  }
-
-  async save(model: TeamModel) {
-    await this.dbClient.team.upsert({
-      create: model.toCreateEntity(),
-      update: model.toEntity(),
-      where: model.keys(),
-    });
-  }
-
-  async delete(model: TeamModel) {
-    let entity: Team | null = null;
-
-    try {
-      entity = await this.dbClient.team.delete({
-        where: model.keys(),
-      });
-    } catch (ex: any) {
-      if (
-        !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
-        ex.code !== 'P2025' // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
-      ) {
-        throw ex;
-      }
-    }
-
-    return entity;
+export class TeamRepository extends AbstractRepository<Team, TeamModel> {
+  constructor(dbClient: PrismaClient) {
+    super(dbClient, 'team');
   }
 
   async createWithDisplayName(displayName: string) {
