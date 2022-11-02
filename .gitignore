@@ -14,9 +14,6 @@ dist
 # Dotenv files
 .env*.local
 
-# Prisma database URL containing password
-.env
-
 # Local folder
 local
 
