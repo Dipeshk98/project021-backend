@@ -34,7 +34,11 @@ afterEach(async () => {
   const deleteList: PrismaPromise<Prisma.BatchPayload>[] = [];
 
   Object.getOwnPropertyNames(prisma).forEach((elt) => {
-    if (!elt.startsWith('_') && !elt.startsWith('$')) {
+    if (
+      !elt.startsWith('_') &&
+      !elt.startsWith('$') &&
+      elt === elt.toLowerCase()
+    ) {
       // TODO: Add better typing and remove the ts-ignore
       // @ts-ignore
       deleteList.push(prisma[elt].deleteMany({}));
