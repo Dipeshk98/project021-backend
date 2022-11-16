@@ -1,6 +1,6 @@
-# Nextless.js backend for SaaS 🚀
+# Modern MERN backend for SaaS 🚀
 
-Nextless.js backend code for the REST Api. The code comes up with a Todo application with CRUD operation: create, read, update and delete a Todo. So, it makes easier to understand the backend architecture and you can adapt easily to your needs. You can also accept payment right away with the provided Stripe Integration. You have access to the all code source if you need more customization or need to go further.
+Modern MERN backend code for the REST Api. The code comes up with a Todo application with CRUD operation: create, read, update and delete a Todo. So, it makes easier to understand the backend architecture and you can adapt easily to your needs. You can also accept payment right away with the provided Stripe Integration. You have access to the all code source if you need more customization or need to go further.
 
 ### Requirements
 
@@ -62,15 +62,15 @@ Located at `tests/api.http`, it's a file where you can run requests directly in 
 
 ### Customization
 
-You can easily configure Nextless by making a search in the whole project with `FIXME:` for making quick customization.
+You can easily configure Modern MERN by making a search in the whole project with `FIXME:` for making quick customization.
 
 You have access to the whole code source if you need further customization. The provided code is only example for you to start your SaaS products. The sky is the limit 🚀.
 
-For your information, you don't need to customize the service name in `serverless.yml` file for one project. But, when you have multiple projects, it'll have name collision. So, you need to update the service name in `serverless.yml` file by choosing a new name instead `nextless`. And, don't forget to update `sst.json` file in Nextless Infra repository.
+For your information, you don't need to customize the service name in `serverless.yml` file for one project. But, when you have multiple projects, it'll have name collision. So, you need to update the service name in `serverless.yml` file by choosing a new name instead `modernmern`. And, don't forget to update `sst.json` file in Modern MERN Infra repository.
 
 ### Deploy to production
 
-If you deploy for the first time, please checkout [this guide](https://github.com/Nextlessjs/Quick-Start/blob/main/PRODUCTION_DEPLOYMENT.md).
+If you deploy for the first time, please checkout [this guide](https://github.com/Nextlessjs/Modern-MERN-Quick-Start/blob/main/PRODUCTION_DEPLOYMENT.md).
 
 You can deploy to production with the following command:
 

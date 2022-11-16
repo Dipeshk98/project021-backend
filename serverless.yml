@@ -1,9 +1,9 @@
 # You don't need to change the following `service` value for one project.
 # But, when you have multiple projects, it'll have name collision.
 # So, you can replace service name and use an alphanumeric name
-# Please also update the name in https://github.com/Nextlessjs/nextless-infra/blob/main/sst.json
-# Don't forget to append the '-infra' in the name in Nextless Infra
-service: nextless
+# Please also update the name in https://github.com/Nextlessjs/modernmern-infra/blob/main/sst.json
+# Don't forget to append the '-infra' in the name in ModernMERN Infra
+service: modernmern
 
 custom:
   # Our stage is based on what is passed in when running serverless
