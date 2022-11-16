@@ -82,7 +82,7 @@ POST http://localhost:4000/{{teamId}}/billing/create-checkout-session HTTP/1.1
 content-type: application/json
 
 {
-  "priceId": "price_1Lhe85JztsvICaDpukHyV8hQ"
+  "priceId": "price_1M4pljARauCrL6c2Kwj45IYx"
 }
 
 ### Create Stripe customer portal link
