@@ -35,7 +35,7 @@ afterEach(async () => {
 
   Object.getOwnPropertyNames(prisma).forEach((elt) => {
     if (!elt.startsWith('_') && !elt.startsWith('$')) {
-      // TODO: Remove the ts-ignore
+      // TODO: Add better typing and remove the ts-ignore
       // @ts-ignore
       deleteList.push(prisma[elt].deleteMany({}));
     }
