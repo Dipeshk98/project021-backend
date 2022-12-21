@@ -91,7 +91,7 @@ provider:
 functions:
   app:
     handler: src/handler.handler
-    reservedConcurrency: 30
+    reservedConcurrency: 30 # Arbitrary number, it can be increased or decreased
     events:
       - httpApi:
           path: '/billing/webhook'

@@ -1,8 +1,6 @@
 import { ErrorCode } from './ErrorCode';
 
 export class ApiError extends Error {
-  public static LOG_TAG = 'API_ERROR';
-
   public readonly originalError: Error | null;
 
   public readonly publicErrorCode: ErrorCode;
