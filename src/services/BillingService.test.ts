@@ -1,21 +1,15 @@
-import type Stripe from 'stripe';
-
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { SubscriptionStatus } from '@/types/StripeTypes';
-import { getDBClient } from '@/utils/DBClient';
-import { getStripe } from '@/utils/Stripe';
+import { dbClient } from '@/utils/DBClient';
+import { stripe } from '@/utils/Stripe';
 
 import { BillingService } from './BillingService';
 
 describe('BillingService', () => {
   let teamRepository: TeamRepository;
 
-  let stripe: Stripe;
-
   beforeEach(() => {
-    teamRepository = new TeamRepository(getDBClient());
-
-    stripe = getStripe();
+    teamRepository = new TeamRepository(dbClient);
   });
 
   describe('BillingService exception in constructor', () => {

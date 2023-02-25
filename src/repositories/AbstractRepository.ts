@@ -12,8 +12,8 @@ export class AbstractRepository<
 
   protected model: string;
 
-  constructor(dbClient: PrismaClient, model: string) {
-    this.dbClient = dbClient;
+  constructor(client: PrismaClient, model: string) {
+    this.dbClient = client;
     this.model = model;
   }
 

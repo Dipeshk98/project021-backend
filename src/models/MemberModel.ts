@@ -1,7 +1,7 @@
 import type { Member } from '@prisma/client';
+import { InvitationStatus, Role } from '@prisma/client';
 import { nanoid } from 'nanoid';
-
-import { MemberRole, MemberStatus } from '@/types/Member';
+import { ulid } from 'ulid';
 
 import { AbstractModel } from './AbstractModel';
 
@@ -10,9 +10,9 @@ export class MemberModel extends AbstractModel<Member> {
 
   public readonly skId: string;
 
-  private role = MemberRole.READ_ONLY;
+  private role: Role = Role.READ_ONLY;
 
-  private status = MemberStatus.PENDING;
+  private status: InvitationStatus = InvitationStatus.PENDING;
 
   private email = '';
 
@@ -30,7 +30,7 @@ export class MemberModel extends AbstractModel<Member> {
       this.skId = userId;
     } else {
       // In pending status, we use the skId for verification code
-      this.skId = nanoid(30);
+      this.skId = ulid() + nanoid(30);
     }
   }
 
@@ -38,7 +38,7 @@ export class MemberModel extends AbstractModel<Member> {
     return this.teamId;
   }
 
-  setRole(role: MemberRole) {
+  setRole(role: Role) {
     this.role = role;
   }
 
@@ -46,7 +46,7 @@ export class MemberModel extends AbstractModel<Member> {
     return this.role;
   }
 
-  setStatus(status: MemberStatus) {
+  setStatus(status: InvitationStatus) {
     this.status = status;
   }
 
@@ -87,8 +87,8 @@ export class MemberModel extends AbstractModel<Member> {
   }
 
   fromEntity(entity: Member) {
-    this.role = MemberRole[entity.role];
-    this.status = MemberStatus[entity.status];
+    this.role = Role[entity.role];
+    this.status = InvitationStatus[entity.status];
     this.email = entity.email;
   }
 }

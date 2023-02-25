@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import type { Prisma, PrismaPromise } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import { execa } from 'execa';
 import pRetry from 'p-retry';
@@ -31,7 +31,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  const deleteList: PrismaPromise<Prisma.BatchPayload>[] = [];
+  const deleteList: Prisma.PrismaPromise<Prisma.BatchPayload>[] = [];
 
   Object.getOwnPropertyNames(prisma).forEach((elt) => {
     if (

@@ -8,7 +8,7 @@ import {
   fullEditMemberValidate,
   fullJoinValidate,
   paramsJoinValidate,
-  paramsRemoveMemberValidate,
+  paramsMemberIdValidate,
   paramsTeamIdValidate,
 } from '@/validations/TeamValidation';
 
@@ -56,8 +56,14 @@ teamRouter.put(
 
 teamRouter.delete(
   '/team/:teamId/remove/:memberId',
-  paramsRemoveMemberValidate,
+  paramsMemberIdValidate,
   teamController.removeMember
+);
+
+teamRouter.put(
+  '/team/:teamId/transfer-ownership/:memberId',
+  paramsMemberIdValidate,
+  teamController.transferOwnership
 );
 
 teamRouter.get(

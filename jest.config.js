@@ -13,7 +13,7 @@ module.exports = {
   setupFiles: ['<rootDir>/jest.setup.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup-after-env.ts'],
   globalTeardown: '<rootDir>/jest.global-teardown.ts',
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!execa)/'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!(execa|nanoid))/'],
   testTimeout: 30000,
   clearMocks: true,
   collectCoverage: true,

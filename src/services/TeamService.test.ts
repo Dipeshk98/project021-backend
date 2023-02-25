@@ -1,3 +1,4 @@
+import { InvitationStatus, Role } from '@prisma/client';
 import assert from 'assert';
 
 import { MemberModel } from '@/models/MemberModel';
@@ -5,8 +6,7 @@ import { UserModel } from '@/models/UserModel';
 import { MemberRepository } from '@/repositories/MemberRepository';
 import { TeamRepository } from '@/repositories/TeamRepository';
 import { UserRepository } from '@/repositories/UserRepository';
-import { MemberRole, MemberStatus } from '@/types/Member';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { TeamService } from './TeamService';
 
@@ -20,10 +20,9 @@ describe('TeamService', () => {
   let memberRepository: MemberRepository;
 
   beforeEach(() => {
-    const dbTable = getDBClient();
-    teamRepository = new TeamRepository(dbTable);
-    userRepository = new UserRepository(dbTable);
-    memberRepository = new MemberRepository(dbTable);
+    teamRepository = new TeamRepository(dbClient);
+    userRepository = new UserRepository(dbClient);
+    memberRepository = new MemberRepository(dbClient);
     teamService = new TeamService(
       teamRepository,
       userRepository,
@@ -55,8 +54,8 @@ describe('TeamService', () => {
       );
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('random@example.com');
-      expect(member.getRole()).toEqual(MemberRole.OWNER);
-      expect(member.getStatus()).toEqual(MemberStatus.ACTIVE);
+      expect(member.getRole()).toEqual(Role.OWNER);
+      expect(member.getStatus()).toEqual(InvitationStatus.ACTIVE);
     });
 
     it("should throw an exception when the user doesn't exist", async () => {
@@ -103,7 +102,7 @@ describe('TeamService', () => {
         '123123123123123123123123',
         user.providerId
       );
-      member.setStatus(MemberStatus.ACTIVE);
+      member.setStatus(InvitationStatus.ACTIVE);
       await memberRepository.create(member);
 
       await expect(
@@ -198,7 +197,7 @@ describe('TeamService', () => {
         createdTeam,
         createdUser2,
         'random2@example.com',
-        MemberRole.ADMIN
+        Role.ADMIN
       );
 
       expect(createdUser.getTeamList()[0]).toEqual(createdTeam.id);
@@ -242,7 +241,7 @@ describe('TeamService', () => {
 
     it('should find team member with `ACTIVE` status only', async () => {
       const createdMember = new MemberModel('team-123', 'user-123');
-      createdMember.setStatus(MemberStatus.ACTIVE);
+      createdMember.setStatus(InvitationStatus.ACTIVE);
       await memberRepository.create(createdMember);
 
       const member = await teamService.findTeamMember('user-123', 'team-123');
@@ -269,7 +268,7 @@ describe('TeamService', () => {
         createdTeam,
         createdUser,
         'random@example.com',
-        MemberRole.ADMIN
+        Role.ADMIN
       );
 
       const { user } = await teamService.requiredAuth(
@@ -286,8 +285,8 @@ describe('TeamService', () => {
       );
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('random@example.com');
-      expect(member.getRole()).toEqual(MemberRole.ADMIN);
-      expect(member.getStatus()).toEqual(MemberStatus.ACTIVE);
+      expect(member.getRole()).toEqual(Role.ADMIN);
+      expect(member.getStatus()).toEqual(InvitationStatus.ACTIVE);
     });
 
     it('should create a new user, make it a team member but in `PENDING` state', async () => {
@@ -295,7 +294,7 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       const member = new MemberModel('team-123', userId);
-      member.setStatus(MemberStatus.PENDING);
+      member.setStatus(InvitationStatus.PENDING);
       await memberRepository.create(member);
 
       await expect(
@@ -308,14 +307,14 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       const member = new MemberModel('team-123', userId);
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.create(member);
 
       await expect(
         teamService.requiredAuth('user-123', 'team-123', [
-          MemberRole.OWNER,
-          MemberRole.ADMIN,
+          Role.OWNER,
+          Role.ADMIN,
         ])
       ).rejects.toThrow('are not able to perform the action');
     });
@@ -325,12 +324,12 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       const member = new MemberModel('team-123', userId);
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.ADMIN);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.ADMIN);
       await memberRepository.create(member);
 
       await expect(
-        teamService.requiredAuth('user-123', 'team-123', [MemberRole.OWNER])
+        teamService.requiredAuth('user-123', 'team-123', [Role.OWNER])
       ).rejects.toThrow('are not able to perform the action');
     });
 
@@ -354,12 +353,12 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       const member = new MemberModel('team-123', userId);
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.OWNER);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.OWNER);
       await memberRepository.create(member);
 
       const { user } = await teamService.requiredAuth('user-123', 'team-123', [
-        MemberRole.OWNER,
+        Role.OWNER,
       ]);
       expect(user.providerId).toEqual('user-123');
     });
@@ -369,13 +368,13 @@ describe('TeamService', () => {
       await userRepository.createWithUserId(userId);
 
       const member = new MemberModel('team-123', userId);
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.ADMIN);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.ADMIN);
       await memberRepository.create(member);
 
       const { user } = await teamService.requiredAuth('user-123', 'team-123', [
-        MemberRole.OWNER,
-        MemberRole.ADMIN,
+        Role.OWNER,
+        Role.ADMIN,
       ]);
       expect(user.providerId).toEqual('user-123');
     });

@@ -1,3 +1,5 @@
+import { InvitationStatus, Role } from '@prisma/client';
+
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { MemberModel } from '@/models/MemberModel';
@@ -6,7 +8,6 @@ import type { UserModel } from '@/models/UserModel';
 import type { MemberRepository } from '@/repositories/MemberRepository';
 import type { TeamRepository } from '@/repositories/TeamRepository';
 import type { UserRepository } from '@/repositories/UserRepository';
-import { MemberRole, MemberStatus } from '@/types/Member';
 
 export class TeamService {
   private teamRepository: TeamRepository;
@@ -30,7 +31,7 @@ export class TeamService {
     team.setDisplayName(displayName);
     await this.teamRepository.save(team);
 
-    await this.join(team, user, userEmail, MemberRole.OWNER);
+    await this.join(team, user, userEmail, Role.OWNER);
 
     return team;
   }
@@ -55,23 +56,18 @@ export class TeamService {
     // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
     // eslint-disable-next-line no-restricted-syntax
     for (const elt of memberList) {
-      if (elt.getStatus() === MemberStatus.ACTIVE) {
+      if (elt.getStatus() === InvitationStatus.ACTIVE) {
         // eslint-disable-next-line no-await-in-loop
         await this.userRepository.removeTeam(elt.skId, teamId);
       }
     }
   }
 
-  async join(
-    team: TeamModel,
-    user: UserModel,
-    userEmail: string,
-    role: MemberRole
-  ) {
+  async join(team: TeamModel, user: UserModel, userEmail: string, role: Role) {
     const member = new MemberModel(team.id, user.providerId);
     member.setEmail(userEmail);
     member.setRole(role);
-    member.setStatus(MemberStatus.ACTIVE);
+    member.setStatus(InvitationStatus.ACTIVE);
     await this.memberRepository.save(member);
 
     user.addTeam(team.id);
@@ -83,7 +79,7 @@ export class TeamService {
   async findTeamMember(userId: string, teamId: string) {
     const member = await this.memberRepository.findByKeys(teamId, userId);
 
-    if (!member || member.getStatus() !== MemberStatus.ACTIVE) {
+    if (!member || member.getStatus() !== InvitationStatus.ACTIVE) {
       return null;
     }
 
@@ -93,11 +89,7 @@ export class TeamService {
   async requiredAuth(
     userId: string,
     teamId: string,
-    requiredRoles: MemberRole[] = [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
-      MemberRole.READ_ONLY,
-    ]
+    requiredRoles: Role[] = [Role.OWNER, Role.ADMIN, Role.READ_ONLY]
   ) {
     const user = await this.userRepository.strictFindByUserId(userId);
     const member = await this.findTeamMember(userId, teamId);
@@ -124,11 +116,7 @@ export class TeamService {
   async requiredAuthWithTeam(
     teamId: string,
     userId: string,
-    requiredRoles: MemberRole[] = [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
-      MemberRole.READ_ONLY,
-    ]
+    requiredRoles: Role[] = [Role.OWNER, Role.ADMIN, Role.READ_ONLY]
   ) {
     const { user, member } = await this.requiredAuth(
       userId,

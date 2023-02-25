@@ -1,7 +1,7 @@
+import { Role } from '@prisma/client';
 import supertest from 'supertest';
 
 import { app } from '@/app';
-import { MemberStatus } from '@/types/Member';
 
 describe('User', () => {
   beforeEach(() => {
@@ -43,8 +43,8 @@ describe('User', () => {
 
       // The user should be an active member of the team and the email address should be correct
       response = await supertest(app).get(`/team/${teamId}/list-members`);
-      expect(response.body.list[0].status).toEqual(MemberStatus.ACTIVE);
       expect(response.body.list[0].email).toEqual('example@example.com');
+      expect(response.body.list[0].role).toEqual(Role.OWNER);
     });
 
     it("shouldn't create a new team or a new user when calling `/user/profile` for the second time", async () => {

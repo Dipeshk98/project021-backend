@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { TeamModel } from '@/models/TeamModel';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { TeamRepository } from './TeamRepository';
 
@@ -9,7 +9,7 @@ describe('TeamRepository', () => {
   let teamRepository: TeamRepository;
 
   beforeEach(() => {
-    teamRepository = new TeamRepository(getDBClient());
+    teamRepository = new TeamRepository(dbClient);
   });
 
   describe('Basic operation', () => {

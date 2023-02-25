@@ -1,10 +1,10 @@
+import { Role } from '@prisma/client';
 import type { RequestHandler } from 'express';
 
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import type { BillingService } from '@/services/BillingService';
 import type { TeamService } from '@/services/TeamService';
-import { MemberRole } from '@/types/Member';
 import type { BodyPriceHandler } from '@/validations/BillingValidation';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 
@@ -20,8 +20,8 @@ export class BillingController {
 
   public createCheckoutSession: BodyPriceHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const customerId = await this.billingService.createOrRetrieveCustomerId(
@@ -51,7 +51,7 @@ export class BillingController {
     const { team } = await this.teamService.requiredAuthWithTeam(
       req.params.teamId,
       req.currentUserId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
+      [Role.OWNER, Role.ADMIN]
     );
 
     const stripeCustomerId = team.getStripeCustomerId();

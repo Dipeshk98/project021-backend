@@ -1,7 +1,7 @@
+import { Role } from '@prisma/client';
 import { z } from 'zod';
 
 import { validateRequest } from '@/middlewares/Validation';
-import { MemberRole } from '@/types/Member';
 
 export const bodyCreateTeamValidate = validateRequest({
   body: z.object({
@@ -37,7 +37,7 @@ export const bodyInviteValidate = validateRequest({
   }),
   body: z.object({
     email: z.string().nonempty().email(),
-    role: z.nativeEnum(MemberRole),
+    role: z.nativeEnum(Role),
   }),
 });
 
@@ -70,17 +70,17 @@ export const fullEditMemberValidate = validateRequest({
     memberId: z.string().nonempty(),
   }),
   body: z.object({
-    role: z.nativeEnum(MemberRole),
+    role: z.nativeEnum(Role),
   }),
 });
 
 export type ParamsEditMemberHandler = typeof fullEditMemberValidate;
 
-export const paramsRemoveMemberValidate = validateRequest({
+export const paramsMemberIdValidate = validateRequest({
   params: z.object({
     teamId: z.string().nonempty(),
     memberId: z.string().nonempty(),
   }),
 });
 
-export type ParamsRemoveMemberHandler = typeof paramsRemoveMemberValidate;
+export type ParamsMemberIdHandler = typeof paramsMemberIdValidate;

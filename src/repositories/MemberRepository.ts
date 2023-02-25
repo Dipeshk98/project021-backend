@@ -1,7 +1,7 @@
 import type { Member, PrismaClient } from '@prisma/client';
+import { InvitationStatus, Role } from '@prisma/client';
 
 import { MemberModel } from '@/models/MemberModel';
-import { MemberRole, MemberStatus } from '@/types/Member';
 
 import { AbstractRepository } from './AbstractRepository';
 
@@ -27,7 +27,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
             teamId,
             skId: verificationCode,
           },
-          status: MemberStatus.PENDING,
+          status: InvitationStatus.PENDING,
         },
       });
     });
@@ -70,10 +70,11 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     return this.get(member);
   }
 
-  async findAllByTeamId(teamId: string) {
+  async findAllByTeamId(teamId: string, status?: InvitationStatus) {
     const list = await this.dbClient.member.findMany({
       where: {
         teamId,
+        status,
       },
     });
 
@@ -98,7 +99,21 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     });
   }
 
-  async updateRoleIfNotOwner(teamId: string, userId: string, role: MemberRole) {
+  async updateRole(teamId: string, userId: string, role: Role) {
+    await this.dbClient.member.update({
+      data: {
+        role,
+      },
+      where: {
+        teamSkId: {
+          teamId,
+          skId: userId,
+        },
+      },
+    });
+  }
+
+  async updateRoleIfNotOwner(teamId: string, userId: string, role: Role) {
     const member = new MemberModel(teamId, userId);
     let entity: Member | null = null;
 
@@ -113,7 +128,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
             skId: userId,
           },
           role: {
-            not: MemberRole.OWNER,
+            not: Role.OWNER,
           },
         },
       });
