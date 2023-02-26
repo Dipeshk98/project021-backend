@@ -6,13 +6,13 @@ import {
   mockSubscriptionsRetrieve,
   originalStripe,
 } from '__mocks__/stripe';
+import { InvitationStatus, Role } from '@prisma/client';
 import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { MemberModel } from '@/models/MemberModel';
 import { memberRepository } from '@/repositories';
-import { MemberRole, MemberStatus } from '@/types/Member';
 import { SubscriptionStatus } from '@/types/StripeTypes';
 import { Env } from '@/utils/Env';
 
@@ -53,8 +53,8 @@ describe('Billing', () => {
 
     it('should not allow to create a checkout session with `READ_ONLY` role', async () => {
       const member = new MemberModel(teamId, '123');
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.update(member);
 
       mockCustomersCreate.mockReturnValue({
@@ -173,8 +173,8 @@ describe('Billing', () => {
         });
 
       const member = new MemberModel(teamId, '123');
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.update(member);
 
       response = await supertest(app).post(

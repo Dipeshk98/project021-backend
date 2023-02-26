@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { TodoModel } from '@/models/TodoModel';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { TodoRepository } from './TodoRepository';
 
@@ -9,7 +9,7 @@ describe('TodoRepository', () => {
   let todoRepository: TodoRepository;
 
   beforeEach(() => {
-    todoRepository = new TodoRepository(getDBClient());
+    todoRepository = new TodoRepository(dbClient);
   });
 
   describe('Basic operation', () => {

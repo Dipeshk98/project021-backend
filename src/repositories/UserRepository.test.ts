@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { UserModel } from '@/models/UserModel';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { UserRepository } from './UserRepository';
 
@@ -9,7 +9,7 @@ describe('UserRepository', () => {
   let userRepository: UserRepository;
 
   beforeEach(() => {
-    userRepository = new UserRepository(getDBClient());
+    userRepository = new UserRepository(dbClient);
   });
 
   describe('Basic operation', () => {

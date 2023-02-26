@@ -1,8 +1,8 @@
+import { InvitationStatus, Role } from '@prisma/client';
 import assert from 'assert';
 
 import { MemberModel } from '@/models/MemberModel';
-import { MemberRole, MemberStatus } from '@/types/Member';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { MemberRepository } from './MemberRepository';
 
@@ -10,7 +10,7 @@ describe('MemberRepository', () => {
   let memberRepository: MemberRepository;
 
   beforeEach(() => {
-    memberRepository = new MemberRepository(getDBClient());
+    memberRepository = new MemberRepository(dbClient);
   });
 
   describe('Basic operation', () => {
@@ -30,7 +30,7 @@ describe('MemberRepository', () => {
       const member = await memberRepository.findByKeys(teamId, userId);
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('random@example.com');
-      expect(member.getStatus()).toEqual(MemberStatus.PENDING);
+      expect(member.getStatus()).toEqual(InvitationStatus.PENDING);
     });
 
     it('should create a todo when saving a non-existing one and update when saving again', async () => {
@@ -46,7 +46,7 @@ describe('MemberRepository', () => {
       const member = await memberRepository.findByKeys(teamId, userId);
       assert(member !== null, "member shouldn't be null");
       expect(member.getEmail()).toEqual('new-random@example.com');
-      expect(member.getStatus()).toEqual(MemberStatus.PENDING);
+      expect(member.getStatus()).toEqual(InvitationStatus.PENDING);
     });
 
     it("shouldn't be able to delete an non-existing team member", async () => {
@@ -84,7 +84,7 @@ describe('MemberRepository', () => {
       const teamId = 'team-123';
       const userId = 'user-123';
       const savedMember = new MemberModel(teamId, userId);
-      savedMember.setStatus(MemberStatus.ACTIVE);
+      savedMember.setStatus(InvitationStatus.ACTIVE);
       await memberRepository.save(savedMember);
 
       const deleteResult = await memberRepository.deleteOnlyInPending(
@@ -142,11 +142,31 @@ describe('MemberRepository', () => {
       expect(member.getEmail()).toEqual('new-random@example.com');
     });
 
+    it('should raise an error when updating the role for non existing member', async () => {
+      await expect(
+        memberRepository.updateRole('team-123', 'user-123', Role.ADMIN)
+      ).rejects.toThrow('Record to update not found');
+    });
+
+    it('should update the team member role', async () => {
+      const teamId = 'team-123';
+      const userId = 'user-123';
+      const savedMember = new MemberModel(teamId, userId);
+      savedMember.setEmail('random@example.com');
+      await memberRepository.save(savedMember);
+
+      await memberRepository.updateRole(teamId, userId, Role.ADMIN);
+
+      const member = await memberRepository.findByKeys(teamId, userId);
+      assert(member !== null, "member shouldn't be null");
+      expect(member.getRole()).toEqual(Role.ADMIN);
+    });
+
     it('should raise an error when updating role for non existing member', async () => {
       const updateRes = await memberRepository.updateRoleIfNotOwner(
         'team-123',
         'user-123',
-        MemberRole.OWNER
+        Role.OWNER
       );
 
       expect(updateRes).toBeNull();
@@ -156,33 +176,29 @@ describe('MemberRepository', () => {
       const teamId = 'team-123';
       const userId = 'user-123';
       const savedMember = new MemberModel(teamId, userId);
-      savedMember.setRole(MemberRole.READ_ONLY);
+      savedMember.setRole(Role.READ_ONLY);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
-      await memberRepository.updateRoleIfNotOwner(
-        teamId,
-        userId,
-        MemberRole.ADMIN
-      );
+      await memberRepository.updateRoleIfNotOwner(teamId, userId, Role.ADMIN);
 
       const member = await memberRepository.findByKeys(teamId, userId);
       assert(member !== null, "member shouldn't be null");
-      expect(member.getRole()).toEqual(MemberRole.ADMIN);
+      expect(member.getRole()).toEqual(Role.ADMIN);
     });
 
     it("shouldn't update the team member role when he is an `OWNER`", async () => {
       const teamId = 'team-123';
       const userId = 'user-123';
       const savedMember = new MemberModel(teamId, userId);
-      savedMember.setRole(MemberRole.OWNER);
+      savedMember.setRole(Role.OWNER);
       savedMember.setEmail('random@example.com');
       await memberRepository.save(savedMember);
 
       const updateRes = await memberRepository.updateRoleIfNotOwner(
         teamId,
         userId,
-        MemberRole.READ_ONLY
+        Role.READ_ONLY
       );
       expect(updateRes).toBeNull();
     });
@@ -211,6 +227,7 @@ describe('MemberRepository', () => {
       // Member 2 in active
       member2 = new MemberModel(teamId, userId);
       member2.setEmail('example2@example.com');
+      member2.setStatus(InvitationStatus.ACTIVE);
       await memberRepository.save(member2);
 
       // Member 3 in pending
@@ -225,6 +242,22 @@ describe('MemberRepository', () => {
 
       // The order isn't always the same. So, we won't able to rely on array index.
       // `skId` can be a userId or a random string.
+      expect(list).toEqual(expect.arrayContaining([member1, member2, member3]));
+    });
+
+    it('should retrieve team members based on status', async () => {
+      let list = await memberRepository.findAllByTeamId(
+        teamId,
+        InvitationStatus.PENDING
+      );
+      expect(list).toHaveLength(2);
+      expect(list).toEqual(expect.arrayContaining([member1, member3]));
+
+      list = await memberRepository.findAllByTeamId(
+        teamId,
+        InvitationStatus.ACTIVE
+      );
+      expect(list).toHaveLength(1);
       expect(list).toEqual(expect.arrayContaining([member2]));
     });
 

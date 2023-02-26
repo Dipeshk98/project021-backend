@@ -1,11 +1,9 @@
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { MemberRepository } from './MemberRepository';
 import { TeamRepository } from './TeamRepository';
 import { TodoRepository } from './TodoRepository';
 import { UserRepository } from './UserRepository';
-
-const dbClient = getDBClient();
 
 const memberRepository = new MemberRepository(dbClient);
 const teamRepository = new TeamRepository(dbClient);

@@ -4,7 +4,7 @@ import {
   userRepository,
 } from '@/repositories';
 import { Env } from '@/utils/Env';
-import { getStripe } from '@/utils/Stripe';
+import { stripe } from '@/utils/Stripe';
 
 import { BillingService } from './BillingService';
 import { EmailService } from './EmailService';
@@ -20,7 +20,7 @@ const teamService = new TeamService(
 );
 const billingService = new BillingService(
   teamRepository,
-  getStripe(),
+  stripe,
   Env.getValue('BILLING_PLAN_ENV')
 );
 const emailService = new EmailService();

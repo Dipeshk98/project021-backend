@@ -1,3 +1,5 @@
+import { InvitationStatus, Role } from '@prisma/client';
+
 import { TeamInviteEmailTemplate } from '@/emails/TeamInviteEmailTemplate';
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
@@ -8,7 +10,6 @@ import type { UserRepository } from '@/repositories/UserRepository';
 import type { BillingService } from '@/services/BillingService';
 import type { EmailService } from '@/services/EmailService';
 import type { TeamService } from '@/services/TeamService';
-import { MemberRole, MemberStatus } from '@/types/Member';
 import type {
   BodyCreateTeamHandler,
   BodyInviteHandler,
@@ -16,7 +17,7 @@ import type {
   FullJoinHandler,
   ParamsEditMemberHandler,
   ParamsJoinHandler,
-  ParamsRemoveMemberHandler,
+  ParamsMemberIdHandler,
   ParamsTeamIdHandler,
 } from '@/validations/TeamValidation';
 
@@ -68,8 +69,8 @@ export class TeamController {
 
   public delete: ParamsTeamIdHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     await this.teamService.delete(req.params.teamId);
@@ -81,8 +82,8 @@ export class TeamController {
 
   public updateDisplayName: BodyTeamNameHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     await this.teamRepository.updateDisplayName(
@@ -102,14 +103,25 @@ export class TeamController {
       req.params.teamId
     );
 
-    const list = await this.memberRepository.findAllByTeamId(req.params.teamId);
+    const list = await this.memberRepository.findAllByTeamId(
+      req.params.teamId,
+      InvitationStatus.ACTIVE
+    );
+    const inviteList = await this.memberRepository.findAllByTeamId(
+      req.params.teamId,
+      InvitationStatus.PENDING
+    );
 
     res.json({
       list: list.map((elt) => ({
         memberId: elt.skId,
         email: elt.getEmail(),
         role: elt.getRole(),
-        status: elt.getStatus(),
+      })),
+      inviteList: inviteList.map((elt) => ({
+        memberId: elt.skId,
+        email: elt.getEmail(),
+        role: elt.getRole(),
       })),
       role: member.getRole(),
     });
@@ -137,8 +149,16 @@ export class TeamController {
     const { team } = await this.teamService.requiredAuthWithTeam(
       req.params.teamId,
       req.currentUserId,
-      [MemberRole.OWNER, MemberRole.ADMIN]
+      [Role.OWNER, Role.ADMIN]
     );
+
+    if (req.body.role === Role.OWNER) {
+      throw new ApiError(
+        'Impossible to invite with OWNER role',
+        null,
+        ErrorCode.INCORRECT_DATA
+      );
+    }
 
     const member = new MemberModel(req.params.teamId);
     member.setEmail(req.body.email);
@@ -170,7 +190,7 @@ export class TeamController {
       req.params.verificationCode
     );
 
-    if (!member || member.getStatus() === MemberStatus.ACTIVE) {
+    if (!member || member.getStatus() === InvitationStatus.ACTIVE) {
       throw new ApiError('Incorrect code', null, ErrorCode.INCORRECT_CODE);
     }
 
@@ -225,8 +245,8 @@ export class TeamController {
 
   public editMember: ParamsEditMemberHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const updateRes = await this.memberRepository.updateRoleIfNotOwner(
@@ -252,10 +272,10 @@ export class TeamController {
     });
   };
 
-  public removeMember: ParamsRemoveMemberHandler = async (req, res) => {
+  public removeMember: ParamsMemberIdHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const member = await this.memberRepository.findByKeys(
@@ -271,7 +291,7 @@ export class TeamController {
       );
     }
 
-    if (member.getRole() === MemberRole.OWNER) {
+    if (member.getRole() === Role.OWNER) {
       // By default, the frontend won't display the option to update role for the owner.
       // If it raises an error, someone try to bypass the frontend? Or is it a bug?
       throw new ApiError(
@@ -281,7 +301,7 @@ export class TeamController {
       );
     }
 
-    if (member.getStatus() === MemberStatus.ACTIVE) {
+    if (member.getStatus() === InvitationStatus.ACTIVE) {
       const { user: removedUser } = await this.teamService.requiredAuth(
         req.params.memberId,
         req.params.teamId
@@ -299,6 +319,36 @@ export class TeamController {
     if (!success) {
       throw new ApiError('Impossible to delete');
     }
+
+    res.json({
+      success: true,
+    });
+  };
+
+  public transferOwnership: ParamsMemberIdHandler = async (req, res) => {
+    await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
+      Role.OWNER,
+    ]);
+
+    const updateRes = await this.memberRepository.updateRoleIfNotOwner(
+      req.params.teamId,
+      req.params.memberId,
+      Role.OWNER
+    );
+
+    if (!updateRes) {
+      throw new ApiError(
+        'Incorrect Member ID or the member has the OWNER ROLE',
+        null,
+        ErrorCode.INCORRECT_MEMBER_ID
+      );
+    }
+
+    await this.memberRepository.updateRole(
+      req.params.teamId,
+      req.currentUserId,
+      Role.ADMIN
+    );
 
     res.json({
       success: true,

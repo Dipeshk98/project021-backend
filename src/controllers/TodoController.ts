@@ -1,9 +1,10 @@
+import { Role } from '@prisma/client';
+
 import { ApiError } from '@/errors/ApiError';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { TodoModel } from '@/models/TodoModel';
 import type { TodoRepository } from '@/repositories/TodoRepository';
 import type { TeamService } from '@/services/TeamService';
-import { MemberRole } from '@/types/Member';
 import type { ParamsTeamIdHandler } from '@/validations/TeamValidation';
 import type {
   BodyTodoHandler,
@@ -40,8 +41,8 @@ export class TodoController {
 
   public create: BodyTodoHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const todo = new TodoModel(req.params.teamId);
@@ -74,8 +75,8 @@ export class TodoController {
 
   public delete: ParamsTodoHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const success = await this.todoRepository.deleteByKeys(
@@ -94,8 +95,8 @@ export class TodoController {
 
   public update: FullTodoHandler = async (req, res) => {
     await this.teamService.requiredAuth(req.currentUserId, req.params.teamId, [
-      MemberRole.OWNER,
-      MemberRole.ADMIN,
+      Role.OWNER,
+      Role.ADMIN,
     ]);
 
     const todo = new TodoModel(req.params.teamId, req.params.id);

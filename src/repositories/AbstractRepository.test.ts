@@ -2,13 +2,13 @@
 import type { PrismaClient, User } from '@prisma/client';
 
 import { UserModel } from '@/models/UserModel';
-import { getDBClient } from '@/utils/DBClient';
+import { dbClient } from '@/utils/DBClient';
 
 import { AbstractRepository } from './AbstractRepository';
 
 class DummyTestRepository extends AbstractRepository<User, UserModel> {
-  constructor(dbClient: PrismaClient) {
-    super(dbClient, 'user');
+  constructor(client: PrismaClient) {
+    super(client, 'user');
   }
 }
 
@@ -16,7 +16,7 @@ describe('AbstractRepository', () => {
   let dummyTestRepository: DummyTestRepository;
 
   beforeEach(() => {
-    dummyTestRepository = new DummyTestRepository(getDBClient());
+    dummyTestRepository = new DummyTestRepository(dbClient);
   });
 
   describe('Basic operation', () => {

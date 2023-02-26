@@ -13,9 +13,9 @@ custom:
   # Name of the SST app that's deploying our infrastructure
   sstApp: ${self:custom.stage}-${self:service}-infra
   nodeEnv:
-    offline: 'development'
-    staging: 'production'
-    prod: 'production'
+    offline: "development"
+    staging: "production"
+    prod: "production"
   noAuth:
     offline: true
     staging: false
@@ -77,8 +77,8 @@ provider:
           # Restrict our IAM role permissions to
           # the specific table for the stage
           Resource:
-            - !ImportValue '${self:custom.sstApp}-TableArn'
-        - Effect: 'Allow'
+            - !ImportValue "${self:custom.sstApp}-TableArn"
+        - Effect: "Allow"
           Action:
             - ses:SendRawEmail
           Resource: "*"
@@ -94,30 +94,30 @@ functions:
     reservedConcurrency: 30 # Arbitrary number, it can be increased or decreased
     events:
       - httpApi:
-          path: '/billing/webhook'
-          method: 'POST'
+          path: "/billing/webhook"
+          method: "POST"
 
       - httpApi:
-          path: '/{proxy+}'
-          method: 'GET'
+          path: "/{proxy+}"
+          method: "GET"
           authorizer:
             type: aws_iam
 
       - httpApi:
-          path: '/{proxy+}'
-          method: 'POST'
+          path: "/{proxy+}"
+          method: "POST"
           authorizer:
             type: aws_iam
 
       - httpApi:
-          path: '/{proxy+}'
-          method: 'PUT'
+          path: "/{proxy+}"
+          method: "PUT"
           authorizer:
             type: aws_iam
 
       - httpApi:
-          path: '/{proxy+}'
-          method: 'DELETE'
+          path: "/{proxy+}"
+          method: "DELETE"
           authorizer:
             type: aws_iam
 

@@ -4,7 +4,7 @@ Modern MERN backend code for the REST Api. The code comes up with a Todo applica
 
 ### Requirements
 
-- Node.js and npm
+- Node.js 14+ and npm
 
 ### Getting started
 

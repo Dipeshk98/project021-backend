@@ -1,10 +1,10 @@
+import { InvitationStatus, Role } from '@prisma/client';
 import supertest from 'supertest';
 
 import { app } from '@/app';
 import { ErrorCode } from '@/errors/ErrorCode';
 import { MemberModel } from '@/models/MemberModel';
 import { memberRepository } from '@/repositories';
-import { MemberRole, MemberStatus } from '@/types/Member';
 
 describe('Todo', () => {
   let teamId: string;
@@ -39,8 +39,8 @@ describe('Todo', () => {
 
     it("shouldn't create todo with `READ_ONLY` role", async () => {
       const member = new MemberModel(teamId, '123');
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.update(member);
 
       const response = await supertest(app)
@@ -114,8 +114,8 @@ describe('Todo', () => {
 
     it("shouldn't be able to delete with `READ_ONLY` role", async () => {
       const member = new MemberModel(teamId, '123');
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.update(member);
 
       const response = await supertest(app).delete(`/${teamId}/todo/123`);
@@ -173,8 +173,8 @@ describe('Todo', () => {
 
     it("shouldn't be able to update a todo with `READ_ONLY` role", async () => {
       const member = new MemberModel(teamId, '123');
-      member.setStatus(MemberStatus.ACTIVE);
-      member.setRole(MemberRole.READ_ONLY);
+      member.setStatus(InvitationStatus.ACTIVE);
+      member.setRole(Role.READ_ONLY);
       await memberRepository.update(member);
 
       const response = await supertest(app).put(`/${teamId}/todo/123`).send({
