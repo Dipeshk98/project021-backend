@@ -23,9 +23,9 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     await this.catchNotFound(async () => {
       entity = await this.dbClient.member.delete({
         where: {
-          teamSkId: {
+          teamInviteCodeOrUserId: {
             teamId,
-            skId: verificationCode,
+            inviteCodeOrUserId: verificationCode,
           },
           status: InvitationStatus.PENDING,
         },
@@ -58,7 +58,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     }
 
     return list.map((elt) => {
-      const member = new MemberModel(elt.teamId, elt.skId);
+      const member = new MemberModel(elt.teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
       return member;
     });
@@ -79,7 +79,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     });
 
     return list.map((elt) => {
-      const member = new MemberModel(teamId, elt.skId);
+      const member = new MemberModel(teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
       return member;
     });
@@ -91,9 +91,9 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
         email,
       },
       where: {
-        teamSkId: {
+        teamInviteCodeOrUserId: {
           teamId,
-          skId: userId,
+          inviteCodeOrUserId: userId,
         },
       },
     });
@@ -105,9 +105,9 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
         role,
       },
       where: {
-        teamSkId: {
+        teamInviteCodeOrUserId: {
           teamId,
-          skId: userId,
+          inviteCodeOrUserId: userId,
         },
       },
     });
@@ -123,9 +123,9 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
           role,
         },
         where: {
-          teamSkId: {
+          teamInviteCodeOrUserId: {
             teamId,
-            skId: userId,
+            inviteCodeOrUserId: userId,
           },
           role: {
             not: Role.OWNER,

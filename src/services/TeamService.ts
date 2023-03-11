@@ -57,7 +57,7 @@ export class TeamService {
     for (const elt of memberList) {
       if (elt.getStatus() === InvitationStatus.ACTIVE) {
         // eslint-disable-next-line no-await-in-loop
-        await this.userRepository.removeTeam(elt.skId, teamId);
+        await this.userRepository.removeTeam(elt.inviteCodeOrUserId, teamId);
       }
     }
   }

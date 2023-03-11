@@ -218,7 +218,7 @@ describe('TeamService', () => {
       expect(member2).toBeNull();
       const pendingMember = await memberRepository.findByKeys(
         createdPendingMember.teamId,
-        createdPendingMember.skId
+        createdPendingMember.inviteCodeOrUserId
       );
       expect(pendingMember).toBeNull();
 
