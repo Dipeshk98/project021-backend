@@ -99,17 +99,17 @@ describe('MemberRepository', () => {
 
     it('should be able to delete the team member in pending status', async () => {
       const teamId = 'team-123';
-      const userId = 'user-123';
-      const savedMember = new MemberModel(teamId, userId);
+      const inviteCode = 'INVITE_CODE';
+      const savedMember = new MemberModel(teamId, inviteCode);
       await memberRepository.save(savedMember);
 
       const deleteResult = await memberRepository.deleteOnlyInPending(
         teamId,
-        userId
+        inviteCode
       );
       expect(deleteResult).toBeTruthy();
 
-      const member = await memberRepository.findByKeys(teamId, userId);
+      const member = await memberRepository.findByKeys(teamId, inviteCode);
       expect(member).toBeNull();
     });
 

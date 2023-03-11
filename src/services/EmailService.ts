@@ -1,4 +1,5 @@
-import AWS from 'aws-sdk';
+import type { SESClientConfig } from '@aws-sdk/client-ses';
+import * as AWS from '@aws-sdk/client-ses';
 import nodemailer from 'nodemailer';
 
 import type { AbstractEmailTemplate } from '@/emails/AbstractEmailTemplate';
@@ -8,7 +9,7 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    let sesOptions = {};
+    let sesOptions: SESClientConfig = {};
 
     if (Env.getValue('IS_OFFLINE', false)) {
       sesOptions = {
@@ -17,7 +18,7 @@ export class EmailService {
     }
 
     this.transporter = nodemailer.createTransport({
-      SES: new AWS.SES(sesOptions),
+      SES: { ses: new AWS.SES(sesOptions), aws: AWS },
     });
   }
 
