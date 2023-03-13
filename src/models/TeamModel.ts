@@ -8,7 +8,7 @@ import { AbstractModel } from './AbstractModel';
 export class TeamModel extends AbstractModel<Team> {
   public readonly id: string;
 
-  private displayName = 'New Team';
+  private displayName = '';
 
   private stripeCustomerId: string | null = null;
 

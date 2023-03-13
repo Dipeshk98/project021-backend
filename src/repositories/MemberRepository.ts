@@ -10,8 +10,8 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     super(dbClient, 'member');
   }
 
-  deleteByKeys(teamId: string, userId: string) {
-    const member = new MemberModel(teamId, userId);
+  deleteByKeys(teamId: string, inviteCodeOrUserId: string) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
 
     return this.delete(member);
   }
@@ -64,8 +64,8 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     });
   }
 
-  findByKeys(teamId: string, userId: string) {
-    const member = new MemberModel(teamId, userId);
+  findByKeys(teamId: string, inviteCodeOrUserId: string) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
 
     return this.get(member);
   }
@@ -85,7 +85,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     });
   }
 
-  async updateEmail(teamId: string, userId: string, email: string) {
+  async updateEmail(teamId: string, inviteCodeOrUserId: string, email: string) {
     await this.dbClient.member.update({
       data: {
         email,
@@ -93,13 +93,13 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
       where: {
         teamInviteCodeOrUserId: {
           teamId,
-          inviteCodeOrUserId: userId,
+          inviteCodeOrUserId,
         },
       },
     });
   }
 
-  async updateRole(teamId: string, userId: string, role: Role) {
+  async updateRole(teamId: string, inviteCodeOrUserId: string, role: Role) {
     await this.dbClient.member.update({
       data: {
         role,
@@ -107,14 +107,18 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
       where: {
         teamInviteCodeOrUserId: {
           teamId,
-          inviteCodeOrUserId: userId,
+          inviteCodeOrUserId,
         },
       },
     });
   }
 
-  async updateRoleIfNotOwner(teamId: string, userId: string, role: Role) {
-    const member = new MemberModel(teamId, userId);
+  async updateRoleIfNotOwner(
+    teamId: string,
+    inviteCodeOrUserId: string,
+    role: Role
+  ) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
     let entity: Member | null = null;
 
     await this.catchNotFound(async () => {
@@ -125,7 +129,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
         where: {
           teamInviteCodeOrUserId: {
             teamId,
-            inviteCodeOrUserId: userId,
+            inviteCodeOrUserId,
           },
           role: {
             not: Role.OWNER,

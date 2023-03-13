@@ -9,27 +9,27 @@ export class TodoRepository extends AbstractRepository<Todo, TodoModel> {
     super(dbClient, 'todo');
   }
 
-  findByKeys(userId: string, id: string) {
-    const todo = new TodoModel(userId, id);
+  findByKeys(teamId: string, id: string) {
+    const todo = new TodoModel(teamId, id);
 
     return this.get(todo);
   }
 
-  deleteByKeys(userId: string, id: string) {
-    const todo = new TodoModel(userId, id);
+  deleteByKeys(teamId: string, id: string) {
+    const todo = new TodoModel(teamId, id);
 
     return this.delete(todo);
   }
 
-  async findAllByUserId(userId: string) {
+  async findAllByUserId(teamId: string) {
     const list = await this.dbClient.todo.findMany({
       where: {
-        ownerId: userId,
+        ownerId: teamId,
       },
     });
 
     return list.map((elt) => {
-      const todo = new TodoModel(userId, elt.id);
+      const todo = new TodoModel(teamId, elt.id);
       todo.fromEntity(elt);
       return todo;
     });

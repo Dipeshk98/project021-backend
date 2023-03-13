@@ -99,17 +99,19 @@ describe('MemberRepository', () => {
 
     it('should be able to delete the team member in pending status', async () => {
       const teamId = 'team-123';
-      const inviteCode = 'INVITE_CODE';
-      const savedMember = new MemberModel(teamId, inviteCode);
+      const savedMember = new MemberModel(teamId);
       await memberRepository.save(savedMember);
 
       const deleteResult = await memberRepository.deleteOnlyInPending(
         teamId,
-        inviteCode
+        savedMember.inviteCodeOrUserId
       );
       expect(deleteResult).toBeTruthy();
 
-      const member = await memberRepository.findByKeys(teamId, inviteCode);
+      const member = await memberRepository.findByKeys(
+        teamId,
+        savedMember.inviteCodeOrUserId
+      );
       expect(member).toBeNull();
     });
 
@@ -241,7 +243,7 @@ describe('MemberRepository', () => {
       expect(list).toHaveLength(3);
 
       // The order isn't always the same. So, we won't able to rely on array index.
-      // `skId` can be a userId or a random string.
+      // `inviteCodeOrUserId` can be a userId or a random string.
       expect(list).toEqual(expect.arrayContaining([member1, member2, member3]));
     });
 
