@@ -5,9 +5,13 @@ import type { ISubscription } from '@/types/StripeTypes';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class TeamRepository extends AbstractRepository<Team, TeamModel> {
+export class TeamRepository extends AbstractRepository<
+  PrismaClient['team'],
+  Team,
+  TeamModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'team');
+    super(dbClient.team);
   }
 
   async createWithDisplayName(displayName: string) {
@@ -36,7 +40,7 @@ export class TeamRepository extends AbstractRepository<Team, TeamModel> {
 
     for (let i = 0; i < teamIdList.length; i += 1) {
       promiseList.push(
-        this.dbClient.team.findUnique({
+        this.dbClient.findUnique({
           where: {
             id: teamIdList[i],
           },
@@ -57,7 +61,7 @@ export class TeamRepository extends AbstractRepository<Team, TeamModel> {
   }
 
   async updateDisplayName(teamId: string, displayName: string) {
-    await this.dbClient.team.update({
+    await this.dbClient.update({
       data: {
         displayName,
       },
@@ -68,7 +72,7 @@ export class TeamRepository extends AbstractRepository<Team, TeamModel> {
   }
 
   async updateSubscription(teamId: string, subscription: ISubscription) {
-    await this.dbClient.team.update({
+    await this.dbClient.update({
       data: {
         subscriptionId: subscription.id,
         subscriptionProductId: subscription.productId,

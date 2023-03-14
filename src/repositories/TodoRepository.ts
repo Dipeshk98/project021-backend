@@ -4,9 +4,13 @@ import { TodoModel } from '@/models/TodoModel';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class TodoRepository extends AbstractRepository<Todo, TodoModel> {
+export class TodoRepository extends AbstractRepository<
+  PrismaClient['todo'],
+  Todo,
+  TodoModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'todo');
+    super(dbClient.todo);
   }
 
   findByKeys(teamId: string, id: string) {
@@ -22,7 +26,7 @@ export class TodoRepository extends AbstractRepository<Todo, TodoModel> {
   }
 
   async findAllByUserId(teamId: string) {
-    const list = await this.dbClient.todo.findMany({
+    const list = await this.dbClient.findMany({
       where: {
         ownerId: teamId,
       },

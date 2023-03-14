@@ -5,9 +5,13 @@ import { MemberModel } from '@/models/MemberModel';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class MemberRepository extends AbstractRepository<Member, MemberModel> {
+export class MemberRepository extends AbstractRepository<
+  PrismaClient['member'],
+  Member,
+  MemberModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'member');
+    super(dbClient.member);
   }
 
   deleteByKeys(teamId: string, inviteCodeOrUserId: string) {
@@ -21,7 +25,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     let entity: Member | null = null;
 
     await this.catchNotFound(async () => {
-      entity = await this.dbClient.member.delete({
+      entity = await this.dbClient.delete({
         where: {
           teamInviteCodeOrUserId: {
             teamId,
@@ -41,13 +45,13 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
   }
 
   async deleteAllMembers(teamId: string) {
-    const list = await this.dbClient.member.findMany({
+    const list = await this.dbClient.findMany({
       where: {
         teamId,
       },
     });
 
-    const deleteRes = await this.dbClient.member.deleteMany({
+    const deleteRes = await this.dbClient.deleteMany({
       where: {
         teamId,
       },
@@ -71,7 +75,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
   }
 
   async findAllByTeamId(teamId: string, status?: InvitationStatus) {
-    const list = await this.dbClient.member.findMany({
+    const list = await this.dbClient.findMany({
       where: {
         teamId,
         status,
@@ -86,7 +90,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
   }
 
   async updateEmail(teamId: string, inviteCodeOrUserId: string, email: string) {
-    await this.dbClient.member.update({
+    await this.dbClient.update({
       data: {
         email,
       },
@@ -100,7 +104,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
   }
 
   async updateRole(teamId: string, inviteCodeOrUserId: string, role: Role) {
-    await this.dbClient.member.update({
+    await this.dbClient.update({
       data: {
         role,
       },
@@ -122,7 +126,7 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     let entity: Member | null = null;
 
     await this.catchNotFound(async () => {
-      entity = await this.dbClient.member.update({
+      entity = await this.dbClient.update({
         data: {
           role,
         },

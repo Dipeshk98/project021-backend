@@ -6,9 +6,13 @@ import { UserModel } from '@/models/UserModel';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class UserRepository extends AbstractRepository<User, UserModel> {
+export class UserRepository extends AbstractRepository<
+  PrismaClient['user'],
+  User,
+  UserModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'user');
+    super(dbClient.user);
   }
 
   async createWithUserId(userId: string) {
