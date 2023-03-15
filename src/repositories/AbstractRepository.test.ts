@@ -6,9 +6,13 @@ import { dbClient } from '@/utils/DBClient';
 
 import { AbstractRepository } from './AbstractRepository';
 
-class DummyTestRepository extends AbstractRepository<User, UserModel> {
+class DummyTestRepository extends AbstractRepository<
+  PrismaClient['user'],
+  User,
+  UserModel
+> {
   constructor(client: PrismaClient) {
-    super(client, 'user');
+    super(client.user);
   }
 }
 

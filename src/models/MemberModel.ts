@@ -8,7 +8,7 @@ import { AbstractModel } from './AbstractModel';
 export class MemberModel extends AbstractModel<Member> {
   public readonly teamId: string;
 
-  public readonly skId: string;
+  public readonly inviteCodeOrUserId: string;
 
   private role: Role = Role.READ_ONLY;
 
@@ -20,17 +20,17 @@ export class MemberModel extends AbstractModel<Member> {
    * Constructor for Member class.
    * @constructor
    * @param teamId - The ID of the team.
-   * @param userId - The ID of the user. Leave it empty for `MemberStatus.PENDING` when the user didn't accept the invitation yet.
+   * @param inviteCodeOrUserId - The ID of the user when status is `MemberStatus.ACTIVE` or the invitation code when status is `MemberStatus.PENDING`.
    */
-  constructor(teamId: string, userId?: string) {
+  constructor(teamId: string, inviteCodeOrUserId?: string) {
     super();
     this.teamId = teamId;
 
-    if (userId) {
-      this.skId = userId;
+    if (inviteCodeOrUserId) {
+      this.inviteCodeOrUserId = inviteCodeOrUserId;
     } else {
       // In pending status, we use the skId for verification code
-      this.skId = ulid() + nanoid(30);
+      this.inviteCodeOrUserId = ulid() + nanoid(30);
     }
   }
 
@@ -64,16 +64,16 @@ export class MemberModel extends AbstractModel<Member> {
 
   keys() {
     return {
-      teamSkId: {
+      teamInviteCodeOrUserId: {
         teamId: this.teamId,
-        skId: this.skId,
+        inviteCodeOrUserId: this.inviteCodeOrUserId,
       },
     };
   }
 
   toCreateEntity() {
     return {
-      ...this.keys().teamSkId,
+      ...this.keys().teamInviteCodeOrUserId,
       ...this.toEntity(),
     };
   }

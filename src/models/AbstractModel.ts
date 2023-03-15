@@ -1,7 +1,7 @@
 /**
  * All database models are extended from AbstractModel
  */
-export abstract class AbstractModel<T> {
+export abstract class AbstractModel<PrismaModel> {
   /**
    * Returns Primary keys.
    */
@@ -10,16 +10,16 @@ export abstract class AbstractModel<T> {
   /**
    * Returns Prisma model with Primary keys.
    */
-  abstract toCreateEntity(): object;
+  abstract toCreateEntity(): Partial<PrismaModel>;
 
   /**
    * Convert to Prisma model without Primary keys.
    */
-  abstract toEntity(): object;
+  abstract toEntity(): Partial<PrismaModel>;
 
   /**
    * Map Prisma model to class attributes.
    * @param item - The item returned by Prisma which need to convert to class attributes.
    */
-  abstract fromEntity(item: T): void;
+  abstract fromEntity(item: PrismaModel): void;
 }

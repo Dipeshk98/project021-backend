@@ -4,32 +4,36 @@ import { TodoModel } from '@/models/TodoModel';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class TodoRepository extends AbstractRepository<Todo, TodoModel> {
+export class TodoRepository extends AbstractRepository<
+  PrismaClient['todo'],
+  Todo,
+  TodoModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'todo');
+    super(dbClient.todo);
   }
 
-  findByKeys(userId: string, id: string) {
-    const todo = new TodoModel(userId, id);
+  findByKeys(teamId: string, id: string) {
+    const todo = new TodoModel(teamId, id);
 
     return this.get(todo);
   }
 
-  deleteByKeys(userId: string, id: string) {
-    const todo = new TodoModel(userId, id);
+  deleteByKeys(teamId: string, id: string) {
+    const todo = new TodoModel(teamId, id);
 
     return this.delete(todo);
   }
 
-  async findAllByUserId(userId: string) {
-    const list = await this.dbClient.todo.findMany({
+  async findAllByUserId(teamId: string) {
+    const list = await this.dbClient.findMany({
       where: {
-        ownerId: userId,
+        ownerId: teamId,
       },
     });
 
     return list.map((elt) => {
-      const todo = new TodoModel(userId, elt.id);
+      const todo = new TodoModel(teamId, elt.id);
       todo.fromEntity(elt);
       return todo;
     });

@@ -54,11 +54,10 @@ export class TeamService {
     }
 
     // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
-    // eslint-disable-next-line no-restricted-syntax
     for (const elt of memberList) {
       if (elt.getStatus() === InvitationStatus.ACTIVE) {
         // eslint-disable-next-line no-await-in-loop
-        await this.userRepository.removeTeam(elt.skId, teamId);
+        await this.userRepository.removeTeam(elt.inviteCodeOrUserId, teamId);
       }
     }
   }
@@ -71,7 +70,7 @@ export class TeamService {
     await this.memberRepository.save(member);
 
     user.addTeam(team.id);
-    await this.userRepository.save(user);
+    await this.userRepository.update(user);
 
     return member;
   }
@@ -141,7 +140,6 @@ export class TeamService {
     const teamList = user.getTeamList();
 
     // run sequentially (not in parallel) with classic loop, `forEach` is not designed for asynchronous code.
-    // eslint-disable-next-line no-restricted-syntax
     for (const elt of teamList) {
       // eslint-disable-next-line no-await-in-loop
       await this.memberRepository.updateEmail(elt, user.providerId, email);

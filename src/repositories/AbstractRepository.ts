@@ -1,32 +1,29 @@
-import type { PrismaClient } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 
 import type { AbstractModel } from '@/models/AbstractModel';
 
 // Use this file as a external library
 export class AbstractRepository<
+  DbClient extends {
+    [Key in keyof Prisma.UserDelegate<
+      Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+    >]: (data: any) => Promise<any>;
+  },
   PrismaModel,
   Model extends AbstractModel<PrismaModel>
 > {
-  protected dbClient: PrismaClient;
+  protected dbClient: DbClient;
 
-  protected model: string;
-
-  constructor(client: PrismaClient, model: string) {
-    this.dbClient = client;
-    this.model = model;
-  }
-
-  // Due to Prisma typing limitation returns `any`: https://github.com/prisma/prisma/discussions/10584`
-  getModelClient(): any {
-    // Randomly choose one Prisma model for typing, here we use 'user' but it also works for other models
-    return this.dbClient[this.model as 'user'];
+  constructor(dbClient: DbClient) {
+    this.dbClient = dbClient;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async catchNotFound(execute: () => Promise<void>) {
+  async catchNotFound(execute: () => Promise<any>) {
+    let res;
+
     try {
-      await execute();
+      res = await execute();
     } catch (ex: any) {
       if (
         !(ex instanceof Prisma.PrismaClientKnownRequestError) ||
@@ -35,16 +32,18 @@ export class AbstractRepository<
         throw ex;
       }
     }
+
+    return res;
   }
 
   async create(model: Model) {
-    await this.getModelClient().create({
+    await this.dbClient.create({
       data: model.toCreateEntity(),
     });
   }
 
   async get(model: Model): Promise<Model | null> {
-    const entity = await this.getModelClient().findUnique({
+    const entity: PrismaModel = await this.dbClient.findUnique({
       where: model.keys(),
     });
 
@@ -57,10 +56,8 @@ export class AbstractRepository<
   }
 
   async update(model: Model) {
-    let entity: PrismaModel | null = null;
-
-    await this.catchNotFound(async () => {
-      entity = await this.getModelClient().update({
+    const entity: PrismaModel = await this.catchNotFound(async () => {
+      return this.dbClient.update({
         data: model.toEntity(),
         where: model.keys(),
       });
@@ -70,7 +67,7 @@ export class AbstractRepository<
   }
 
   async save(model: Model) {
-    await this.getModelClient().upsert({
+    await this.dbClient.upsert({
       create: model.toCreateEntity(),
       update: model.toEntity(),
       where: model.keys(),
@@ -78,10 +75,8 @@ export class AbstractRepository<
   }
 
   async delete(model: Model) {
-    let entity: PrismaModel | null = null;
-
-    await this.catchNotFound(async () => {
-      entity = await this.getModelClient().delete({
+    const entity: PrismaModel = await this.catchNotFound(() => {
+      return this.dbClient.delete({
         where: model.keys(),
       });
     });

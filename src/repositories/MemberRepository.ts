@@ -5,13 +5,17 @@ import { MemberModel } from '@/models/MemberModel';
 
 import { AbstractRepository } from './AbstractRepository';
 
-export class MemberRepository extends AbstractRepository<Member, MemberModel> {
+export class MemberRepository extends AbstractRepository<
+  PrismaClient['member'],
+  Member,
+  MemberModel
+> {
   constructor(dbClient: PrismaClient) {
-    super(dbClient, 'member');
+    super(dbClient.member);
   }
 
-  deleteByKeys(teamId: string, userId: string) {
-    const member = new MemberModel(teamId, userId);
+  deleteByKeys(teamId: string, inviteCodeOrUserId: string) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
 
     return this.delete(member);
   }
@@ -21,11 +25,11 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     let entity: Member | null = null;
 
     await this.catchNotFound(async () => {
-      entity = await this.dbClient.member.delete({
+      entity = await this.dbClient.delete({
         where: {
-          teamSkId: {
+          teamInviteCodeOrUserId: {
             teamId,
-            skId: verificationCode,
+            inviteCodeOrUserId: verificationCode,
           },
           status: InvitationStatus.PENDING,
         },
@@ -41,13 +45,13 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
   }
 
   async deleteAllMembers(teamId: string) {
-    const list = await this.dbClient.member.findMany({
+    const list = await this.dbClient.findMany({
       where: {
         teamId,
       },
     });
 
-    const deleteRes = await this.dbClient.member.deleteMany({
+    const deleteRes = await this.dbClient.deleteMany({
       where: {
         teamId,
       },
@@ -58,20 +62,20 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     }
 
     return list.map((elt) => {
-      const member = new MemberModel(elt.teamId, elt.skId);
+      const member = new MemberModel(elt.teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
       return member;
     });
   }
 
-  findByKeys(teamId: string, userId: string) {
-    const member = new MemberModel(teamId, userId);
+  findByKeys(teamId: string, inviteCodeOrUserId: string) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
 
     return this.get(member);
   }
 
   async findAllByTeamId(teamId: string, status?: InvitationStatus) {
-    const list = await this.dbClient.member.findMany({
+    const list = await this.dbClient.findMany({
       where: {
         teamId,
         status,
@@ -79,53 +83,57 @@ export class MemberRepository extends AbstractRepository<Member, MemberModel> {
     });
 
     return list.map((elt) => {
-      const member = new MemberModel(teamId, elt.skId);
+      const member = new MemberModel(teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
       return member;
     });
   }
 
-  async updateEmail(teamId: string, userId: string, email: string) {
-    await this.dbClient.member.update({
+  async updateEmail(teamId: string, inviteCodeOrUserId: string, email: string) {
+    await this.dbClient.update({
       data: {
         email,
       },
       where: {
-        teamSkId: {
+        teamInviteCodeOrUserId: {
           teamId,
-          skId: userId,
+          inviteCodeOrUserId,
         },
       },
     });
   }
 
-  async updateRole(teamId: string, userId: string, role: Role) {
-    await this.dbClient.member.update({
+  async updateRole(teamId: string, inviteCodeOrUserId: string, role: Role) {
+    await this.dbClient.update({
       data: {
         role,
       },
       where: {
-        teamSkId: {
+        teamInviteCodeOrUserId: {
           teamId,
-          skId: userId,
+          inviteCodeOrUserId,
         },
       },
     });
   }
 
-  async updateRoleIfNotOwner(teamId: string, userId: string, role: Role) {
-    const member = new MemberModel(teamId, userId);
+  async updateRoleIfNotOwner(
+    teamId: string,
+    inviteCodeOrUserId: string,
+    role: Role
+  ) {
+    const member = new MemberModel(teamId, inviteCodeOrUserId);
     let entity: Member | null = null;
 
     await this.catchNotFound(async () => {
-      entity = await this.dbClient.member.update({
+      entity = await this.dbClient.update({
         data: {
           role,
         },
         where: {
-          teamSkId: {
+          teamInviteCodeOrUserId: {
             teamId,
-            skId: userId,
+            inviteCodeOrUserId,
           },
           role: {
             not: Role.OWNER,

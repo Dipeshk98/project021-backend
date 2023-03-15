@@ -114,12 +114,12 @@ export class TeamController {
 
     res.json({
       list: list.map((elt) => ({
-        memberId: elt.skId,
+        memberId: elt.inviteCodeOrUserId,
         email: elt.getEmail(),
         role: elt.getRole(),
       })),
       inviteList: inviteList.map((elt) => ({
-        memberId: elt.skId,
+        memberId: elt.inviteCodeOrUserId,
         email: elt.getEmail(),
         role: elt.getRole(),
       })),
@@ -166,7 +166,7 @@ export class TeamController {
     await this.memberRepository.save(member);
 
     await this.emailService.send(
-      new TeamInviteEmailTemplate(team, member.skId),
+      new TeamInviteEmailTemplate(team, member.inviteCodeOrUserId),
       req.body.email
     );
 
@@ -313,7 +313,7 @@ export class TeamController {
 
     const success = await this.memberRepository.deleteByKeys(
       member.getTeamId(),
-      member.skId
+      member.inviteCodeOrUserId
     );
 
     if (!success) {
