@@ -23,7 +23,7 @@ describe('UserRepository', () => {
       await userRepository.createWithUserId('user-123');
 
       await expect(userRepository.createWithUserId('user-123')).rejects.toThrow(
-        'Unique constraint failed on the constraint'
+        'Unique constraint failed on the'
       );
     });
 

@@ -25,7 +25,7 @@ export class TodoRepository extends AbstractRepository<
     return this.delete(todo);
   }
 
-  async findAllByUserId(teamId: string) {
+  async findAllByTeamId(teamId: string) {
     const list = await this.dbClient.findMany({
       where: {
         ownerId: teamId,

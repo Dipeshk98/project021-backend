@@ -4,8 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import { execa } from 'execa';
 import pRetry from 'p-retry';
 
-const prismaDbPush = async () => {
-  await execa(
+const prismaDbPush = () => {
+  return execa(
     'prisma',
     ['db', 'push', '--accept-data-loss', '--force-reset', '--skip-generate'],
     {

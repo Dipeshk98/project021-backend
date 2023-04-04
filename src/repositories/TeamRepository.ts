@@ -56,8 +56,7 @@ export class TeamRepository extends AbstractRepository<
         const team = new TeamModel(elt.id);
         team.fromEntity(elt);
         return team;
-      })
-      .sort((team1, team2) => team1.id.localeCompare(team2.id));
+      });
   }
 
   async updateDisplayName(teamId: string, displayName: string) {

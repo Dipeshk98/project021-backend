@@ -29,7 +29,7 @@ export class MemberModel extends AbstractModel<Member> {
     if (inviteCodeOrUserId) {
       this.inviteCodeOrUserId = inviteCodeOrUserId;
     } else {
-      // In pending status, we use the skId for verification code
+      // In pending status, we use the inviteCodeOrUserId for verification code
       this.inviteCodeOrUserId = ulid() + nanoid(30);
     }
   }

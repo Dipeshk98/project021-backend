@@ -89,7 +89,7 @@ describe('TodoRepository', () => {
       todo3.setTitle('todo-user-3');
       await todoRepository.save(todo3);
 
-      const result = await todoRepository.findAllByUserId(teamId);
+      const result = await todoRepository.findAllByTeamId(teamId);
       expect(result).toHaveLength(3);
 
       expect(result[0]).toEqual(todo1);
@@ -123,7 +123,7 @@ describe('TodoRepository', () => {
       await todoRepository.deleteByKeys(teamId3, todo31.id);
 
       // The order is maintaining because the id is from `ulid` library
-      const todoList1 = await todoRepository.findAllByUserId(teamId1);
+      const todoList1 = await todoRepository.findAllByTeamId(teamId1);
 
       // Verify todos from User 1
       expect(todoList1).toHaveLength(2);
@@ -131,12 +131,12 @@ describe('TodoRepository', () => {
       expect(todoList1[1]).toEqual(todo12);
 
       // Verify todo from User 2
-      const todoList2 = await todoRepository.findAllByUserId(teamId2);
+      const todoList2 = await todoRepository.findAllByTeamId(teamId2);
       expect(todoList2).toHaveLength(1);
       expect(todoList2[0]).toEqual(todo21);
 
       // Verify todo from User 3
-      const todoList3 = await todoRepository.findAllByUserId(teamId3);
+      const todoList3 = await todoRepository.findAllByTeamId(teamId3);
       expect(todoList3).toHaveLength(0);
     });
   });

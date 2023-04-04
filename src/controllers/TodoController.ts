@@ -28,7 +28,7 @@ export class TodoController {
       req.params.teamId
     );
 
-    const list = await this.todoRepository.findAllByUserId(req.params.teamId);
+    const list = await this.todoRepository.findAllByTeamId(req.params.teamId);
 
     res.json({
       list: list.map((elt) => ({

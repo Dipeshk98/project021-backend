@@ -1,8 +1,7 @@
 # You don't need to change the following `service` value for one project.
 # But, when you have multiple projects, it'll have name collision.
 # So, you can replace service name and use an alphanumeric name
-# Please also update the name in https://github.com/Nextlessjs/modernmern-infra/blob/main/sst.json
-# Don't forget to append the '-infra' in the name in ModernMERN Infra
+# Please also update the environment variable `PROJECT_NAME` in infra, both name should match
 service: modernmern
 
 custom:
@@ -20,18 +19,14 @@ custom:
     offline: true
     staging: false
     prod: false
+  prismaEngine:
+    offline: "node_modules/.prisma/client/libquery_engine-*"
+    staging: "node_modules/.prisma/client/libquery_engine-rhel*"
+    prod: "node_modules/.prisma/client/libquery_engine-rhel*"
 
-  bundle:
-    linting: false
-    excludeFiles: "**/*.test.ts"
-    externals:
-      - "@prisma/client"
-    copyFiles:
-      - from: "prisma/schema.prisma"
-        to: "./"
-    packagerOptions:
-      scripts:
-        - prisma generate && rimraf node_modules/@prisma/engines/** && rimraf node_modules/prisma/libquery_engine-[^rhel]* && prisma db push
+  esbuild:
+    platform: "node"
+    target: node16
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
@@ -42,7 +37,8 @@ custom:
 provider:
   name: aws
   stage: ${self:custom.stage}
-  runtime: nodejs14.x
+  region: ${self:custom.region}
+  runtime: nodejs16.x
   memorySize: 512
   timeout: 10
   logRetentionInDays: 90
@@ -66,18 +62,6 @@ provider:
   iam:
     role:
       statements:
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-            - dynamodb:BatchGetItem
-          # Restrict our IAM role permissions to
-          # the specific table for the stage
-          Resource:
-            - !ImportValue "${self:custom.sstApp}-TableArn"
         - Effect: "Allow"
           Action:
             - ses:SendRawEmail
@@ -126,10 +110,14 @@ resources:
   - ${file(./aws-resources/cognito-policy.yml)}
 
 package:
+  patterns:
+    - "!**/*.test.ts"
+    - ${self:custom.prismaEngine.${self:custom.stage}}
+    - "node_modules/.prisma/client/schema.prisma"
   individually: true
 
 plugins:
   - serverless-dotenv-plugin
-  - serverless-bundle
+  - serverless-esbuild
   - serverless-offline-ses-v2
   - serverless-offline

@@ -29,7 +29,7 @@ describe('AbstractRepository', () => {
 
       await dummyTestRepository.create(model);
       await expect(dummyTestRepository.create(model)).rejects.toThrow(
-        'Unique constraint failed on the constraint'
+        'Unique constraint failed on the'
       );
     });
 
