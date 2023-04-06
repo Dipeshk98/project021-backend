@@ -1,4 +1,5 @@
-import { spawn as spawnCb } from 'child_process';
+/* eslint-disable import/no-extraneous-dependencies */
+import { spawn as spawnCb } from 'cross-spawn';
 import { promisify } from 'util';
 
 const spawn = promisify(spawnCb);
