@@ -20,7 +20,7 @@ custom:
     staging: false
     prod: false
   prismaEngine:
-    offline: "node_modules/.prisma/client/libquery_engine-*"
+    offline: "node_modules/.prisma/client/*.node"
     staging: "node_modules/.prisma/client/libquery_engine-rhel*"
     prod: "node_modules/.prisma/client/libquery_engine-rhel*"
 
