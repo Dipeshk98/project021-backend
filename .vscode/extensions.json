@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "mikestead.dotenv",
     "humao.rest-client",
-    "Orta.vscode-jest"
+    "Orta.vscode-jest",
+    "yoavbls.pretty-ts-errors"
   ]
 }
