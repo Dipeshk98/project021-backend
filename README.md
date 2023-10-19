@@ -66,7 +66,7 @@ You can easily configure Modern MERN by making a search in the whole project wit
 
 You have access to the whole code source if you need further customization. The provided code is only example for you to start your SaaS products. The sky is the limit 🚀.
 
-For your information, you don't need to customize the service name in `serverless.yml` file for one project. But, when you have multiple projects, it'll have name collision. So, you need to update the service name in `serverless.yml` file by choosing a new name instead `modernmern`. And, don't forget to update `sst.json` file in Modern MERN Infra repository.
+For your information, you don't need to customize the service name in `serverless.yml` file for one project. But, when you have multiple projects, it'll have name collision. So, you need to update the service name in `serverless.yml` file by choosing a new name instead `safespacelabs`. And, don't forget to update `sst.json` file in Modern MERN Infra repository.
 
 ### Deploy to production
 

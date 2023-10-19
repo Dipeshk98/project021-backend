@@ -2,7 +2,9 @@
 # But, when you have multiple projects, it'll have name collision.
 # So, you can replace service name and use an alphanumeric name
 # Please also update the environment variable `PROJECT_NAME` in infra, both name should match
-service: modernmern
+org: safespacelabs
+app: safespacelabs
+service: safespacelabs-backend
 
 custom:
   # Our stage is based on what is passed in when running serverless
@@ -76,7 +78,7 @@ provider:
 functions:
   app:
     handler: src/handler.handler
-    reservedConcurrency: 30 # Arbitrary number, it can be increased or decreased
+    reservedConcurrency: 10 # Arbitrary number, it can be increased or decreased
     events:
       - httpApi:
           path: "/billing/webhook"
@@ -106,9 +108,9 @@ functions:
           authorizer:
             type: aws_iam
 
-resources:
-  # Cognito Identity Pool Policy
-  - ${file(./aws-resources/cognito-policy.yml)}
+# resources:
+# Cognito Identity Pool Policy
+# - ${file(./aws-resources/cognito-policy.yml)}
 
 package:
   patterns:
