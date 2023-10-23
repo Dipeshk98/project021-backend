@@ -53,7 +53,7 @@ provider:
       allowedOrigins:
         # In serverless 2, this step was automatically done but, serverless>=3.0.0 introduces changes that significantly impacts this step.
         # FIXME: Update the allowedOrigin to matched the environment variable `FRONTEND_DOMAIN_URL`.
-        - http://localhost:3000
+        - https://main.d254mjh22d7ga1.amplifyapp.com
       allowedHeaders: # Set the default value from Serverless framework, this workaround is needed by serverless-offline
         - Content-Type
         - X-Amz-Date
@@ -108,9 +108,9 @@ functions:
           authorizer:
             type: aws_iam
 
-# resources:
-# Cognito Identity Pool Policy
-# - ${file(./aws-resources/cognito-policy.yml)}
+resources:
+  # Cognito Identity Pool Policy
+  - ${file(./aws-resources/cognito-policy.yml)}
 
 package:
   patterns:
