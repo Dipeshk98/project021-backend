@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["es2017"],
-    "module": "esnext",
+    "module": "CommonJS",    // Change from "esnext" to "CommonJS"
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "removeComments": true,
@@ -10,7 +10,6 @@
     "alwaysStrict": true,
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true,
-
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -18,27 +17,24 @@
     "noUnusedParameters": true,
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
-
     "target": "es2017",
     "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
-
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
   "ts-node": {
-    "require": ["tsconfig-paths/register"],
+    "require": ["tsconfig-paths/register"],  // Ensure path resolution is still applied
     "compilerOptions": {
-      "module": "CommonJS"
+      "module": "CommonJS"                     // Match with root tsconfig
     }
   },
   "exclude": ["./dist/**/*", "./node_modules/**/*"]
