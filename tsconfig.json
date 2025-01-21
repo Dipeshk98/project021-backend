@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2017"],
+    "lib": ["es2021"],
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -19,7 +19,7 @@
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
 
-    "target": "es2017",
+    "target": "es2021",
     "outDir": "dist",
     "declaration": true,
     "sourceMap": true,
@@ -32,8 +32,16 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"],
+      "@models/*": ["src/models/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@services/*": ["src/services/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"],
@@ -41,5 +49,5 @@
       "module": "CommonJS"
     }
   },
-  "exclude": ["./dist/**/*", "./node_modules/**/*"]
+  "exclude": ["./dist/**/*", "./node_modules/**/*", "./prisma/generated/**/*"]
 }

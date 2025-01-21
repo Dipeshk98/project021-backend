@@ -1,8 +1,4 @@
 import type { Team } from '@prisma/client';
-import { ObjectId } from 'bson';
-
-import type { ISubscription } from '@/types/StripeTypes';
-
 import { AbstractModel } from './AbstractModel';
 
 export class TeamModel extends AbstractModel<Team> {
@@ -12,21 +8,15 @@ export class TeamModel extends AbstractModel<Team> {
 
   private stripeCustomerId: string | null = null;
 
-  private subscription: ISubscription | null = null;
+  private subscriptionId: string | null = null;
 
-  /**
-   * Constructor for Team class.
-   * @constructor
-   * @param id - The ID of the team.
-   */
-  constructor(id?: string) {
+  private subscriptionProductId: string | null = null;
+
+  private subscriptionStatus: string | null = null;
+
+  constructor(id: string) {
     super();
-
-    if (id) {
-      this.id = id;
-    } else {
-      this.id = new ObjectId().toString();
-    }
+    this.id = id;
   }
 
   setDisplayName(name: string) {
@@ -45,14 +35,6 @@ export class TeamModel extends AbstractModel<Team> {
     return this.stripeCustomerId;
   }
 
-  hasStripeCustomerId() {
-    return !!this.stripeCustomerId;
-  }
-
-  getSubscription() {
-    return this.subscription;
-  }
-
   keys() {
     return {
       id: this.id,
@@ -62,7 +44,11 @@ export class TeamModel extends AbstractModel<Team> {
   toCreateEntity() {
     return {
       ...this.keys(),
-      ...this.toEntity(),
+      displayName: this.displayName,
+      stripeCustomerId: this.stripeCustomerId,
+      subscriptionId: this.subscriptionId,
+      subscriptionProductId: this.subscriptionProductId,
+      subscriptionStatus: this.subscriptionStatus,
     };
   }
 
@@ -70,26 +56,17 @@ export class TeamModel extends AbstractModel<Team> {
     return {
       displayName: this.displayName,
       stripeCustomerId: this.stripeCustomerId,
-      subscriptionId: this.subscription?.id,
-      subscriptionProductId: this.subscription?.productId,
-      subscriptionStatus: this.subscription?.status,
+      subscriptionId: this.subscriptionId,
+      subscriptionProductId: this.subscriptionProductId,
+      subscriptionStatus: this.subscriptionStatus,
     };
   }
 
   fromEntity(entity: Team) {
     this.displayName = entity.displayName;
     this.stripeCustomerId = entity.stripeCustomerId;
-
-    if (
-      entity.subscriptionId &&
-      entity.subscriptionProductId &&
-      entity.subscriptionStatus
-    ) {
-      this.subscription = {
-        id: entity.subscriptionId,
-        productId: entity.subscriptionProductId,
-        status: entity.subscriptionStatus,
-      };
-    }
+    this.subscriptionId = entity.subscriptionId;
+    this.subscriptionProductId = entity.subscriptionProductId;
+    this.subscriptionStatus = entity.subscriptionStatus;
   }
 }

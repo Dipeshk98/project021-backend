@@ -1,40 +1,33 @@
 /* eslint-disable import/no-extraneous-dependencies,no-console */
-import { MongoMemoryReplSet } from 'mongodb-memory-server';
+import { PrismaClient } from '@prisma/client';
 import pRetry from 'p-retry';
 
-import { prismaDbPush } from './prisma';
+const prisma = new PrismaClient();
 
-let mongodb: MongoMemoryReplSet | null = null;
+const prismaDbPush = async () => {
+  try {
+    console.log('Pushing Prisma schema to PostgreSQL...');
+    await prisma.$executeRaw`SELECT 1`; // Verify the connection
+    console.log('Prisma schema successfully synced with PostgreSQL');
+  } catch (error) {
+    console.error('Failed to connect to PostgreSQL:', error);
+    throw error;
+  }
+};
 
 (async () => {
-  mongodb = new MongoMemoryReplSet({
-    instanceOpts: [
-      {
-        port: 27017,
-        storageEngine: 'wiredTiger',
-      },
-      {
-        port: 27018,
-        storageEngine: 'wiredTiger',
-      },
-    ],
-  });
-
-  await mongodb.start();
-
-  process.env.MONGODB_DATABASE_ENDPOINT = mongodb
-    .getUri()
-    .replace('/?replicaSet=', `/modernmern?replicaSet=`);
+  process.env.DATABASE_URL =
+    process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/mydatabase';
 
   await pRetry(prismaDbPush, { retries: 5 });
 
-  console.log(`MongoDB ready - endpoint: ${mongodb.getUri()}`);
+  console.log(`PostgreSQL ready - endpoint: ${process.env.DATABASE_URL}`);
 })();
 
-process.on('SIGINT', () => {
-  if (mongodb) {
-    mongodb.stop();
-  }
-
+process.on('SIGINT', async () => {
+  console.log('Closing PostgreSQL connection...');
+  await prisma.$disconnect();
   process.exit();
 });
+
+export { prisma };

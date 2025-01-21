@@ -15,36 +15,36 @@ export class UserRepository extends AbstractRepository<
     super(dbClient.user);
   }
 
-  async createWithUserId(userId: string) {
-    const user = new UserModel(userId);
+  async createWithUserId(providerId: string) {
+    const user = new UserModel(providerId);
 
     await this.create(user);
 
     return user;
   }
 
-  findByUserId(userId: string) {
-    const user = new UserModel(userId);
+  findByUserId(providerId: string) {
+    const user = new UserModel(providerId);
 
     return this.get(user);
   }
 
-  async findOrCreate(userId: string) {
-    const user = await this.findByUserId(userId);
+  async findOrCreate(providerId: string) {
+    const user = await this.findByUserId(providerId);
 
     if (!user) {
-      return this.createWithUserId(userId);
+      return this.createWithUserId(providerId);
     }
 
     return user;
   }
 
-  async strictFindByUserId(userId: string) {
-    const user = await this.findByUserId(userId);
+  async strictFindByUserId(providerId: string) {
+    const user = await this.findByUserId(providerId);
 
     if (!user) {
       throw new ApiError(
-        `Incorrect UserID ${userId}`,
+        `Incorrect UserID ${providerId}`,
         null,
         ErrorCode.INCORRECT_USER_ID
       );
@@ -53,8 +53,8 @@ export class UserRepository extends AbstractRepository<
     return user;
   }
 
-  async removeTeam(userId: string, teamId: string) {
-    const user = await this.strictFindByUserId(userId);
+  async removeTeam(providerId: string, teamId: string) {
+    const user = await this.strictFindByUserId(providerId);
     user.removeTeam(teamId);
     await this.save(user);
   }
