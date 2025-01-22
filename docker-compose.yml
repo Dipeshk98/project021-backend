@@ -6,6 +6,8 @@ services:
     container_name: my-postgres
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Use the password from .env file
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"  # Expose PostgreSQL port to the host
     volumes:
@@ -14,12 +16,26 @@ services:
       - .env  # Make sure to load environment variables from the .env file
 
   adminer:
-    image: adminer:latest  # The Adminer Docker image
+    image: adminer:latest
     container_name: my-adminer
     ports:
       - "8080:8080"  # Expose Adminer on port 8080 on your localhost
     depends_on:
       - postgres  # Adminer depends on PostgreSQL being ready first
+
+  backend:
+    build:
+      context: .  # Build the backend image from the current directory (Dockerfile)
+    container_name: my-backend
+    environment:
+      DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB  # Connection URL for the PostgreSQL DB
+    ports:
+      - "3000:3000"  # Expose backend on port 3000
+    depends_on:
+      - postgres  # Make sure PostgreSQL is ready before starting the backend
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container for live code changes (for dev)
+    command: sh -c "npx prisma generate && npm run dev"  # Ensure Prisma Client is generated before starting the app
 
 volumes:
   postgres_data:
