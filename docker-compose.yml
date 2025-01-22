@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: my-postgres
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Use the password from .env file
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port to the host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent data storage for PostgreSQL
+    env_file:
+      - .env  # Make sure to load environment variables from the .env file
+
+  adminer:
+    image: adminer:latest  # The Adminer Docker image
+    container_name: my-adminer
+    ports:
+      - "8080:8080"  # Expose Adminer on port 8080 on your localhost
+    depends_on:
+      - postgres  # Adminer depends on PostgreSQL being ready first
+
+volumes:
+  postgres_data:
+    driver: local

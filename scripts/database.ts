@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
 const prismaDbPush = async () => {
   try {
     console.log('Pushing Prisma schema to PostgreSQL...');
-    await prisma.$executeRaw`SELECT 1`; // Verify the connection
+    // Switched from $executeRaw to $queryRaw for querying.
+    await prisma.$queryRaw`SELECT 1`; // Verify the connection
     console.log('Prisma schema successfully synced with PostgreSQL');
   } catch (error) {
     console.error('Failed to connect to PostgreSQL:', error);
