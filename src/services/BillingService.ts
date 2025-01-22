@@ -56,8 +56,6 @@ export class BillingService {
   }
 
   async processEvent(event: Stripe.Event) {
-    // FYI, here is the explanation why we need these Stripe events:
-    // https://github.com/stripe/stripe-firebase-extensions/issues/146
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
@@ -92,8 +90,6 @@ export class BillingService {
   }
 
   private async retrieveSubscriptionAndUpdate(subscriptionId: string) {
-    // `customer.subscription.updated` can be called `before customer.subscription.created`
-    // what is why we need to retrieve subscription to get the latest version
     const subscription = await this.paymentSdk.subscriptions.retrieve(
       subscriptionId
     );
@@ -114,7 +110,7 @@ export class BillingService {
 
     if (
       customer.deleted === true ||
-      customer.metadata.teamId === undefined ||
+      !customer.metadata.teamId ||
       typeof product !== 'string'
     ) {
       throw new ApiError(
@@ -141,7 +137,6 @@ export class BillingService {
     const customerId = team.getStripeCustomerId();
 
     if (customerId) {
-      // Return the Stripe customer ID if the user has already one.
       return customerId;
     }
 
@@ -165,13 +160,9 @@ export class BillingService {
       line_items: [
         {
           price: priceId,
-          // For metered billing, do not pass quantity
           quantity: 1,
         },
       ],
-      // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
-      // the actual Session ID is returned in the query parameter when your customer
-      // is redirected to the success page.
       success_url: `${Env.getValue(
         'FRONTEND_DOMAIN_URL'
       )}/dashboard/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -181,13 +172,11 @@ export class BillingService {
 
   getPlanFromSubscription(subscription: ISubscription | null) {
     if (!subscription) {
-      // Subscription isn't defined, it means the user is at free tier.
       return this.billingPlanEnv.free;
     }
 
     const pricing = this.billingPlanEnv[subscription.productId];
 
-    // List of Stripe Subscription statuses: https://stripe.com/docs/billing/subscriptions/overview#subscription-statuses
     if (pricing && subscription.status === SubscriptionStatus.ACTIVE) {
       return pricing;
     }

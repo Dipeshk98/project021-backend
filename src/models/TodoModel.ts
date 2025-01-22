@@ -1,6 +1,4 @@
 import type { Todo } from '@prisma/client';
-import { ObjectId } from 'bson';
-
 import { AbstractModel } from './AbstractModel';
 
 export class TodoModel extends AbstractModel<Todo> {
@@ -10,21 +8,10 @@ export class TodoModel extends AbstractModel<Todo> {
 
   private title: string = '';
 
-  /**
-   * Constructor for Todo class.
-   * @constructor
-   * @param ownerId - The owner ID of the todo.
-   * @param id - The ID of the todo.
-   */
-  constructor(ownerId: string, id?: string) {
+  constructor(ownerId: string, id: string) {
     super();
+    this.id = id;
     this.ownerId = ownerId;
-
-    if (id) {
-      this.id = id;
-    } else {
-      this.id = new ObjectId().toString();
-    }
   }
 
   setTitle(title: string) {
@@ -44,7 +31,8 @@ export class TodoModel extends AbstractModel<Todo> {
   toCreateEntity() {
     return {
       ...this.keys(),
-      ...this.toEntity(),
+      ownerId: this.ownerId,
+      title: this.title,
     };
   }
 

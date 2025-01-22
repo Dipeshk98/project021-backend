@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 
 import type { AbstractModel } from '@/models/AbstractModel';
 
-// Use this file as a external library
 export class AbstractRepository<
   DbClient extends {
     [Key in keyof Prisma.UserDelegate<
@@ -18,10 +17,8 @@ export class AbstractRepository<
     this.dbClient = dbClient;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async catchNotFound(execute: () => Promise<any>) {
     let res;
-
     try {
       res = await execute();
     } catch (ex: any) {
@@ -32,7 +29,6 @@ export class AbstractRepository<
         throw ex;
       }
     }
-
     return res;
   }
 
@@ -43,14 +39,12 @@ export class AbstractRepository<
   }
 
   async get(model: Model): Promise<Model | null> {
-    const entity: PrismaModel = await this.dbClient.findUnique({
+    const entity: PrismaModel | null = await this.dbClient.findUnique({
       where: model.keys(),
     });
-
     if (!entity) {
       return null;
     }
-
     model.fromEntity(entity);
     return model;
   }
@@ -62,7 +56,6 @@ export class AbstractRepository<
         where: model.keys(),
       });
     });
-
     return entity;
   }
 
@@ -80,7 +73,6 @@ export class AbstractRepository<
         where: model.keys(),
       });
     });
-
     return entity;
   }
 }

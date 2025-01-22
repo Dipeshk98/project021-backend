@@ -1,57 +1,91 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider        = "prisma-client-js"
-  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
-  previewFeatures = ["extendedWhereUnique"]
+datasource db {
+  provider = "postgresql" // Specifies the PostgreSQL provider
+  url      = env("DATABASE_URL") // Fetches the connection string from the .env file
 }
 
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+generator client {
+  provider = "prisma-client-js" // Generates the Prisma client
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  providerId  String   @unique
-  firstSignIn DateTime
-  teamList    String[]
+  id              String     @id // Company ID as the primary key
+  status          String     // Active or Inactive
+  userId          String     @unique // Unique identifier for tracking employee records
+  username        String?    // Unique username for login
+  firstName       String     // Employee's first name
+  lastName        String     // Employee's last name
+  gender          String?    // Gender: M/F
+  email           String     @unique // Complete email address
+  manager         String?    // Manager's USERID or NO_MANAGER
+  hr              String?    // HR representative's USERID or NO_HR
+  timezone        String?    // Time zone (e.g., PST, EST)
+  mi              String?    // Employee's full name
+  department      String?    // Department name
+  jobCode         String?    // Job role code
+  division        String?    // Division name
+  location        String?    // Location where employee works
+  hireDate        DateTime?  // Hire date (mm/dd/yyyy format)
+  empId           String?    // Employee ID
+  title           String?    // Employee's title
+  bizPhone        String?    // Business phone number
+  fax             String?    // Fax number
+  addr1           String?    // Address line 1
+  addr2           String?    // Address line 2
+  city            String?    // City
+  state           String?    // State
+  zip             String?    // ZIP code
+  country         String?    // Country
+  reviewFreq      String?    // Review frequency (e.g., Annual)
+  lastReviewDate  DateTime?  // Last review date
+  customFields    Json?      // Custom fields (CUSTOM01-CUSTOM15)
+  matrixManager   String?    // Dotted line manager's USERID
+  defaultLocale   String?    // Locale used by the employee
+  proxy           String?    // Proxy's USERID
+
+  @@map("users")
 }
 
 model Team {
-  id                    String  @id @default(auto()) @map("_id") @db.ObjectId
-  displayName           String
-  stripeCustomerId      String?
-  subscriptionId        String?
-  subscriptionProductId String?
-  subscriptionStatus    String?
+  id                    String  @id @default(uuid()) // Primary key
+  displayName           String                      // Team name
+  stripeCustomerId      String?                     // Stripe customer ID
+  subscriptionId        String?                     // Subscription ID
+  subscriptionProductId String?                     // Subscription product ID
+  subscriptionStatus    String?                     // Subscription status
+
+  @@map("teams") // Maps to the "teams" table in the database
 }
 
 model Member {
-  id                 String           @id @default(auto()) @map("_id") @db.ObjectId
-  teamId             String
-  inviteCodeOrUserId String
-  email              String
-  role               Role
-  status             InvitationStatus
+  id                 String           @id @default(uuid()) // Primary key
+  teamId             String                                       // Foreign key to Team
+  inviteCodeOrUserId String                                       // Invite code or user ID
+  email              String                                       // Member email
+  role               Role                                         // Role (ENUM)
+  status             InvitationStatus                            // Invitation status (ENUM)
 
-  @@unique([teamId, inviteCodeOrUserId], name: "teamInviteCodeOrUserId")
+  @@unique([teamId, inviteCodeOrUserId], name: "teamInviteCodeOrUserId") // Unique composite key
+  @@map("members") // Maps to the "members" table in the database
 }
 
 model Todo {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId String
-  title   String
+  id      String @id @default(uuid()) // Primary key
+  ownerId String                     // Foreign key to User or Team
+  title   String                     // Todo title
+
+  @@map("todos") // Maps to the "todos" table in the database
 }
 
+// Enums
 enum Role {
   OWNER
   ADMIN
+  MEMBER
   READ_ONLY
 }
 
 enum InvitationStatus {
-  ACTIVE
   PENDING
+  ACTIVE
+  INACTIVE
 }

@@ -2,7 +2,7 @@
 # But, when you have multiple projects, it'll have name collision.
 # So, you can replace service name and use an alphanumeric name
 # Please also update the environment variable `PROJECT_NAME` in infra, both name should match
-org: safespacelabs
+org: safespaceinc
 app: safespacelabs
 service: safespacelabs
 

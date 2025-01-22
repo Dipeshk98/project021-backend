@@ -1,38 +1,33 @@
 /* eslint-disable import/no-extraneous-dependencies,no-console */
-import { MongoClient } from 'mongodb';
+import { PrismaClient } from '@prisma/client';
 import pRetry from 'p-retry';
-import { prismaDbPush } from './prisma';
+
+const prisma = new PrismaClient();
+
+const prismaDbPush = async () => {
+  try {
+    console.log('Pushing Prisma schema to PostgreSQL...');
+    await prisma.$executeRaw`SELECT 1`; // Verify the connection
+    console.log('Prisma schema successfully synced with PostgreSQL');
+  } catch (error) {
+    console.error('Failed to connect to PostgreSQL:', error);
+    throw error;
+  }
+};
 
 (async () => {
-  // Fetch the MongoDB connection URL from environment variable
-  const databaseUrl = process.env.DATABASE_URL || 'mongodb://localhost:27017/your-database-name'; // Default to local if not set
+  process.env.DATABASE_URL =
+    process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/mydatabase';
 
-  // Connect to MongoDB locally using MongoClient
-  const client = new MongoClient(databaseUrl);
+  await pRetry(prismaDbPush, { retries: 5 });
 
-  try {
-    // Connect to MongoDB
-    await client.connect();
-    console.log('Successfully connected to MongoDB locally.');
-
-    // Optionally, list available databases to ensure connection is successful
-    const databasesList = await client.db().admin().listDatabases();
-    console.log('Databases available:', databasesList.databases);
-    
-    // Set the environment variable to your local MongoDB instance
-    process.env.MONGODB_DATABASE_ENDPOINT = databaseUrl;
-
-    // Retry Prisma DB push if necessary
-    await pRetry(prismaDbPush, { retries: 5 });
-    console.log('MongoDB ready - endpoint:', process.env.MONGODB_DATABASE_ENDPOINT);
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
-  } finally {
-    await client.close();
-  }
+  console.log(`PostgreSQL ready - endpoint: ${process.env.DATABASE_URL}`);
 })();
 
-process.on('SIGINT', () => {
-  console.log('Process interrupted. Exiting...');
+process.on('SIGINT', async () => {
+  console.log('Closing PostgreSQL connection...');
+  await prisma.$disconnect();
   process.exit();
 });
+
+export { prisma };

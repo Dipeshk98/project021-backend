@@ -36,27 +36,17 @@ export class TeamRepository extends AbstractRepository<
   }
 
   async findAllByTeamIdList(teamIdList: string[]) {
-    const promiseList = [];
+    const list = await this.dbClient.findMany({
+      where: {
+        id: { in: teamIdList },
+      },
+    });
 
-    for (let i = 0; i < teamIdList.length; i += 1) {
-      promiseList.push(
-        this.dbClient.findUnique({
-          where: {
-            id: teamIdList[i],
-          },
-        })
-      );
-    }
-
-    const result = await Promise.all(promiseList);
-
-    return result
-      .filter((elt): elt is Team => elt !== null)
-      .map((elt) => {
-        const team = new TeamModel(elt.id);
-        team.fromEntity(elt);
-        return team;
-      });
+    return list.map((elt) => {
+      const team = new TeamModel(elt.id);
+      team.fromEntity(elt);
+      return team;
+    });
   }
 
   async updateDisplayName(teamId: string, displayName: string) {

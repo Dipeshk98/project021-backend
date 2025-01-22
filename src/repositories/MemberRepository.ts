@@ -16,7 +16,6 @@ export class MemberRepository extends AbstractRepository<
 
   deleteByKeys(teamId: string, inviteCodeOrUserId: string) {
     const member = new MemberModel(teamId, inviteCodeOrUserId);
-
     return this.delete(member);
   }
 
@@ -46,21 +45,14 @@ export class MemberRepository extends AbstractRepository<
 
   async deleteAllMembers(teamId: string) {
     const list = await this.dbClient.findMany({
-      where: {
-        teamId,
-      },
+      where: { teamId },
     });
-
     const deleteRes = await this.dbClient.deleteMany({
-      where: {
-        teamId,
-      },
+      where: { teamId },
     });
-
     if (deleteRes.count === 0) {
       return null;
     }
-
     return list.map((elt) => {
       const member = new MemberModel(elt.teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
@@ -70,18 +62,13 @@ export class MemberRepository extends AbstractRepository<
 
   findByKeys(teamId: string, inviteCodeOrUserId: string) {
     const member = new MemberModel(teamId, inviteCodeOrUserId);
-
     return this.get(member);
   }
 
   async findAllByTeamId(teamId: string, status?: InvitationStatus) {
     const list = await this.dbClient.findMany({
-      where: {
-        teamId,
-        status,
-      },
+      where: { teamId, status },
     });
-
     return list.map((elt) => {
       const member = new MemberModel(teamId, elt.inviteCodeOrUserId);
       member.fromEntity(elt);
@@ -91,9 +78,7 @@ export class MemberRepository extends AbstractRepository<
 
   async updateEmail(teamId: string, inviteCodeOrUserId: string, email: string) {
     await this.dbClient.update({
-      data: {
-        email,
-      },
+      data: { email },
       where: {
         teamInviteCodeOrUserId: {
           teamId,
@@ -105,9 +90,7 @@ export class MemberRepository extends AbstractRepository<
 
   async updateRole(teamId: string, inviteCodeOrUserId: string, role: Role) {
     await this.dbClient.update({
-      data: {
-        role,
-      },
+      data: { role },
       where: {
         teamInviteCodeOrUserId: {
           teamId,
@@ -127,9 +110,7 @@ export class MemberRepository extends AbstractRepository<
 
     await this.catchNotFound(async () => {
       entity = await this.dbClient.update({
-        data: {
-          role,
-        },
+        data: { role },
         where: {
           teamInviteCodeOrUserId: {
             teamId,

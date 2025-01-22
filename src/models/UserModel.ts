@@ -1,5 +1,4 @@
 import type { User } from '@prisma/client';
-
 import { AbstractModel } from './AbstractModel';
 
 export class UserModel extends AbstractModel<User> {
@@ -9,11 +8,6 @@ export class UserModel extends AbstractModel<User> {
 
   private teamList: string[];
 
-  /**
-   * Constructor for User class.
-   * @constructor
-   * @param id - The ID of the user.
-   */
   constructor(providerId: string) {
     super();
     this.providerId = providerId;
@@ -21,24 +15,20 @@ export class UserModel extends AbstractModel<User> {
     this.teamList = [];
   }
 
-  getFirstSignIn() {
-    return this.firstSignIn;
-  }
-
   setFirstSignIn(date: Date) {
     this.firstSignIn = date;
   }
 
+  getFirstSignIn() {
+    return this.firstSignIn;
+  }
+
+  setTeamList(teamList: string[]) {
+    this.teamList = teamList;
+  }
+
   getTeamList() {
     return this.teamList;
-  }
-
-  addTeam(teamId: string) {
-    this.teamList.push(teamId);
-  }
-
-  removeTeam(teamId: string) {
-    this.teamList = this.teamList.filter((elt) => elt !== teamId);
   }
 
   keys() {
@@ -50,7 +40,8 @@ export class UserModel extends AbstractModel<User> {
   toCreateEntity() {
     return {
       ...this.keys(),
-      ...this.toEntity(),
+      firstSignIn: this.firstSignIn,
+      teamList: this.teamList,
     };
   }
 
