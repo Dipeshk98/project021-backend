@@ -35,7 +35,7 @@ services:
       - postgres  # Make sure PostgreSQL is ready before starting the backend
     volumes:
       - .:/app  # Mount the current directory to /app in the container for live code changes (for dev)
-    command: sh -c "npx prisma generate && npm run dev"  # Ensure Prisma Client is generated before starting the app
+    command: sh -c "npx prisma generate && npx prisma migrate dev --name y && npm run dev"  # Ensure Prisma Client is generated before starting the app
 
 volumes:
   postgres_data:
