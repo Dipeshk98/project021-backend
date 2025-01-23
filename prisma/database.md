@@ -45,7 +45,7 @@ In the Adminer login page, use the following credentials to connect to the Postg
 Now, apply any pending Prisma migrations to the PostgreSQL database:
 
 ```bash
-npx prisma migrate deploy
+npx prisma migrate dev
 ```
 
 This will apply all the migrations and update the database schema.
