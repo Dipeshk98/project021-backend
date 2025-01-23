@@ -35,6 +35,30 @@ If you have **Adminer** running, you can access it at: (for databse)
 - [http://localhost:8080](http://localhost:8080)
 
 ---
+### 4. Log in to Adminer with the Following Credentials
+
+In the Adminer login page, use the following credentials to connect to the PostgreSQL database:
+
+- **System**: PostgreSQL
+- **Server**: `postgres` (this is the name of the PostgreSQL service in Docker, not `localhost`)
+- **Username**: `postgres`
+- **Password**: `yourpassword` (this is the password defined in your `.env` file)
+- **Database**: `postgres` (or the name of the database you are using)
+
+### 5. Run Prisma Migrations
+
+Now, apply any pending Prisma migrations to the PostgreSQL database:
+
+```bash
+npx prisma migrate dev
+```
+
+This will apply all the migrations and update the database schema.
+
+### 6. Verify the Tables in Adminer
+
+After the migration completes, you should be able to see the tables and data that were created by the migrations within Adminer.
+
 
 ## Stopping the Application
 
