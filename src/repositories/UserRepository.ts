@@ -1,7 +1,4 @@
 import type { PrismaClient, User } from '@prisma/client';
-
-import { ApiError } from '@/errors/ApiError';
-import { ErrorCode } from '@/errors/ErrorCode';
 import { UserModel } from '@/models/UserModel';
 
 import { AbstractRepository } from './AbstractRepository';
@@ -29,33 +26,26 @@ export class UserRepository extends AbstractRepository<
     return this.get(user);
   }
 
-  async findOrCreate(providerId: string) {
-    const user = await this.findByUserId(providerId);
-
-    if (!user) {
-      return this.createWithUserId(providerId);
-    }
-
-    return user;
+  async findById(id: string): Promise<User | null> {
+    return this.dbClient.findUnique({
+      where: { id },
+    });
   }
-
-  async strictFindByUserId(providerId: string) {
-    const user = await this.findByUserId(providerId);
-
-    if (!user) {
-      throw new ApiError(
-        `Incorrect UserID ${providerId}`,
-        null,
-        ErrorCode.INCORRECT_USER_ID
-      );
-    }
-
-    return user;
+  async updateById(id: string, updateData: Partial<User>): Promise<User> {
+    return this.dbClient.update({
+      where: { id },
+      data: updateData,
+    });
   }
-
-  async removeTeam(providerId: string, teamId: string) {
-    const user = await this.strictFindByUserId(providerId);
-    user.removeTeam(teamId);
-    await this.save(user);
+  async deleteById(id: string): Promise<void> {
+    await this.dbClient.delete({
+      where: { id },
+    });
+  }
+  async findAll(): Promise<User[]> {
+    return this.dbClient.findMany(); // Fetch all users
+  }
+  async create(data: Partial<User>): Promise<User> {
+    return this.dbClient.create({ data }); // Create a new user
   }
 }

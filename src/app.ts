@@ -9,6 +9,7 @@ import { billingRouter } from './routes/BillingRoute';
 import { teamRouter } from './routes/TeamRoute';
 import { todoRouter } from './routes/TodoRoute';
 import { userRouter } from './routes/UserRoute';
+import { I9userRouter } from './routes/I9UserRoute';
 import { Env } from './utils/Env';
 
 const app = express();
@@ -34,7 +35,7 @@ app.use(userRouter);
 app.use(todoRouter);
 app.use(billingRouter);
 app.use(teamRouter);
-
+app.use(I9userRouter);
 // Error handler
 app.use(handler404);
 app.use(errorHandler);

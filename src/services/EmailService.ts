@@ -9,13 +9,14 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    let sesOptions: SESClientConfig = {};
-
-    if (Env.getValue('IS_OFFLINE', false)) {
-      sesOptions = {
-        endpoint: 'http://localhost:8005',
-      };
-    }
+    // Configure AWS SES client with credentials from .env
+    const sesOptions: SESClientConfig = {
+      region: Env.getValue('AWS_REGION', 'us-west-1'),
+      credentials: {
+        accessKeyId: Env.getValue('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: Env.getValue('AWS_SECRET_ACCESS_KEY'),
+      },
+    };
 
     this.transporter = nodemailer.createTransport({
       SES: { ses: new AWS.SES(sesOptions), aws: AWS },
@@ -32,5 +33,31 @@ export class EmailService {
       subject: template.buildSubject(),
       text: template.buildText(),
     });
+  }
+   /**
+   * Send an email with a custom subject and body.
+   * @param to - Recipient email address
+   * @param subject - Email subject
+   * @param body - Email body content (plain text)
+   * @returns {Promise<boolean>} - Returns true if email is sent, false otherwise
+   */
+   async sendEmail(to: string, subject: string, body: string): Promise<boolean> {
+    try {
+      await this.transporter.sendMail({
+        from: {
+          name: Env.getValue('SITE_NAME', 'HR Team'),
+          address: Env.getValue('SENDER_EMAIL_ADDRESS', 'hr@example.com'),
+        },
+        to,
+        subject,
+        text: body,
+      });
+
+      console.log(`✅ Email sent successfully to ${to}`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Error sending email to ${to}:`, error);
+      return false;
+    }
   }
 }

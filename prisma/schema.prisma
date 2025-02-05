@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql" // Specifies the PostgreSQL provider
-  url      = env("DATABASE_URL") // Fetches the connection string from the .env file
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,85 +8,202 @@ generator client {
    binaryTargets = ["native", "linux-musl"]
 }
 
+///// EXISTING USERS TABLE (FOR OTHER PURPOSES) /////
+
 model User {
-  id              String     @id // Company ID as the primary key
-  status          String     // Active or Inactive
-  userId          String     @unique // Unique identifier for tracking employee records
-  username        String?    // Unique username for login
-  firstName       String     // Employee's first name
-  lastName        String     // Employee's last name
-  gender          String?    // Gender: M/F
-  email           String     @unique // Complete email address
-  manager         String?    // Manager's USERID or NO_MANAGER
-  hr              String?    // HR representative's USERID or NO_HR
-  timezone        String?    // Time zone (e.g., PST, EST)
-  mi              String?    // Employee's full name
-  department      String?    // Department name
-  jobCode         String?    // Job role code
-  division        String?    // Division name
-  location        String?    // Location where employee works
-  hireDate        DateTime?  // Hire date (mm/dd/yyyy format)
-  empId           String?    // Employee ID
-  title           String?    // Employee's title
-  bizPhone        String?    // Business phone number
-  fax             String?    // Fax number
-  addr1           String?    // Address line 1
-  addr2           String?    // Address line 2
-  city            String?    // City
-  state           String?    // State
-  zip             String?    // ZIP code
-  country         String?    // Country
-  reviewFreq      String?    // Review frequency (e.g., Annual)
-  lastReviewDate  DateTime?  // Last review date
-  customFields    Json?      // Custom fields (CUSTOM01-CUSTOM15)
-  matrixManager   String?    // Dotted line manager's USERID
-  defaultLocale   String?    // Locale used by the employee
-  proxy           String?    // Proxy's USERID
+  id              String     @id
+  status          String
+  userId          String     @unique
+  username        String?
+  firstName       String
+  lastName        String
+  gender          String?
+  email           String     @unique
+  manager         String?
+  hr              String?
+  timezone        String?
+  mi              String?
+  department      String?
+  jobCode         String?
+  division        String?
+  location        String?
+  hireDate        DateTime?
+  empId           String?
+  title           String?
+  bizPhone        String?
+  fax             String?
+  addr1           String?
+  addr2           String?
+  city            String?
+  state           String?
+  zip             String?
+  country         String?
+  reviewFreq      String?
+  lastReviewDate  DateTime?
+  customFields    Json?
+  matrixManager   String?
+  defaultLocale   String?
+  proxy           String?
 
   @@map("users")
 }
 
-model Team {
-  id                    String  @id @default(uuid()) // Primary key
-  displayName           String                      // Team name
-  stripeCustomerId      String?                     // Stripe customer ID
-  subscriptionId        String?                     // Subscription ID
-  subscriptionProductId String?                     // Subscription product ID
-  subscriptionStatus    String?                     // Subscription status
+///// NEW USERS TABLE FOR I-9 DOCUMENTS SYSTEM /////
 
-  @@map("teams") // Maps to the "teams" table in the database
+model I9Users {
+  user_id       String   @id @default(uuid())  // Unique User ID
+  first_name    String   @db.VarChar(100)      // Given Name
+  last_name     String   @db.VarChar(100)      // Family Name (Last Name)
+  middle_initial String?  @db.VarChar(10)      // Middle Initial (Optional)
+  other_last_names String? @db.VarChar(100)    // Other Last Names Used (if any)
+
+  email         String   @unique @db.VarChar(255) // Employee's Email Address
+  phone_number  String?  @db.VarChar(20)          // Employee's Telephone Number
+  created_at    DateTime @default(now())          // Timestamp
+
+  // 🔹 Address Fields - Made Optional
+  address_street  String?   @db.VarChar(255) // Street Number and Name
+  address_apt     String?   @db.VarChar(50)  // Apartment Number (if any)
+  city           String?   @db.VarChar(100)  // City or Town
+  state          String?   @db.VarChar(100)  // State
+  zip_code       String?   @db.VarChar(20)   // ZIP Code
+
+  // 🔹 Date of Birth and SSN - Made Optional
+  date_of_birth  DateTime?  // Date of Birth (mm/dd/yyyy)
+  ssn            String?   @unique @db.VarChar(11) // U.S. Social Security Number
+
+  // 🔹 Citizenship Status Selection - Made Optional
+  citizenship_status      String?  @db.VarChar(50) // Citizenship Status Selection
+  alien_registration_number String? @db.VarChar(50)  // Alien Registration Number (if applicable)
+  work_authorization_expiry DateTime? // Work Authorization Expiry Date (if applicable)
+  uscis_a_number          String?  @db.VarChar(50) // USCIS A-Number
+  i94_admission_number    String?  @db.VarChar(50) // Form I-94 Admission Number
+  foreign_passport_number String?  @db.VarChar(50) // Foreign Passport Number
+  country_of_issuance     String?  @db.VarChar(100) // Country of Issuance for Foreign Passport
+
+  // 🔹 Signature & Date - Made Optional
+  employee_signature String?   @db.Text  // Employee's Signature
+  signed_date       DateTime?  // Date Signed
+
+  // Relations
+  i9_forms I9Forms[]
+
+  @@map("i9_users") // Mapping the table name
 }
 
-model Member {
-  id                 String           @id @default(uuid()) // Primary key
-  teamId             String                                       // Foreign key to Team
-  inviteCodeOrUserId String                                       // Invite code or user ID
-  email              String                                       // Member email
-  role               Role                                         // Role (ENUM)
-  status             InvitationStatus                            // Invitation status (ENUM)
 
-  @@unique([teamId, inviteCodeOrUserId], name: "teamInviteCodeOrUserId") // Unique composite key
-  @@map("members") // Maps to the "members" table in the database
+
+///// UPDATED I-9 SYSTEM TABLES ///// 
+
+model I9Forms {
+  form_id        String   @id @default(uuid())
+  user_id        String
+  form_status    String   @db.VarChar(50)
+  submission_date DateTime
+  updated_at     DateTime @updatedAt
+
+  // Relations
+  user I9Users @relation(fields: [user_id], references: [user_id])
+  i9_employee_section I9EmployeeSection?
+  i9_employer_section I9EmployerSection?
+  i9_documents I9Documents[]
+  i9_reverification I9Reverification?
+  audit_trail AuditTrail[]
+
+  @@map("i9_forms")
 }
 
-model Todo {
-  id      String @id @default(uuid()) // Primary key
-  ownerId String                     // Foreign key to User or Team
-  title   String                     // Todo title
+model I9EmployeeSection {
+  section_id       String   @id @default(uuid())
+  form_id          String   @unique
+  employee_name    String   @db.VarChar(255)
+  date_of_birth    DateTime
+  ssn              String   @unique @db.VarChar(11)
+  citizenship_status String @db.VarChar(50)
+  alien_registration_number String? @db.VarChar(50)
+  work_authorization_expiry DateTime?
+  signature        String
+  signed_date      DateTime
 
-  @@map("todos") // Maps to the "todos" table in the database
+  // Relations
+  form I9Forms @relation(fields: [form_id], references: [form_id])
+
+  @@map("i9_employee_section")
 }
 
-// Enums
-enum Role {
-  OWNER
-  ADMIN
-  MEMBER
-  READ_ONLY
+model I9EmployerSection {
+  section_id       String   @id @default(uuid()) // Unique Section ID
+  form_id          String   @unique              // Foreign key to I9Forms
+  employer_name    String   @db.VarChar(255)     // Employer’s Business or Organization Name
+  employer_address String   @db.VarChar(255)     // Employer’s Address
+  title            String   @db.VarChar(255)     // Title of Employer or Representative
+  signature        String                        // Signature of Employer or Representative
+  signed_date      DateTime                      // Date when signed (Today's Date)
+  first_day_of_employment DateTime               // 🆕 New Field: First Day of Employment
+
+  // Relations
+  form I9Forms @relation(fields: [form_id], references: [form_id])
+
+  @@map("i9_employer_section") // Maps to "i9_employer_section" in the database
 }
 
-enum InvitationStatus {
-  PENDING
-  ACTIVE
-  INACTIVE
+
+model I9Documents {
+  document_id       String   @id @default(uuid())  // Unique Document ID
+  form_id           String                                   // Foreign key to I9Forms
+  document_title    String   @db.VarChar(255)               // Added: Document Title
+  document_type     String   @db.VarChar(100)               // Passport, Driver's License, etc.
+  document_number   String?  @db.VarChar(100)               // Document Number (if any)
+  document_expiry   DateTime?                               // Expiration Date (if any)
+  issuing_authority String   @db.VarChar(255)               // Authority that issued the document
+  uploaded_file     String                                   // File path or reference to uploaded doc
+  uploaded_at       DateTime @default(now())                // Timestamp when uploaded
+
+  // Relations
+  form I9Forms @relation(fields: [form_id], references: [form_id])
+
+  @@map("i9_documents") // Maps to "i9_documents" in the database
+}
+
+model I9Reverification {
+  reverification_id   String   @id @default(uuid())  // Unique ID
+  form_id             String   @unique               // Foreign key to I9Forms
+
+  // 🆕 New Fields Based on the Form
+  rehire_date         DateTime?  // Date of Rehire (if applicable)
+  new_last_name       String?    @db.VarChar(100)  // Updated last name
+  new_first_name      String?    @db.VarChar(100)  // Updated first name
+  new_middle_initial  String?    @db.VarChar(10)   // Updated middle initial
+
+  reverification_document_title  String?  @db.VarChar(100)  // Title of the reverification document
+  reverification_document_number String?  @db.VarChar(100)  // Document number (if any)
+  reverification_document_expiry DateTime?  // Expiration Date (if any)
+
+  employer_name       String   @db.VarChar(255)  // Name of Employer or Authorized Representative
+  employer_signature  String   // Signature of Employer or Representative
+  employer_signed_date DateTime  // Today's Date when employer signs
+
+  additional_information String?  // Any additional information
+  used_dhs_alternative  Boolean?  // Checkbox if an alternative DHS verification procedure was used
+
+  updated_at          DateTime @updatedAt  // Timestamp for the last update
+
+  // Relations
+  form I9Forms @relation(fields: [form_id], references: [form_id])
+
+  @@map("i9_reverification") // Maps to "i9_reverification" in the database
+}
+
+
+model AuditTrail {
+  audit_id       String   @id @default(uuid())
+  form_id        String
+  action         String   @db.VarChar(50)
+  performed_by   String
+  performed_at   DateTime @default(now())
+
+  // Relations
+  form I9Forms @relation(fields: [form_id], references: [form_id])
+
+  @@map("audit_trail")
 }

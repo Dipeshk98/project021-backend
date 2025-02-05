@@ -3,6 +3,11 @@ import {
   teamRepository,
   todoRepository,
   userRepository,
+  i9UserRepository,
+  i9DocumentRepository,
+  i9EmployerRepository,
+  i9FormRepository,
+  i9Reverification,
 } from '@/repositories';
 import { billingService, emailService, teamService } from '@/services';
 
@@ -10,6 +15,7 @@ import { BillingController } from './BillingController';
 import { TeamController } from './TeamController';
 import { TodoController } from './TodoController';
 import { UserController } from './UserController';
+import { I9UserController } from './I9UserController';
 
 // Manual `dependency injection` (DI) without external libraries.
 // No overhead, some DI library can increase cold start in serverless architecture.
@@ -17,7 +23,20 @@ import { UserController } from './UserController';
 const userController = new UserController(
   teamService,
   userRepository,
-  teamRepository
+  teamRepository,
+  i9UserRepository, 
+  emailService
+);
+const I9userController = new I9UserController(
+  teamService,
+  userRepository,
+  teamRepository,
+  i9UserRepository, 
+  emailService,
+  i9DocumentRepository,
+  i9EmployerRepository,
+  i9FormRepository,
+  i9Reverification,
 );
 const todoController = new TodoController(teamService, todoRepository);
 const billingController = new BillingController(teamService, billingService);
@@ -30,4 +49,4 @@ const teamController = new TeamController(
   emailService
 );
 
-export { billingController, teamController, todoController, userController };
+export { billingController, teamController, todoController, userController,I9userController };
