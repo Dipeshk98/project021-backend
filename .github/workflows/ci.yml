@@ -1,0 +1,57 @@
+name: CI for Backend with Docker Compose
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Load Environment Variables from GitHub Secrets
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "DATABASE_URL=postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}" >> .env
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+
+      - name: Set Up Docker Compose
+        working-directory: .
+        run: |
+          docker-compose down -v --remove-orphans
+          docker system prune -af
+          docker-compose up -d --build
+
+      # Uncomment this part once tests are implemented
+      # - name: Wait for PostgreSQL to Be Ready
+      #   run: docker-compose exec postgres pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h localhost
+      # - name: Run Tests
+      #   run: docker-compose exec backend npm test
+      # - name: Send Email on Build Failure
+      #   if: failure()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 587
+      #     username: ${{ secrets.SMTP_USERNAME }}
+      #     password: ${{ secrets.SMTP_PASSWORD }}
+      #     subject: GitHub Actions Workflow Failed
+      #     body: Build failed in ${{ github.repository }} at ${{ github.sha }}.
+      #     to: ${{ secrets.RECIPIENT_EMAIL }}
+      #     from: ${{ secrets.SMTP_USERNAME }}
+      - name: Stop and Clean Up Docker Compose
+        working-directory: .
+        run: docker-compose down
