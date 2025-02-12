@@ -1,5 +1,6 @@
 import type { Member } from '@prisma/client';
 import { InvitationStatus, Role } from '@prisma/client';
+
 import { AbstractModel } from './AbstractModel';
 
 export class MemberModel extends AbstractModel<Member> {

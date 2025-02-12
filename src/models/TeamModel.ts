@@ -1,4 +1,5 @@
 import type { Team } from '@prisma/client';
+
 import { AbstractModel } from './AbstractModel';
 
 export class TeamModel extends AbstractModel<Team> {

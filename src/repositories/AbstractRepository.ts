@@ -17,7 +17,7 @@ export class AbstractRepository<
     this.dbClient = dbClient;
   }
 
-  async catchNotFound(execute: () => Promise<any>) {
+  static async catchNotFound(execute: () => Promise<any>) {
     let res;
     try {
       res = await execute();

@@ -1,4 +1,5 @@
-import type { PrismaClient, I9Documents } from '@prisma/client';
+import type { I9Documents, PrismaClient } from '@prisma/client';
+
 import { AbstractRepository } from './AbstractRepository';
 
 export class I9DocumentRepository extends AbstractRepository<

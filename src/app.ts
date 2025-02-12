@@ -6,10 +6,10 @@ import helmet from 'helmet';
 
 import { errorHandler, handler404 } from './controllers/ErrorController';
 import { billingRouter } from './routes/BillingRoute';
+import { I9userRouter } from './routes/I9UserRoute';
 import { teamRouter } from './routes/TeamRoute';
 import { todoRouter } from './routes/TodoRoute';
 import { userRouter } from './routes/UserRoute';
-import { I9userRouter } from './routes/I9UserRoute';
 import { Env } from './utils/Env';
 
 const app = express();

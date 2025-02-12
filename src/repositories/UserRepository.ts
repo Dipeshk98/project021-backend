@@ -1,4 +1,5 @@
 import type { PrismaClient, User } from '@prisma/client';
+
 import { UserModel } from '@/models/UserModel';
 
 import { AbstractRepository } from './AbstractRepository';
@@ -31,20 +32,24 @@ export class UserRepository extends AbstractRepository<
       where: { id },
     });
   }
+
   async updateById(id: string, updateData: Partial<User>): Promise<User> {
     return this.dbClient.update({
       where: { id },
       data: updateData,
     });
   }
+
   async deleteById(id: string): Promise<void> {
     await this.dbClient.delete({
       where: { id },
     });
   }
+
   async findAll(): Promise<User[]> {
     return this.dbClient.findMany(); // Fetch all users
   }
+
   async create(data: Partial<User>): Promise<User> {
     return this.dbClient.create({ data }); // Create a new user
   }

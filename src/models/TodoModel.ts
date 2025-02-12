@@ -1,4 +1,5 @@
 import type { Todo } from '@prisma/client';
+
 import { AbstractModel } from './AbstractModel';
 
 export class TodoModel extends AbstractModel<Todo> {
