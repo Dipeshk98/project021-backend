@@ -26,21 +26,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-<<<<<<< HEAD
-=======
 
 
->>>>>>> a05c24bfc797c9ff4becdc94ddaa6013aed1eaf7
       - name: Set Up Docker Compose
         working-directory: .
         run: |
           docker-compose down -v --remove-orphans
           docker system prune -af
           docker-compose up -d --build
-<<<<<<< HEAD
-=======
-
->>>>>>> a05c24bfc797c9ff4becdc94ddaa6013aed1eaf7
       # Uncomment this part once tests are implemented
       # - name: Wait for PostgreSQL to Be Ready
       #   run: docker-compose exec postgres pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h localhost
