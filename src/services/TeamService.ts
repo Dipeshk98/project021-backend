@@ -53,11 +53,14 @@ export class TeamService {
       );
     }
 
-    for (const elt of memberList) {
-      if (elt.getStatus() === InvitationStatus.ACTIVE) {
-        await this.userRepository.removeTeam(elt.inviteCodeOrUserId, teamId);
-      }
-    }
+    // Collect all promises and execute them in parallel
+    const removeTeamPromises = memberList
+      .filter((elt) => elt.getStatus() === InvitationStatus.ACTIVE)
+      .map((elt) =>
+        this.userRepository.removeTeam(elt.inviteCodeOrUserId, teamId)
+      );
+
+    await Promise.all(removeTeamPromises); // Execute all removals concurrently
   }
 
   async join(team: TeamModel, user: UserModel, userEmail: string, role: Role) {
@@ -137,8 +140,10 @@ export class TeamService {
   async updateEmailAllTeams(user: UserModel, email: string) {
     const teamList = user.getTeamList();
 
-    for (const elt of teamList) {
-      await this.memberRepository.updateEmail(elt, user.providerId, email);
-    }
+    await Promise.all(
+      teamList.map((elt) =>
+        this.memberRepository.updateEmail(elt, user.providerId, email)
+      )
+    );
   }
 }

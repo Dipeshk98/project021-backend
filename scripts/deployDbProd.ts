@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies,no-console */
 import { MongoClient } from 'mongodb';
+
 import { prismaDbPush } from './prisma';
 
 (async () => {

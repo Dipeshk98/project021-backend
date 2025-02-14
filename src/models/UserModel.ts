@@ -1,4 +1,5 @@
 import type { User } from '@prisma/client';
+
 import { AbstractModel } from './AbstractModel';
 
 export class UserModel extends AbstractModel<User> {

@@ -20,6 +20,13 @@
         "project": "./tsconfig.json"
       },
       "rules": {
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "variable",
+            "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"]
+          }
+        ],
         "prettier/prettier": [
           "error",
           {

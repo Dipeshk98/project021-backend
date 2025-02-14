@@ -17,7 +17,8 @@ const prismaDbPush = async () => {
 
 (async () => {
   process.env.DATABASE_URL =
-    process.env.DATABASE_URL || 'postgresql://username:password@localhost:5432/mydatabase';
+    process.env.DATABASE_URL ||
+    'postgresql://username:password@localhost:5432/mydatabase';
 
   await pRetry(prismaDbPush, { retries: 5 });
 

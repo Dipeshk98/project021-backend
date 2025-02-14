@@ -34,14 +34,15 @@ export class EmailService {
       text: template.buildText(),
     });
   }
-   /**
+
+  /**
    * Send an email with a custom subject and body.
    * @param to - Recipient email address
    * @param subject - Email subject
    * @param body - Email body content (plain text)
    * @returns {Promise<boolean>} - Returns true if email is sent, false otherwise
    */
-   async sendEmail(to: string, subject: string, body: string): Promise<boolean> {
+  async sendEmail(to: string, subject: string, body: string): Promise<boolean> {
     try {
       await this.transporter.sendMail({
         from: {
@@ -53,10 +54,10 @@ export class EmailService {
         text: body,
       });
 
-      console.log(`✅ Email sent successfully to ${to}`);
+      // console.log(`✅ Email sent successfully to ${to}`);
       return true;
     } catch (error) {
-      console.error(`❌ Error sending email to ${to}:`, error);
+      // console.error(`❌ Error sending email to ${to}:`, error);
       return false;
     }
   }

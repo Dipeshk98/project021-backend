@@ -1,4 +1,5 @@
-import type { PrismaClient, I9Users} from '@prisma/client';
+import type { I9Users, PrismaClient } from '@prisma/client';
+
 import { AbstractRepository } from './AbstractRepository';
 
 export class I9UserRepository extends AbstractRepository<
@@ -16,16 +17,18 @@ export class I9UserRepository extends AbstractRepository<
       where: { user_id },
     });
   }
- // Fetch an I-9 user by email
- async findI9UserByEmail(email: string): Promise<I9Users | null> {
-  return this.dbClient.findUnique({
-    where: { email },
-  });
-}
-// Create a new I-9 user
-async create(data: Partial<I9Users>): Promise<I9Users> {
-  return this.dbClient.create({
-    data
-  });
-}
+
+  // Fetch an I-9 user by email
+  async findI9UserByEmail(email: string): Promise<I9Users | null> {
+    return this.dbClient.findUnique({
+      where: { email },
+    });
+  }
+
+  // Create a new I-9 user
+  async create(data: Partial<I9Users>): Promise<I9Users> {
+    return this.dbClient.create({
+      data,
+    });
+  }
 }

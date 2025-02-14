@@ -1,4 +1,5 @@
-import type { PrismaClient, I9Forms } from '@prisma/client';
+import type { I9Forms, PrismaClient } from '@prisma/client';
+
 import { AbstractRepository } from './AbstractRepository';
 
 export class I9FormRepository extends AbstractRepository<
@@ -16,6 +17,7 @@ export class I9FormRepository extends AbstractRepository<
       where: { form_id },
     });
   }
+
   async createI9Form(data: Partial<I9Forms>): Promise<I9Forms> {
     return this.dbClient.create({
       data,

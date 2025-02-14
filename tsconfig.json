@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["es2017"],
-    "module": "CommonJS",    // Change from "esnext" to "CommonJS"
+    "module": "CommonJS", // Change from "esnext" to "CommonJS"
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "removeComments": true,
@@ -41,9 +41,9 @@
     "emitDecoratorMetadata": true
   },
   "ts-node": {
-    "require": ["tsconfig-paths/register"],  // Ensure path resolution is still applied
+    "require": ["tsconfig-paths/register"], // Ensure path resolution is still applied
     "compilerOptions": {
-      "module": "CommonJS"                     // Match with root tsconfig
+      "module": "CommonJS" // Match with root tsconfig
     }
   },
   "exclude": ["./dist/**/*", "./node_modules/**/*", "./prisma/generated/**/*"]
