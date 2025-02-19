@@ -2,7 +2,7 @@
 FROM node:18-alpine
 
 # Step 2: Install OpenSSL and other dependencies required by Prisma
-RUN apk add --no-cache openssl
+RUN apk update && apk add --no-cache openssl openssl-dev
 
 # Step 3: Set the working directory in the container
 WORKDIR /app
@@ -17,9 +17,10 @@ RUN npm install --force
 COPY . .
 
 # Step 7: Generate the Prisma client (with the correct binary target for Alpine)
-RUN npx prisma generate
+# You can set the binary target explicitly to ensure compatibility with Alpine
+RUN npx prisma generate 
 
-# Step 8: Expose port 3000
+# Step 8: Expose port 4000 (ensure this is the correct port for your app)
 EXPOSE 4000
 
 # Step 9: Start the application (in development mode)

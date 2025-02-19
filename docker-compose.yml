@@ -30,7 +30,7 @@ services:
     environment:
       DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB  # Connection URL for the PostgreSQL DB
     ports:
-      - "3000:3000"  # Expose backend on port 3000
+      - "4000:4000"  # Expose backend on port 3000
     depends_on:
       - postgres  # Make sure PostgreSQL is ready before starting the backend
     volumes:
