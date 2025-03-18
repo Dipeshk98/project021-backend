@@ -4,7 +4,7 @@
   "description": "Serverless framework ExpressJS TypeScript",
   "scripts": {
     "dev:db": "ts-node scripts/database.ts",
-    "dev:server": "cross-env NODE_ENV=development sls offline start --no-auth  --stage offline",
+    "dev:server": "cross-env NODE_ENV=development sls offline --noAuth",
     "dev": "run-p dev:*",
     "tail-log": "sls logs -f app -t",
     "deploy:db": "dotenv -e .env.production -c -- ts-node --esm scripts/deployDbProd.ts",
