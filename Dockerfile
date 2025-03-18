@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Step 5: Install dependencies
-RUN npm install --force
+# RUN npm install --force
 
 # Step 6: Copy the entire project into the container
 COPY . .
