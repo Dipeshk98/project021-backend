@@ -1,46 +1,222 @@
 # Configure S3 backend for state management
 terraform {
   backend "s3" {
-    bucket         = "project021-backend-terraform-state"
-    key            = "project021-backend/terraform.tfstate"
-    region         = "us-west-1"
-
+    bucket = "project021-backend-terraform-state"
+    key    = "project021-backend/terraform.tfstate"
+    region = "us-west-1"
   }
 }
+
+# AWS Provider
 provider "aws" {
-  region = "us-west-1"
+  region = var.aws_region
 }
 
-# ✅ Create an ECS Cluster
-resource "aws_ecs_cluster" "ecs_cluster" {
+# Variables
+variable "aws_region" {
+  description = "AWS region to deploy resources"
+  type        = string
+  default     = "us-west-1"
+}
+
+variable "container_image" {
+  description = "Docker image to use for the container"
+  type        = string
+}
+
+variable "app_port" {
+  description = "Port exposed by the docker image"
+  type        = number
+  default     = 4000
+}
+
+variable "desired_count" {
+  description = "Number of ECS tasks to run"
+  type        = number
+  default     = 1
+}
+
+variable "vpc_id" {
+  description = "VPC ID where resources will be deployed"
+  type        = string
+  default     = "vpc-0a20efc55fab4f2aa"
+}
+
+variable "subnet_ids" {
+  description = "Subnet IDs for ECS tasks and ALB"
+  type        = list(string)
+  default     = ["subnet-0a8d3b2c34d4e9329", "subnet-0ac2c7330f9607de6"]
+}
+
+variable "execution_role_arn" {
+  description = "ARN of the IAM role for ECS task execution"
+  type        = string
+  default     = "arn:aws:iam::843365213176:role/ecsTaskExecutionRole"
+}
+
+# ECS Cluster
+resource "aws_ecs_cluster" "main" {
   name = "project021-backend-cluster"
+  
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 
-# ✅ Define an ECS Task Definition (Using Existing IAM Role)
-resource "aws_ecs_task_definition" "ecs_task" {
+# CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "ecs_logs" {
+  name              = "/ecs/project021-backend"
+  retention_in_days = 30
+}
+
+# Security Groups
+resource "aws_security_group" "alb" {
+  name        = "project021-backend-alb-sg"
+  description = "Controls access to the ALB"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP traffic"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTPS traffic"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "project021-backend-alb-sg"
+  }
+}
+
+resource "aws_security_group" "ecs_tasks" {
+  name        = "project021-backend-ecs-sg"
+  description = "Controls access to the ECS tasks"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = var.app_port
+    to_port         = var.app_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+    description     = "Allow inbound traffic from ALB"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "project021-backend-ecs-sg"
+  }
+}
+
+# ALB
+resource "aws_lb" "main" {
+  name               = "project021-backend-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = var.subnet_ids
+  
+  enable_deletion_protection = false
+  
+  tags = {
+    Name = "project021-backend-alb"
+  }
+}
+
+# Target Group
+resource "aws_lb_target_group" "main" {
+  name        = "project021-backend-tg"
+  port        = var.app_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+  
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/health"  # Update to a valid health check path
+    port                = "traffic-port"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 5
+    protocol            = "HTTP"
+    matcher             = "200-399"
+  }
+  
+  tags = {
+    Name = "project021-backend-tg"
+  }
+}
+
+# ALB Listener
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 80
+  protocol          = "HTTP"
+  
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
+  }
+}
+
+# ECS Task Definition
+resource "aws_ecs_task_definition" "main" {
   family                   = "project021-backend-task"
-  requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
   cpu                      = "512"
   memory                   = "1024"
-  execution_role_arn       = "arn:aws:iam::843365213176:role/ecsTaskExecutionRole" # Use your existing IAM role
-
+  execution_role_arn       = var.execution_role_arn
+  
+  # Force new deployment on each apply by adding a timestamp to the task definition
   container_definitions = jsonencode([
     {
-      name  = "project021-backend"
-      image = var.container_image
+      name         = "project021-backend"
+      image        = var.container_image
+      essential    = true
+      
       portMappings = [
         {
-          containerPort = 4000
-          hostPort      = 4000
+          containerPort = var.app_port
+          hostPort      = var.app_port
+          protocol      = "tcp"
         }
       ]
-      # Add logging configuration
+      
+      environment = [
+        {
+          name  = "DEPLOYMENT_TIMESTAMP"
+          value = timestamp()
+        }
+      ]
+      
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/project021-backend"
-          "awslogs-region"        = "us-west-1"
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_logs.name
+          "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
       }
@@ -48,147 +224,58 @@ resource "aws_ecs_task_definition" "ecs_task" {
   ])
 }
 
-# Create CloudWatch log group
-resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/project021-backend"
-  retention_in_days = 30
-}
-
-# Create security group for the ALB
-resource "aws_security_group" "alb_sg" {
-  name        = "project021-backend-alb-sg"
-  description = "Security group for the ALB"
+# ECS Service
+resource "aws_ecs_service" "main" {
+  name                = "project021-backend-service"
+  cluster             = aws_ecs_cluster.main.id
+  task_definition     = aws_ecs_task_definition.main.arn
+  desired_count       = var.desired_count
+  launch_type         = "FARGATE"
+  scheduling_strategy = "REPLICA"
   
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # Force new deployment on each apply
+  force_new_deployment = true
   
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# Update the ECS security group to only allow traffic from the ALB
-# Fix the ECS security group
-resource "aws_security_group" "ecs_sg" {
-  name        = "project021-backend-ecs-sg"
-  description = "Security group for ECS tasks"
-  
-  # Allow traffic from the ALB to port 4000
-  ingress {
-    from_port       = 4000
-    to_port         = 4000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]
-    description     = "Allow traffic from ALB to container port"
-  }
-  
-  # For testing purposes, you can also add direct access 
-  # (remove this after testing if not needed)
-  ingress {
-    from_port   = 4000
-    to_port     = 4000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow direct access to container port for testing"
-  }
-  
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# Create an Application Load Balancer
-resource "aws_lb" "backend_alb" {
-  name               = "project021-backend-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = ["subnet-0a8d3b2c34d4e9329", "subnet-0ac2c7330f9607de6"]
-  
-  enable_deletion_protection = false
-}
-
-# Create ALB target group
-resource "aws_lb_target_group" "backend_tg" {
-  name        = "project021-backend-tg"
-  port        = 4000
-  protocol    = "HTTP"
-  vpc_id      = "vpc-0a20efc55fab4f2aa" # Replace with your VPC ID
-  target_type = "ip"
-  
-  health_check {
-    enabled             = true
-    interval            = 30
-    path                = "/" # Update this to a valid health check endpoint
-    port                = "traffic-port"
-    healthy_threshold   = 3
-    unhealthy_threshold = 3
-    timeout             = 5
-    protocol            = "HTTP"
-    matcher             = "200-399" # Acceptable HTTP response codes
-  }
-}
-
-# Create ALB listener
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.backend_alb.arn
-  port              = 80
-  protocol          = "HTTP"
-  
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.backend_tg.arn
-  }
-}
-
-# ✅ Update the ECS Service to use the ALB
-resource "aws_ecs_service" "ecs_service" {
-  name            = "project021-backend-service"
-  cluster         = aws_ecs_cluster.ecs_cluster.id
-  task_definition = aws_ecs_task_definition.ecs_task.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-  
-  # Add load balancer configuration
-  load_balancer {
-    target_group_arn = aws_lb_target_group.backend_tg.arn
-    container_name   = "project021-backend"
-    container_port   = 4000
-  }
-
   network_configuration {
-    subnets         = ["subnet-0a8d3b2c34d4e9329", "subnet-0ac2c7330f9607de6"]
-    security_groups = [aws_security_group.ecs_sg.id] # Use the new security group
+    subnets          = var.subnet_ids
+    security_groups  = [aws_security_group.ecs_tasks.id]
     assign_public_ip = true
   }
   
-  # Ensure the ALB is created before the service
-  depends_on = [aws_lb_listener.http]
+  load_balancer {
+    target_group_arn = aws_lb_target_group.main.arn
+    container_name   = "project021-backend"
+    container_port   = var.app_port
+  }
+  
+  depends_on = [
+    aws_lb_listener.http,
+    aws_ecs_task_definition.main
+  ]
+  
+  # Set deployment configuration for faster deployments
+  deployment_configuration {
+    deployment_circuit_breaker {
+      enable   = true
+      rollback = true
+    }
+    maximum_percent         = 200
+    minimum_healthy_percent = 50
+  }
 }
 
-# Output the ALB DNS name
+# Outputs
 output "alb_dns_name" {
-  value       = aws_lb.backend_alb.dns_name
-  description = "The DNS name of the load balancer"
+  value       = aws_lb.main.dns_name
+  description = "DNS name of the load balancer"
 }
-variable "container_image" {
-  description = "Docker image to use for the container"
-  type        = string
+
+output "ecs_cluster_name" {
+  value       = aws_ecs_cluster.main.name
+  description = "Name of the ECS cluster"
+}
+
+output "ecs_service_name" {
+  value       = aws_ecs_service.main.name
+  description = "Name of the ECS service"
 }
