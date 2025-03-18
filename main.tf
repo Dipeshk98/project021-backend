@@ -28,7 +28,7 @@ resource "aws_ecs_task_definition" "ecs_task" {
   container_definitions = jsonencode([
     {
       name  = "project021-backend"
-      image = "843365213176.dkr.ecr.us-west-1.amazonaws.com/main-backend:latest"
+      image = var.container_image
       portMappings = [
         {
           containerPort = 4000
