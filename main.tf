@@ -4,8 +4,7 @@ terraform {
     bucket         = "project021-backend-terraform-state"
     key            = "project021-backend/terraform.tfstate"
     region         = "us-west-1"
-    encrypt        = true
-    dynamodb_table = "project021-backend-terraform-locks"
+
   }
 }
 provider "aws" {
