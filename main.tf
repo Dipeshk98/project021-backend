@@ -188,3 +188,7 @@ output "alb_dns_name" {
   value       = aws_lb.backend_alb.dns_name
   description = "The DNS name of the load balancer"
 }
+variable "container_image" {
+  description = "Docker image to use for the container"
+  type        = string
+}
