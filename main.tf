@@ -11,6 +11,10 @@ resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/MyTask"
   retention_in_days = 30
 }
+resource "aws_cloudwatch_log_group" "frontend_logs" {
+  name              = "/ecs/MyFrontendTask"
+  retention_in_days = 30
+}
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "MyTask"
@@ -161,4 +165,140 @@ resource "aws_ecs_service" "ecs_service" {
 output "alb_endpoint" {
   description = "ALB URL"
   value       = aws_lb.application_lb.dns_name
+}
+# ECS Task Definition for Frontend
+resource "aws_ecs_task_definition" "frontend_task" {
+  family                   = "MyFrontendTask"
+  cpu                      = "1024"
+  memory                   = "3072"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  execution_role_arn       = "arn:aws:iam::843365213176:role/ecsTaskExecutionRole"
+
+  container_definitions = jsonencode([
+    {
+      name         = "MyFrontendContainer"
+      image        = "843365213176.dkr.ecr.us-west-1.amazonaws.com/project021-frontend:latest"
+      portMappings = [
+        {
+          containerPort = 3000
+          protocol      = "tcp"
+        }
+      ],
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = "/ecs/MyFrontendTask",
+          "awslogs-region"        = "us-west-1",
+          "awslogs-stream-prefix" = "ecs"
+        }
+      },
+      essential = true
+    }
+  ])
+    depends_on = [aws_cloudwatch_log_group.frontend_logs] # Ensure log group exists first
+}
+
+# Security Group for Frontend ALB
+resource "aws_security_group" "frontend_alb_sg" {
+  name        = "FrontendALBSecurityGroup"
+  description = "Frontend ALB Security Group"
+  vpc_id      = "vpc-0a20efc55fab4f2aa"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Frontend ALB
+resource "aws_lb" "frontend_alb" {
+  name               = "MyFrontendALB"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.frontend_alb_sg.id]
+  subnets            = ["subnet-0a8d3b2c34d4e9329", "subnet-0ac2c7330f9607de6"]
+
+  idle_timeout = 60
+}
+
+resource "aws_lb_target_group" "frontend_target_group" {
+  name        = "MyFrontendTargetGroup"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = "vpc-0a20efc55fab4f2aa"
+  target_type = "ip"
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    matcher             = "200-399"
+  }
+}
+
+# ALB Listener for Frontend
+resource "aws_lb_listener" "frontend_alb_listener" {
+  load_balancer_arn = aws_lb.frontend_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+  }
+}
+
+# ECS Service for Frontend
+resource "aws_ecs_service" "frontend_service" {
+  name            = "MyFrontendService"
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  task_definition = aws_ecs_task_definition.frontend_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = ["subnet-0a8d3b2c34d4e9329", "subnet-0ac2c7330f9607de6"]
+    security_groups  = [aws_security_group.frontend_alb_sg.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+    container_name   = "MyFrontendContainer"
+    container_port   = 3000
+  }
+
+  depends_on = [aws_lb_listener.frontend_alb_listener]
+}
+
+# Output for Frontend ALB
+output "frontend_alb_endpoint" {
+  description = "Frontend ALB URL"
+  value       = aws_lb.frontend_alb.dns_name
 }
