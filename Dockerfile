@@ -25,3 +25,4 @@ EXPOSE 4000
 
 # Step 9: Start the application (in development mode)
 CMD ["npm", "run", "dev"]
+

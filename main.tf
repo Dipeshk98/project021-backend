@@ -6,6 +6,17 @@ variable "certificate_arn" {
 }
 
 
+# Configure S3 backend for state management
+terraform {
+  backend "s3" {
+    bucket = "project021-backend-terraform-state"
+    key    = "project021-backend/terraform.tfstate"
+    region = "us-west-1"
+  }
+}
+
+# AWS Provider
+
 provider "aws" {
   region = "us-west-1"  # Based on subnet IDs which appear to be in us-west-1
 }
@@ -332,3 +343,4 @@ output "frontend_alb_endpoint" {
   description = "Frontend ALB URL"
   value       = aws_lb.frontend_alb.dns_name
 }
+
