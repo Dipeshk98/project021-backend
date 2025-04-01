@@ -1,209 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js" // Generates the Prisma client
-   binaryTargets = ["native", "linux-musl"]
-}
-
-///// EXISTING USERS TABLE (FOR OTHER PURPOSES) /////
-
 model User {
-  id              String     @id
-  status          String
-  userId          String     @unique
-  username        String?
-  firstName       String
-  lastName        String
-  gender          String?
-  email           String     @unique
-  manager         String?
-  hr              String?
-  timezone        String?
-  mi              String?
-  department      String?
-  jobCode         String?
-  division        String?
-  location        String?
-  hireDate        DateTime?
-  empId           String?
-  title           String?
-  bizPhone        String?
-  fax             String?
-  addr1           String?
-  addr2           String?
-  city            String?
-  state           String?
-  zip             String?
-  country         String?
-  reviewFreq      String?
-  lastReviewDate  DateTime?
-  customFields    Json?
-  matrixManager   String?
-  defaultLocale   String?
-  proxy           String?
+  id             String      @id
+  status         String
+  userId         String      @unique
+  username       String?
+  firstName      String
+  lastName       String
+  gender         String?
+  email          String      @unique
+  manager        String?
+  hr             String?
+  timezone       String?
+  mi             String?
+  department     String?
+  jobCode        String?
+  division       String?
+  location       String?
+  hireDate       DateTime?
+  empId          String?
+  title          String?
+  bizPhone       String?
+  fax            String?
+  addr1          String?
+  addr2          String?
+  city           String?
+  state          String?
+  zip            String?
+  country        String?
+  reviewFreq     String?
+  lastReviewDate DateTime?
+  customFields   Json?
+  matrixManager  String?
+  defaultLocale  String?
+  proxy          String?
+  documents      documents[]
 
   @@map("users")
 }
 
-///// NEW USERS TABLE FOR I-9 DOCUMENTS SYSTEM /////
-
 model I9Users {
-  user_id       String   @id @default(uuid())  // Unique User ID
-  first_name    String   @db.VarChar(100)      // Given Name
-  last_name     String   @db.VarChar(100)      // Family Name (Last Name)
-  middle_initial String?  @db.VarChar(10)      // Middle Initial (Optional)
-  other_last_names String? @db.VarChar(100)    // Other Last Names Used (if any)
+  user_id                   String    @id @default(uuid())
+  first_name                String    @db.VarChar(100)
+  last_name                 String    @db.VarChar(100)
+  email                     String    @unique @db.VarChar(255)
+  phone_number              String?   @db.VarChar(20)
+  created_at                DateTime  @default(now())
+  address_apt               String?   @db.VarChar(50)
+  address_street            String?   @db.VarChar(255)
+  alien_registration_number String?   @db.VarChar(50)
+  citizenship_status        String?   @db.VarChar(50)
+  city                      String?   @db.VarChar(100)
+  country_of_issuance       String?   @db.VarChar(100)
+  date_of_birth             DateTime?
+  employee_signature        String?
+  foreign_passport_number   String?   @db.VarChar(50)
+  i94_admission_number      String?   @db.VarChar(50)
+  middle_initial            String?   @db.VarChar(10)
+  other_last_names          String?   @db.VarChar(100)
+  signed_date               DateTime?
+  ssn                       String?   @unique @db.VarChar(11)
+  state                     String?   @db.VarChar(100)
+  uscis_a_number            String?   @db.VarChar(50)
+  work_authorization_expiry DateTime?
+  zip_code                  String?   @db.VarChar(20)
+  i9_forms                  I9Forms[]
 
-  email         String   @unique @db.VarChar(255) // Employee's Email Address
-  phone_number  String?  @db.VarChar(20)          // Employee's Telephone Number
-  created_at    DateTime @default(now())          // Timestamp
-
-  // 🔹 Address Fields - Made Optional
-  address_street  String?   @db.VarChar(255) // Street Number and Name
-  address_apt     String?   @db.VarChar(50)  // Apartment Number (if any)
-  city           String?   @db.VarChar(100)  // City or Town
-  state          String?   @db.VarChar(100)  // State
-  zip_code       String?   @db.VarChar(20)   // ZIP Code
-
-  // 🔹 Date of Birth and SSN - Made Optional
-  date_of_birth  DateTime?  // Date of Birth (mm/dd/yyyy)
-  ssn            String?   @unique @db.VarChar(11) // U.S. Social Security Number
-
-  // 🔹 Citizenship Status Selection - Made Optional
-  citizenship_status      String?  @db.VarChar(50) // Citizenship Status Selection
-  alien_registration_number String? @db.VarChar(50)  // Alien Registration Number (if applicable)
-  work_authorization_expiry DateTime? // Work Authorization Expiry Date (if applicable)
-  uscis_a_number          String?  @db.VarChar(50) // USCIS A-Number
-  i94_admission_number    String?  @db.VarChar(50) // Form I-94 Admission Number
-  foreign_passport_number String?  @db.VarChar(50) // Foreign Passport Number
-  country_of_issuance     String?  @db.VarChar(100) // Country of Issuance for Foreign Passport
-
-  // 🔹 Signature & Date - Made Optional
-  employee_signature String?   @db.Text  // Employee's Signature
-  signed_date       DateTime?  // Date Signed
-
-  // Relations
-  i9_forms I9Forms[]
-
-  @@map("i9_users") // Mapping the table name
+  @@map("i9_users")
 }
 
-
-
-///// UPDATED I-9 SYSTEM TABLES ///// 
-
 model I9Forms {
-  form_id        String   @id @default(uuid())
-  user_id        String
-  form_status    String   @db.VarChar(50)
-  submission_date DateTime
-  updated_at     DateTime @updatedAt
-
-  // Relations
-  user I9Users @relation(fields: [user_id], references: [user_id])
+  form_id             String             @id @default(uuid())
+  user_id             String
+  form_status         String             @db.VarChar(50)
+  submission_date     DateTime
+  updated_at          DateTime           @updatedAt
+  audit_trail         AuditTrail[]
+  i9_documents        I9Documents[]
   i9_employee_section I9EmployeeSection?
   i9_employer_section I9EmployerSection?
-  i9_documents I9Documents[]
-  i9_reverification I9Reverification?
-  audit_trail AuditTrail[]
+  user                I9Users            @relation(fields: [user_id], references: [user_id])
+  i9_reverification   I9Reverification?
 
   @@map("i9_forms")
 }
 
 model I9EmployeeSection {
-  section_id       String   @id @default(uuid())
-  form_id          String   @unique
-  employee_name    String   @db.VarChar(255)
-  date_of_birth    DateTime
-  ssn              String   @unique @db.VarChar(11)
-  citizenship_status String @db.VarChar(50)
-  alien_registration_number String? @db.VarChar(50)
+  section_id                String    @id @default(uuid())
+  form_id                   String    @unique
+  employee_name             String    @db.VarChar(255)
+  date_of_birth             DateTime
+  ssn                       String    @unique @db.VarChar(11)
+  citizenship_status        String    @db.VarChar(50)
+  alien_registration_number String?   @db.VarChar(50)
   work_authorization_expiry DateTime?
-  signature        String
-  signed_date      DateTime
-
-  // Relations
-  form I9Forms @relation(fields: [form_id], references: [form_id])
+  signature                 String
+  signed_date               DateTime
+  form                      I9Forms   @relation(fields: [form_id], references: [form_id])
 
   @@map("i9_employee_section")
 }
 
 model I9EmployerSection {
-  section_id       String   @id @default(uuid()) // Unique Section ID
-  form_id          String   @unique              // Foreign key to I9Forms
-  employer_name    String   @db.VarChar(255)     // Employer’s Business or Organization Name
-  employer_address String   @db.VarChar(255)     // Employer’s Address
-  title            String   @db.VarChar(255)     // Title of Employer or Representative
-  signature        String                        // Signature of Employer or Representative
-  signed_date      DateTime                      // Date when signed (Today's Date)
-  first_day_of_employment DateTime               // 🆕 New Field: First Day of Employment
+  section_id              String   @id @default(uuid())
+  form_id                 String   @unique
+  employer_name           String   @db.VarChar(255)
+  employer_address        String   @db.VarChar(255)
+  title                   String   @db.VarChar(255)
+  signature               String
+  signed_date             DateTime
+  first_day_of_employment DateTime
+  form                    I9Forms  @relation(fields: [form_id], references: [form_id])
 
-  // Relations
-  form I9Forms @relation(fields: [form_id], references: [form_id])
-
-  @@map("i9_employer_section") // Maps to "i9_employer_section" in the database
+  @@map("i9_employer_section")
 }
 
-
 model I9Documents {
-  document_id       String   @id @default(uuid())  // Unique Document ID
-  form_id           String                                   // Foreign key to I9Forms
-  document_title    String   @db.VarChar(255)               // Added: Document Title
-  document_type     String   @db.VarChar(100)               // Passport, Driver's License, etc.
-  document_number   String?  @db.VarChar(100)               // Document Number (if any)
-  document_expiry   DateTime?                               // Expiration Date (if any)
-  issuing_authority String   @db.VarChar(255)               // Authority that issued the document
-  uploaded_file     String                                   // File path or reference to uploaded doc
-  uploaded_at       DateTime @default(now())                // Timestamp when uploaded
+  document_id       String    @id @default(uuid())
+  form_id           String
+  document_type     String    @db.VarChar(100)
+  document_number   String?   @db.VarChar(100)
+  document_expiry   DateTime?
+  issuing_authority String    @db.VarChar(255)
+  uploaded_file     String
+  uploaded_at       DateTime  @default(now())
+  document_title    String    @db.VarChar(255)
+  form              I9Forms   @relation(fields: [form_id], references: [form_id])
 
-  // Relations
-  form I9Forms @relation(fields: [form_id], references: [form_id])
-
-  @@map("i9_documents") // Maps to "i9_documents" in the database
+  @@map("i9_documents")
 }
 
 model I9Reverification {
-  reverification_id   String   @id @default(uuid())  // Unique ID
-  form_id             String   @unique               // Foreign key to I9Forms
+  reverification_id              String    @id @default(uuid())
+  form_id                        String    @unique
+  updated_at                     DateTime  @updatedAt
+  additional_information         String?
+  employer_name                  String    @db.VarChar(255)
+  employer_signature             String
+  employer_signed_date           DateTime
+  new_first_name                 String?   @db.VarChar(100)
+  new_last_name                  String?   @db.VarChar(100)
+  new_middle_initial             String?   @db.VarChar(10)
+  rehire_date                    DateTime?
+  reverification_document_expiry DateTime?
+  reverification_document_number String?   @db.VarChar(100)
+  reverification_document_title  String?   @db.VarChar(100)
+  used_dhs_alternative           Boolean?
+  form                           I9Forms   @relation(fields: [form_id], references: [form_id])
 
-  // 🆕 New Fields Based on the Form
-  rehire_date         DateTime?  // Date of Rehire (if applicable)
-  new_last_name       String?    @db.VarChar(100)  // Updated last name
-  new_first_name      String?    @db.VarChar(100)  // Updated first name
-  new_middle_initial  String?    @db.VarChar(10)   // Updated middle initial
-
-  reverification_document_title  String?  @db.VarChar(100)  // Title of the reverification document
-  reverification_document_number String?  @db.VarChar(100)  // Document number (if any)
-  reverification_document_expiry DateTime?  // Expiration Date (if any)
-
-  employer_name       String   @db.VarChar(255)  // Name of Employer or Authorized Representative
-  employer_signature  String   // Signature of Employer or Representative
-  employer_signed_date DateTime  // Today's Date when employer signs
-
-  additional_information String?  // Any additional information
-  used_dhs_alternative  Boolean?  // Checkbox if an alternative DHS verification procedure was used
-
-  updated_at          DateTime @updatedAt  // Timestamp for the last update
-
-  // Relations
-  form I9Forms @relation(fields: [form_id], references: [form_id])
-
-  @@map("i9_reverification") // Maps to "i9_reverification" in the database
+  @@map("i9_reverification")
 }
 
-
 model AuditTrail {
-  audit_id       String   @id @default(uuid())
-  form_id        String
-  action         String   @db.VarChar(50)
-  performed_by   String
-  performed_at   DateTime @default(now())
-
-  // Relations
-  form I9Forms @relation(fields: [form_id], references: [form_id])
+  audit_id     String   @id @default(uuid())
+  form_id      String
+  action       String   @db.VarChar(50)
+  performed_by String
+  performed_at DateTime @default(now())
+  form         I9Forms  @relation(fields: [form_id], references: [form_id])
 
   @@map("audit_trail")
+}
+
+model documents {
+  id            Int       @id @default(autoincrement())
+  user_id       String    @db.VarChar(50)
+  file_id       String    @unique @db.VarChar(50)
+  s3_path       String    @db.VarChar(255)
+  document_type String?   @db.VarChar(100)
+  details       Json?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  users         User      @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model passport_data {
+  id                Int       @id @default(autoincrement())
+  file_id           String    @unique @db.VarChar(50)
+  s3_path           String    @db.VarChar(255)
+  passport_number   String?   @db.VarChar(30)
+  full_name         String?   @db.VarChar(100)
+  surname           String?   @db.VarChar(100)
+  given_names       String?   @db.VarChar(100)
+  nationality       String?   @db.VarChar(50)
+  date_of_birth     String?   @db.VarChar(20)
+  place_of_birth    String?   @db.VarChar(100)
+  gender            String?   @db.VarChar(10)
+  issue_date        String?   @db.VarChar(20)
+  expiry_date       String?   @db.VarChar(20)
+  issuing_authority String?   @db.VarChar(100)
+  mrz_data          String?
+  confidence_score  Float?
+  raw_text          String?
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
 }

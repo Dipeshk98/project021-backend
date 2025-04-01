@@ -77,6 +77,8 @@ export class I9UserController {
 
   public createI9User = async (req, res) => {
     try {
+      const requestingUser = (req as any).user;
+      console.log('Request made by:', requestingUser.sub || requestingUser.email || requestingUser['cognito:username'] || 'unknown');
       const {
         first_name,
         last_name,
@@ -338,6 +340,38 @@ export class I9UserController {
       return res
         .status(500)
         .json({ error: 'Failed to create reverification entry' });
+    }
+  };
+
+  public getAllI9Users = async (req, res) => {
+    try {
+      // Implement pagination if needed
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const skip = (page - 1) * limit;
+  
+      // Get total count for pagination
+      const totalCount = await this.i9UserRepository.count();
+      
+      // Fetch users with pagination
+      const users = await this.i9UserRepository.findAll({
+        skip,
+        take: limit,
+      });
+  
+      return res.json({
+        success: true,
+        data: users,
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          pages: Math.ceil(totalCount / limit)
+        }
+      });
+    } catch (error) {
+      // console.error('Error fetching I-9 users:', error);
+      return res.status(500).json({ error: 'Failed to fetch I-9 users' });
     }
   };
 }
