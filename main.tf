@@ -1,3 +1,11 @@
+# Certificate ARN reference
+variable "certificate_arn" {
+  description = "ARN of the ACM certificate"
+  type        = string
+  default     = "arn:aws:acm:us-west-1:843365213176:certificate/876e436c-62f6-49f9-9d22-2e54105a43ef"
+}
+
+
 # Configure S3 backend for state management
 terraform {
   backend "s3" {
@@ -8,6 +16,7 @@ terraform {
 }
 
 # AWS Provider
+
 provider "aws" {
   region = "us-west-1"  # Based on subnet IDs which appear to be in us-west-1
 }
@@ -16,15 +25,18 @@ provider "aws" {
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "MyECSCluster"
 }
+
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/MyTask"
   retention_in_days = 30
 }
+
 resource "aws_cloudwatch_log_group" "frontend_logs" {
   name              = "/ecs/MyFrontendTask"
   retention_in_days = 30
 }
+
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "MyTask"
@@ -127,15 +139,15 @@ resource "aws_lb_target_group" "target_group" {
   
   health_check {
     path                = "/health"  # Use a path your application actually responds to
-    interval            = 30
-    timeout             = 5
+    interval            = 60
+    timeout             = 10
     healthy_threshold   = 2
-    unhealthy_threshold = 3
+    unhealthy_threshold = 5
     matcher             = "200-399"  # Accept any 2XX or 3XX as healthy
   }
 }
 
-# ALB Listener
+# ALB Listener for Backend (HTTP only)
 resource "aws_lb_listener" "alb_listener" {
   load_balancer_arn = aws_lb.application_lb.arn
   port              = 80
@@ -176,7 +188,8 @@ output "alb_endpoint" {
   description = "ALB URL"
   value       = aws_lb.application_lb.dns_name
 }
-# ECS Task Definition for Frontend
+
+# ECS Task Definition for Frontend ------------------------------------------------------------------------------------
 resource "aws_ecs_task_definition" "frontend_task" {
   family                   = "MyFrontendTask"
   cpu                      = "1024"
@@ -206,7 +219,7 @@ resource "aws_ecs_task_definition" "frontend_task" {
       essential = true
     }
   ])
-    depends_on = [aws_cloudwatch_log_group.frontend_logs] # Ensure log group exists first
+  depends_on = [aws_cloudwatch_log_group.frontend_logs] # Ensure log group exists first
 }
 
 # Security Group for Frontend ALB
@@ -264,19 +277,37 @@ resource "aws_lb_target_group" "frontend_target_group" {
 
   health_check {
     path                = "/"
-    interval            = 30
-    timeout             = 5
+    interval            = 60
+    timeout             = 10
     healthy_threshold   = 2
-    unhealthy_threshold = 3
+    unhealthy_threshold = 5
     matcher             = "200-399"
   }
 }
 
-# ALB Listener for Frontend
-resource "aws_lb_listener" "frontend_alb_listener" {
+# HTTP -> HTTPS Redirect for Frontend
+resource "aws_lb_listener" "frontend_http_listener" {
   load_balancer_arn = aws_lb.frontend_alb.arn
   port              = 80
   protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+# HTTPS Listener for Frontend
+resource "aws_lb_listener" "frontend_https_listener" {
+  load_balancer_arn = aws_lb.frontend_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type             = "forward"
@@ -304,11 +335,12 @@ resource "aws_ecs_service" "frontend_service" {
     container_port   = 3000
   }
 
-  depends_on = [aws_lb_listener.frontend_alb_listener]
+  depends_on = [aws_lb_listener.frontend_https_listener]
 }
 
 # Output for Frontend ALB
 output "frontend_alb_endpoint" {
   description = "Frontend ALB URL"
   value       = aws_lb.frontend_alb.dns_name
+}
 
