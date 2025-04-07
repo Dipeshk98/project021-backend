@@ -24,7 +24,19 @@ export class I9UserRepository extends AbstractRepository<
       where: { email },
     });
   }
-
+  async count(): Promise<number> {
+    return this.dbClient.count();
+  }
+  
+  async findAll(options?: { skip?: number; take?: number }): Promise<I9Users[]> {
+    return this.dbClient.findMany({
+      skip: options?.skip,
+      take: options?.take,
+      orderBy: {
+        created_at: 'desc'
+      }
+    });
+  }
   // Create a new I-9 user
   async create(data: Partial<I9Users>): Promise<I9Users> {
     return this.dbClient.create({
