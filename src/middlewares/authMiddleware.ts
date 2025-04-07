@@ -8,9 +8,9 @@ let jwksCache = null;
 let cacheTime = null;
 
 // Configuration
-const region = 'eu-north-1';
-const userPoolId = 'eu-north-1_2Wez3B7dw';
-const clientId = '76voiupv9jps5cio5vra94fj1k';
+const region = 'us-west-1';
+const userPoolId = 'us-west-1_PoRjnQjbm';
+const clientId = '12b0pqhf68mftc04f1d8eu3mee';
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
