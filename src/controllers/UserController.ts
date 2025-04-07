@@ -26,86 +26,41 @@ export class UserController {
 
   public createUser = async (req, res) => {
     try {
-      // Extract the necessary fields from the request body
-      const {
-        id,
-        status,
-        userId,
-        username,
-        firstName,
-        lastName,
-        gender,
-        email,
-        manager,
-        hr,
-        timezone,
-        mi,
-        department,
-        jobCode,
-        division,
-        location,
-        hireDate,
-        empId,
-        title,
-        bizPhone,
-        fax,
-        addr1,
-        addr2,
-        city,
-        state,
-        zip,
-        country,
-        reviewFreq,
-        lastReviewDate,
-        customFields,
-        matrixManager,
-        defaultLocale,
-        proxy,
-      } = req.body;
-
-      // Create a new user in the database
-      // const newUser =
-      await this.userRepository.create({
-        id,
-        status,
-        userId,
-        username,
-        firstName,
-        lastName,
-        gender,
-        email,
-        manager,
-        hr,
-        timezone,
-        mi,
-        department,
-        jobCode,
-        division,
-        location,
-        hireDate,
-        empId,
-        title,
-        bizPhone,
-        fax,
-        addr1,
-        addr2,
-        city,
-        state,
-        zip,
-        country,
-        reviewFreq,
-        lastReviewDate,
-        customFields,
-        matrixManager,
-        defaultLocale,
-        proxy,
-      });
-
-      // Return the newly created user
+      const userData = req.body;
+  
+      // Check for required fields based on Prisma schema
+      const requiredFields = ['status', 'userId', 'firstName', 'lastName'];
+      const missingFields = requiredFields.filter(field => !userData[field]);
+  
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          error: 'Validation Error',
+          message: `The following required fields are missing: ${missingFields.join(', ')}`
+        });
+      }
+  
+      // Create a new user with the provided data
+      await this.userRepository.create(userData);
+  
+      // Return success response
       res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
-      // console.error(error);
-      res.status(500).json({ error: 'Failed to create user' });
+      console.error('User creation error:', error);
+      
+      // Provide more user-friendly error messages for common issues
+      if (error.name === 'PrismaClientValidationError') {
+        return res.status(400).json({ 
+          error: 'Validation Error', 
+          message: 'Missing required fields in the request',
+          details: error.message
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to create user', 
+        message: 'An error occurred while creating the user',
+        details: error.message 
+      });
     }
   };
 

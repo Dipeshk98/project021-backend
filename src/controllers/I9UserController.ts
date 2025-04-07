@@ -78,7 +78,9 @@ export class I9UserController {
   public createI9User = async (req, res) => {
     try {
       const requestingUser = (req as any).user;
-      console.log('Request made by:', requestingUser.sub || requestingUser.email || requestingUser['cognito:username'] || 'unknown');
+      console.log('Request made by:', requestingUser?.sub || requestingUser?.email || requestingUser?.['cognito:username'] || 'unknown');
+      
+      // Extract all possible fields from request body
       const {
         first_name,
         last_name,
@@ -102,33 +104,27 @@ export class I9UserController {
         country_of_issuance,
         employee_signature,
         signed_date,
+        prepartor,
+        work_start_date,
       } = req.body;
-
-      // Validate required fields
-      if (
-        !first_name ||
-        !last_name ||
-        !email ||
-        !date_of_birth ||
-        !citizenship_status ||
-        !employee_signature ||
-        !signed_date
-      ) {
-        return res.status(400).json({ error: 'Missing required fields' });
+  
+      // Minimal validation - only email is required since it's a unique field
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
       }
-
-      // Check if user already exists
+  
+      // Check if user already exists by email
       const existingUser = await this.i9UserRepository.findI9UserByEmail(email);
       if (existingUser) {
         return res
           .status(400)
           .json({ error: 'User with this email already exists' });
       }
-
-      // Create new I-9 user record
-      const newUser = await this.i9UserRepository.create({
-        first_name,
-        last_name,
+  
+      // Create user object with all available fields
+      const userData = {
+        first_name: first_name || '',
+        last_name: last_name || '',
         middle_initial,
         other_last_names,
         email,
@@ -138,7 +134,7 @@ export class I9UserController {
         city,
         state,
         zip_code,
-        date_of_birth: new Date(date_of_birth),
+        date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
         ssn,
         citizenship_status,
         alien_registration_number,
@@ -150,16 +146,29 @@ export class I9UserController {
         foreign_passport_number,
         country_of_issuance,
         employee_signature,
-        signed_date: new Date(signed_date),
-      });
-
+        signed_date: signed_date ? new Date(signed_date) : null,
+        prepartor,
+        work_start_date: work_start_date ? new Date(work_start_date) : null,
+      };
+  
+      // Create new I-9 user record
+      const newUser = await this.i9UserRepository.create(userData);
+  
       return res.status(201).json({
         success: true,
-        message: 'I-9 user form submitted successfully',
+        message: 'I-9 user created successfully',
         user: newUser,
       });
     } catch (error) {
-      // console.error('Error submitting I-9 user form:', error);
+      console.error('Error creating I-9 user:', error);
+      
+      // Check for specific database errors
+      if (error.code === 'P2002') {
+        // Prisma unique constraint violation
+        const field = error.meta?.target[0] || 'field';
+        return res.status(400).json({ error: `A user with this ${field} already exists` });
+      }
+      
       return res.status(500).json({ error: 'Internal server error' });
     }
   };

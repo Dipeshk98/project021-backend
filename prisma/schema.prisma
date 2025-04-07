@@ -53,10 +53,12 @@ model I9Users {
   email                     String    @unique @db.VarChar(255)
   phone_number              String?   @db.VarChar(20)
   created_at                DateTime  @default(now())
+  work_start_date           DateTime?
+  prepartor                  String?   @db.VarChar(100)
   address_apt               String?   @db.VarChar(50)
   address_street            String?   @db.VarChar(255)
   alien_registration_number String?   @db.VarChar(50)
-  citizenship_status        String?   @db.VarChar(50)
+  citizenship_status        String?   @db.VarChar(100)
   city                      String?   @db.VarChar(100)
   country_of_issuance       String?   @db.VarChar(100)
   date_of_birth             DateTime?
