@@ -11,7 +11,7 @@ export class EmailService {
   constructor() {
     // Configure AWS SES client with credentials from .env
     const sesOptions: SESClientConfig = {
-      region: Env.getValue('AWS_REGION', 'us-west-1'),
+      region: Env.getValue('AWS_REGION'),
       credentials: {
         accessKeyId: Env.getValue('AWS_ACCESS_KEY_ID'),
         secretAccessKey: Env.getValue('AWS_SECRET_ACCESS_KEY'),
@@ -46,8 +46,8 @@ export class EmailService {
     try {
       await this.transporter.sendMail({
         from: {
-          name: Env.getValue('SITE_NAME', 'HR Team'),
-          address: Env.getValue('SENDER_EMAIL_ADDRESS', 'hr@example.com'),
+          name: Env.getValue('SITE_NAME', false) || 'HR Team',
+          address: Env.getValue('SENDER_EMAIL_ADDRESS'),
         },
         to,
         subject,
@@ -60,5 +60,13 @@ export class EmailService {
       // console.error(`❌ Error sending email to ${to}:`, error);
       return false;
     }
+  }
+
+  /**
+   * Get the sender email address configured for this service
+   * @returns {string} The sender email address
+   */
+  getSenderEmail(): string {
+    return Env.getValue('SENDER_EMAIL_ADDRESS');
   }
 }

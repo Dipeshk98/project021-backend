@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { errorHandler, handler404 } from './controllers/ErrorController';
 import { billingRouter } from './routes/BillingRoute';
 import { I9userRouter } from './routes/I9UserRoute';
+import { notificationRouter } from './routes/NotificationRoute';
 import { teamRouter } from './routes/TeamRoute';
 import { todoRouter } from './routes/TodoRoute';
 import { userRouter } from './routes/UserRoute';
@@ -36,6 +37,7 @@ app.use(todoRouter);
 app.use(billingRouter);
 app.use(teamRouter);
 app.use(I9userRouter);
+app.use(notificationRouter);
 // Error handler
 app.use(handler404);
 app.use(errorHandler);
