@@ -3,11 +3,14 @@ import {
   teamRepository,
   userRepository,
 } from '@/repositories';
+import { NotificationLogRepository } from '@/repositories/NotificationLogRepository';
+import { PrismaClient } from '@prisma/client';
 import { Env } from '@/utils/Env';
 import { stripe } from '@/utils/Stripe';
 
 import { BillingService } from './BillingService';
 import { EmailService } from './EmailService';
+import { NotificationService } from './NotificationService';
 import { TeamService } from './TeamService';
 
 // Manual `dependency injection` (DI) without external libraries.
@@ -24,5 +27,7 @@ const billingService = new BillingService(
   Env.getValue('BILLING_PLAN_ENV')
 );
 const emailService = new EmailService();
+const notificationLogRepository = new NotificationLogRepository(new PrismaClient());
+const notificationService = new NotificationService(emailService, notificationLogRepository);
 
-export { billingService, emailService, teamService };
+export { billingService, emailService, notificationService, teamService };
