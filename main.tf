@@ -23,12 +23,12 @@ provider "aws" {
 
 # ECS Cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
-  name = "MyECSCluster"
+  name = "I9_ECS_Cluster"
 }
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/MyTask"
+  name              = "/ecs/Backend_Task"
   retention_in_days = 30
 }
 
@@ -39,17 +39,17 @@ resource "aws_cloudwatch_log_group" "frontend_logs" {
 
 # ECS Task Definition
 resource "aws_ecs_task_definition" "task_definition" {
-  family                   = "MyTask"
+  family                   = "Backend_Task"
   cpu                      = "512"  # Increased from 256 to 512
-  memory                   = "1024" # Increased from 512 to 1024
+  memory                   = "2048" # Increased from 512 to 1024
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = "arn:aws:iam::843365213176:role/ecsTaskExecutionRole"
 
   container_definitions = jsonencode([
     {
-      name         = "MyContainer"
-      image        = "843365213176.dkr.ecr.us-west-1.amazonaws.com/main-backend:latest"
+      name         = "Backend_Container"
+      image        = "843365213176.dkr.ecr.us-west-1.amazonaws.com/main-backend:180425"
       portMappings = [
         {
           containerPort = 4000
@@ -59,7 +59,7 @@ resource "aws_ecs_task_definition" "task_definition" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          "awslogs-group"         = "/ecs/MyTask",
+          "awslogs-group"         = "/ecs/Backend_Task",
           "awslogs-region"        = "us-west-1",
           "awslogs-stream-prefix" = "ecs",
           "awslogs-create-group"  = "true"
@@ -121,7 +121,7 @@ resource "aws_security_group" "ecs_sg" {
 
 # Application Load Balancer
 resource "aws_lb" "application_lb" {
-  name               = "MyALB"
+  name               = "BackendALB"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
@@ -131,7 +131,7 @@ resource "aws_lb" "application_lb" {
 }
 
 resource "aws_lb_target_group" "target_group" {
-  name        = "MyTargetGroup"
+  name        = "BackendTargetGroup"
   port        = 4000
   protocol    = "HTTP"
   vpc_id      = "vpc-0a20efc55fab4f2aa"
@@ -161,7 +161,7 @@ resource "aws_lb_listener" "alb_listener" {
 
 # ECS Service
 resource "aws_ecs_service" "ecs_service" {
-  name            = "MyService"
+  name            = "Backend_Service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.task_definition.arn
   desired_count   = 1
@@ -175,7 +175,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.target_group.arn
-    container_name   = "MyContainer"
+    container_name   = "Backend_Container"
     container_port   = 4000
   }
 
