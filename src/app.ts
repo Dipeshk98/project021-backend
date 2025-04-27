@@ -12,6 +12,10 @@ import { teamRouter } from './routes/TeamRoute';
 import { todoRouter } from './routes/TodoRoute';
 import { userRouter } from './routes/UserRoute';
 import { Env } from './utils/Env';
+import uploadRouter from './routes/upload'; // Import your upload route
+
+
+
 
 const app = express();
 // Needed to secure the Stripe webhook
@@ -38,6 +42,7 @@ app.use(billingRouter);
 app.use(teamRouter);
 app.use(I9userRouter);
 app.use(notificationRouter);
+app.use(uploadRouter); 
 // Error handler
 app.use(handler404);
 app.use(errorHandler);
