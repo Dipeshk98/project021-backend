@@ -4,6 +4,10 @@ import type { UserRepository } from '@/repositories/UserRepository';
 import type { EmailService } from '@/services/EmailService';
 import type { TeamService } from '@/services/TeamService';
 import type { ParamsEmailHandler } from '@/validations/UserValidation';
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export class UserController {
   private userRepository: UserRepository;
@@ -24,7 +28,7 @@ export class UserController {
     this.i9UserRepository = i9UserRepository;
   }
 
-  public createUser = async (req, res) => {
+  public createUser = async (req: Request, res: Response) => {
     try {
       const userData = req.body;
   
@@ -44,11 +48,11 @@ export class UserController {
   
       // Return success response
       res.status(201).json({ message: 'User created successfully' });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('User creation error:', error);
       
       // Provide more user-friendly error messages for common issues
-      if (error.name === 'PrismaClientValidationError') {
+      if (error instanceof Error && error.name === 'PrismaClientValidationError') {
         return res.status(400).json({ 
           error: 'Validation Error', 
           message: 'Missing required fields in the request',
@@ -59,7 +63,7 @@ export class UserController {
       res.status(500).json({ 
         error: 'Failed to create user', 
         message: 'An error occurred while creating the user',
-        details: error.message 
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   };
@@ -67,6 +71,9 @@ export class UserController {
   public getUserById: ParamsEmailHandler = async (req, res) => {
     try {
       const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
 
       const user = await this.userRepository.findById(id);
 
@@ -76,55 +83,52 @@ export class UserController {
 
       return res.json(user);
     } catch (error) {
-      // console.error(error);
       return res.status(500).json({ error: 'Failed to fetch user' });
     }
   };
 
-  public updateUserById = async (req, res) => {
+  public updateUserById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params; // Extract the user's unique identifier from the route parameters
-      const updateData = req.body; // Extract the updated fields from the request body
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+      const updateData = req.body;
 
-      // Check if the user exists
       const existingUser = await this.userRepository.findById(id);
       if (!existingUser) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // Update the user
       const updatedUser = await this.userRepository.updateById(id, updateData);
 
-      // Respond with the updated user
       return res.json(updatedUser);
     } catch (error) {
-      // console.error(error);
       return res.status(500).json({ error: 'Failed to update user' });
     }
   };
 
-  public deleteUserById = async (req, res) => {
+  public deleteUserById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params; // Extract the user's unique identifier from the route parameters
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
 
-      // Check if the user exists
       const existingUser = await this.userRepository.findById(id);
       if (!existingUser) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // Delete the user
       await this.userRepository.deleteById(id);
 
-      // Respond with a success message
       return res.json({ message: 'User deleted successfully' });
     } catch (error) {
-      // console.error(error);
       return res.status(500).json({ error: 'Failed to delete user' });
     }
   };
 
-  public getAllUsers = async (req, res) => {
+  public getAllUsers = async (req: Request, res: Response) => {
     try {
       // Fetch all users from the database
       const users = await this.userRepository.findAll();
@@ -134,6 +138,133 @@ export class UserController {
     } catch (error) {
       // console.error(error);
       res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  };
+
+  public registerUserFromCognito = async (req: Request, res: Response) => {
+    try {
+      const { cognitoUsername, email } = req.body;
+
+      if (!cognitoUsername || !email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cognito username and email are required'
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          id: cognitoUsername
+        }
+      });
+
+      if (existingUser) {
+        return res.status(200).json({
+          success: true,
+          message: 'User already exists',
+          data: existingUser
+        });
+      }
+
+      // Create new user
+      const newUser = await prisma.user.create({
+        data: {
+          id: cognitoUsername,
+          email: email
+        }
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: newUser
+      });
+    } catch (error) {
+      console.error('Error in registerUserFromCognito:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  public getUserPermissions = async (req: Request, res: Response) => {
+    try {
+      const authenticatedUser = (req as any).user;
+      if (!authenticatedUser || !authenticatedUser.sub) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const userId = authenticatedUser.sub;
+
+      // Check if user exists
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Get all permissions for the user through the relationship chain
+      const userPermissions = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          userGroups: {
+            select: {
+              group: {
+                select: {
+                  groupRoles: {
+                    select: {
+                      role: {
+                        select: {
+                          rolePermissions: {
+                            select: {
+                              permission: {
+                                select: {
+                                  permissionName: true,
+                                  access: true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!userPermissions) {
+        return res.status(200).json({ success: true, data: { permissions: [] } });
+      }
+
+      // Flatten and deduplicate permissions
+      const permissions = userPermissions.userGroups.flatMap(ug =>
+        ug.group.groupRoles.flatMap(gr =>
+          gr.role.rolePermissions.map(rp => ({
+            permissionName: rp.permission.permissionName,
+            access: rp.permission.access
+          }))
+        )
+      );
+      const uniquePermissions = Array.from(new Set(permissions.map(p => JSON.stringify(p))))
+        .map(p => JSON.parse(p));
+
+      return res.status(200).json({
+        success: true,
+        data: { permissions: uniquePermissions }
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   };
 }
