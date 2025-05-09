@@ -8,42 +8,78 @@ datasource db {
 }
 
 model User {
-  id             String      @id
-  status         String
-  userId         String      @unique
-  username       String?
-  firstName      String
-  lastName       String
-  gender         String?
-  email          String      @unique
-  manager        String?
-  hr             String?
-  timezone       String?
-  mi             String?
-  department     String?
-  jobCode        String?
-  division       String?
-  location       String?
-  hireDate       DateTime?
-  empId          String?
-  title          String?
-  bizPhone       String?
-  fax            String?
-  addr1          String?
-  addr2          String?
-  city           String?
-  state          String?
-  zip            String?
-  country        String?
-  reviewFreq     String?
-  lastReviewDate DateTime?
-  customFields   Json?
-  matrixManager  String?
-  defaultLocale  String?
-  proxy          String?
-  documents      documents[]
+  id        String      @id
+  email     String      @unique
+  userGroups UserGroup[]
+  documents documents[]
 
   @@map("users")
+}
+
+model Group {
+  id          String      @id @default(uuid())
+  groupName   String      @unique
+  userGroups  UserGroup[]
+  groupRoles  GroupRole[]
+  targetUsers TargetUser[]
+
+  @@map("groups")
+}
+
+model Role {
+  id            String          @id @default(uuid())
+  roleName      String          @unique
+  groupRoles    GroupRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id              String          @id @default(uuid())
+  permissionName  String          
+  access          String
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserGroup {
+  userId    String
+  groupId   String
+  user      User    @relation(fields: [userId], references: [id])
+  group     Group   @relation(fields: [groupId], references: [id])
+
+  @@id([userId, groupId])
+  @@map("user_groups")
+}
+
+model GroupRole {
+  groupId   String
+  roleId    String
+  group     Group   @relation(fields: [groupId], references: [id])
+  role      Role    @relation(fields: [roleId], references: [id])
+
+  @@id([groupId, roleId])
+  @@map("group_roles")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model TargetUser {
+  groupId     String
+  targetUser  String  @unique
+  group       Group   @relation(fields: [groupId], references: [id])
+
+  @@map("target_users")
 }
 
 model I9Users {
@@ -179,7 +215,7 @@ model documents {
   document_type String?   @db.VarChar(100)
   details       Json?
   created_at    DateTime? @default(now()) @db.Timestamp(6)
-  users         User      @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  users         User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model passport_data {
