@@ -12,6 +12,14 @@ model User {
   email     String      @unique
   userGroups UserGroup[]
   documents documents[]
+  i9Forms   I9Forms[]
+  i9Section1Signed I9Section1[]
+  i9Section1PreparerCreated I9Section1Preparer[]
+  i9Section2Signed I9Section2[]
+  i9DocumentsSigned I9Documents[]
+  i9ReverificationSigned I9Reverification[]
+  auditTrailPerformed AuditTrail[]
+  initiationMetadataInitiated InitiationMetadata[]
 
   @@map("users")
 }
@@ -82,15 +90,34 @@ model TargetUser {
   @@map("target_users")
 }
 
-model I9Users {
-  user_id                   String    @id @default(uuid())
+model I9Forms {
+  form_id                String             @id @default(uuid())
+  employee_id           String
+  status               String             @db.VarChar(50)
+  start_date           DateTime
+  completion_date      DateTime?
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+  audit_trail          AuditTrail[]
+  i9_documents         I9Documents[]
+  i9_section1          I9Section1?
+  i9_section2          I9Section2?
+  i9_reverification    I9Reverification?
+  initiation_metadata  InitiationMetadata[]
+  user                 User               @relation(fields: [employee_id], references: [id])
+
+  @@map("i9_forms")
+}
+
+model I9Section1 {
+  section1_id                String    @id @default(uuid())
+  form_id                   String    @unique
   first_name                String    @db.VarChar(100)
   last_name                 String    @db.VarChar(100)
   email                     String    @unique @db.VarChar(255)
   phone_number              String?   @db.VarChar(20)
   created_at                DateTime  @default(now())
   work_start_date           DateTime?
-  prepartor                  String?   @db.VarChar(100)
   address_apt               String?   @db.VarChar(50)
   address_street            String?   @db.VarChar(255)
   alien_registration_number String?   @db.VarChar(50)
@@ -109,55 +136,55 @@ model I9Users {
   uscis_a_number            String?   @db.VarChar(50)
   work_authorization_expiry DateTime?
   zip_code                  String?   @db.VarChar(20)
-  i9_forms                  I9Forms[]
-
-  @@map("i9_users")
-}
-
-model I9Forms {
-  form_id             String             @id @default(uuid())
-  user_id             String
-  form_status         String             @db.VarChar(50)
-  submission_date     DateTime
-  updated_at          DateTime           @updatedAt
-  audit_trail         AuditTrail[]
-  i9_documents        I9Documents[]
-  i9_employee_section I9EmployeeSection?
-  i9_employer_section I9EmployerSection?
-  user                I9Users            @relation(fields: [user_id], references: [user_id])
-  i9_reverification   I9Reverification?
-
-  @@map("i9_forms")
-}
-
-model I9EmployeeSection {
-  section_id                String    @id @default(uuid())
-  form_id                   String    @unique
-  employee_name             String    @db.VarChar(255)
-  date_of_birth             DateTime
-  ssn                       String    @unique @db.VarChar(11)
-  citizenship_status        String    @db.VarChar(50)
-  alien_registration_number String?   @db.VarChar(50)
-  work_authorization_expiry DateTime?
-  signature                 String
-  signed_date               DateTime
+  signed_by                 String
   form                      I9Forms   @relation(fields: [form_id], references: [form_id])
+  user                      User      @relation(fields: [signed_by], references: [id])
+  preparers                 I9Section1Preparer[]
 
-  @@map("i9_employee_section")
+  @@map("i9_section1")
 }
 
-model I9EmployerSection {
-  section_id              String   @id @default(uuid())
-  form_id                 String   @unique
-  employer_name           String   @db.VarChar(255)
-  employer_address        String   @db.VarChar(255)
-  title                   String   @db.VarChar(255)
-  signature               String
-  signed_date             DateTime
-  first_day_of_employment DateTime
-  form                    I9Forms  @relation(fields: [form_id], references: [form_id])
+model I9Section1Preparer {
+  preparer_id    String    @id @default(uuid())
+  section1_id    String
+  name           String    @db.VarChar(255)
+  address        String    @db.VarChar(255)
+  city           String    @db.VarChar(100)
+  state          String    @db.VarChar(100)
+  zip_code       String    @db.VarChar(20)
+  signed_date    DateTime
+  created_by     String
+  section1       I9Section1 @relation(fields: [section1_id], references: [section1_id])
+  user           User      @relation(fields: [created_by], references: [id])
 
-  @@map("i9_employer_section")
+  @@map("i9_section1_preparers")
+}
+
+model I9Section2 {
+  section2_id              String    @id @default(uuid())
+  form_id                 String    @unique
+  document_a_type         String?   @db.VarChar(100)
+  document_a_number       String?   @db.VarChar(100)
+  document_a_expiration   DateTime?
+  document_b_type         String?   @db.VarChar(100)
+  document_b_number       String?   @db.VarChar(100)
+  document_b_expiration   DateTime?
+  document_c_type         String?   @db.VarChar(100)
+  document_c_number       String?   @db.VarChar(100)
+  document_c_expiration   DateTime?
+  used_alt_procedure      Boolean?
+  additional_info         String?   @db.Text
+  first_day_employment    DateTime
+  employer_name           String    @db.VarChar(255)
+  employer_title          String    @db.VarChar(255)
+  business_name           String    @db.VarChar(255)
+  business_address        String    @db.VarChar(255)
+  signed_by               String
+  signed_date             DateTime
+  form                    I9Forms   @relation(fields: [form_id], references: [form_id])
+  user                    User      @relation(fields: [signed_by], references: [id])
+
+  @@map("i9_section2")
 }
 
 model I9Documents {
@@ -170,7 +197,9 @@ model I9Documents {
   uploaded_file     String
   uploaded_at       DateTime  @default(now())
   document_title    String    @db.VarChar(255)
+  signed_by         String
   form              I9Forms   @relation(fields: [form_id], references: [form_id])
+  user              User      @relation(fields: [signed_by], references: [id])
 
   @@map("i9_documents")
 }
@@ -191,7 +220,9 @@ model I9Reverification {
   reverification_document_number String?   @db.VarChar(100)
   reverification_document_title  String?   @db.VarChar(100)
   used_dhs_alternative           Boolean?
+  signed_by                      String
   form                           I9Forms   @relation(fields: [form_id], references: [form_id])
+  user                           User      @relation(fields: [signed_by], references: [id])
 
   @@map("i9_reverification")
 }
@@ -202,9 +233,28 @@ model AuditTrail {
   action       String   @db.VarChar(50)
   performed_by String
   performed_at DateTime @default(now())
+  section      String   @db.VarChar(50)
+  ip_address   String   @db.VarChar(50)
+  device_info  String   @db.VarChar(255)
+  changes_json Json?
   form         I9Forms  @relation(fields: [form_id], references: [form_id])
+  user         User     @relation(fields: [performed_by], references: [id])
 
   @@map("audit_trail")
+}
+
+model InitiationMetadata {
+  initiation_id     String   @id @default(uuid())
+  form_id           String
+  initiated_by      String
+  initiation_method String   @db.VarChar(50)
+  tracking_code     String?  @db.VarChar(100)
+  notes             String?  @db.Text
+  created_at        DateTime @default(now())
+  form              I9Forms  @relation(fields: [form_id], references: [form_id])
+  user              User     @relation(fields: [initiated_by], references: [id])
+
+  @@map("initiation_metadata")
 }
 
 model documents {
