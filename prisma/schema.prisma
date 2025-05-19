@@ -251,6 +251,11 @@ model InitiationMetadata {
   tracking_code     String?  @db.VarChar(100)
   notes             String?  @db.Text
   created_at        DateTime @default(now())
+  first_name        String   @db.VarChar(100)
+  last_name         String   @db.VarChar(100)
+  email             String   @db.VarChar(255)
+  phone_no          String?  @db.VarChar(20)
+  verification_type String   @db.VarChar(50)
   form              I9Forms  @relation(fields: [form_id], references: [form_id])
   user              User     @relation(fields: [initiated_by], references: [id])
 
