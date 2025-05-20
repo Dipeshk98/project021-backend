@@ -17,4 +17,18 @@ initiationMetadataRouter.post(
   initiationMetadataController.createInitiation
 );
 
+// GET endpoint to retrieve initiation metadata
+initiationMetadataRouter.get(
+  '/initiation/:form_id',
+  authenticate,
+  initiationMetadataController.getInitiation
+);
+
+// GET endpoint to retrieve user's form ID
+initiationMetadataRouter.get(
+  '/user-form',
+  authenticate,
+  initiationMetadataController.getUserFormId
+);
+
 export { initiationMetadataRouter }; 
