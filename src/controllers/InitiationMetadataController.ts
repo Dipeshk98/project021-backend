@@ -183,4 +183,92 @@ export class InitiationMetadataController {
       });
     }
   };
+
+  public getInitiation = async (req: Request, res: Response) => {
+    try {
+      const { form_id } = req.params;
+
+      if (!form_id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Form ID is required'
+        });
+      }
+
+      const initiationMetadata = await this.initiationMetadataRepository.findByFormId(form_id);
+
+      if (!initiationMetadata) {
+        return res.status(404).json({
+          success: false,
+          message: 'Initiation metadata not found'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          first_name: initiationMetadata.first_name,
+          last_name: initiationMetadata.last_name,
+          email: initiationMetadata.email,
+          phone_no: initiationMetadata.phone_no
+        }
+      });
+
+    } catch (error) {
+      console.error('Error in getInitiation:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  public getUserFormId = async (req: Request, res: Response) => {
+    try {
+      // Get the authenticated user from the request
+      const user = (req as any).user;
+      if (!user || !user.sub) {
+        return res.status(401).json({ 
+          success: false,
+          message: 'User not authenticated' 
+        });
+      }
+
+      // Find the most recent form for the user
+      const form = await prisma.i9Forms.findFirst({
+        where: {
+          employee_id: user.sub
+        },
+        orderBy: {
+          created_at: 'desc'
+        },
+        select: {
+          form_id: true
+        }
+      });
+
+      if (!form) {
+        return res.status(404).json({
+          success: false,
+          message: 'No form found for this user'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          form_id: form.form_id
+        }
+      });
+
+    } catch (error) {
+      console.error('Error in getUserFormId:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
 } 

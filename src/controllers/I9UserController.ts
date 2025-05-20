@@ -80,12 +80,13 @@ export class I9UserController {
       const requestingUser = (req as any).user;
       console.log('Request made by:', requestingUser?.sub || requestingUser?.email || requestingUser?.['cognito:username'] || 'unknown');
       
+      // Get form_id from URL params
+      const { form_id } = req.params;
+      
       // Extract all possible fields from request body
       const {
         first_name,
         last_name,
-        middle_initial,
-        other_last_names,
         email,
         phone_number,
         address_street,
@@ -104,29 +105,33 @@ export class I9UserController {
         country_of_issuance,
         employee_signature,
         signed_date,
-        prepartor,
         work_start_date,
+        middle_initial,
+        other_last_names
       } = req.body;
   
-      // Minimal validation - only email is required since it's a unique field
-      if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
+      // Validate required fields
+      if (!first_name || !last_name || !email) {
+        return res.status(400).json({ error: 'first_name, last_name, and email are required' });
+      }
+
+      // Check if form exists
+      const formExists = await this.i9FormRepository.findI9FormById(form_id);
+      if (!formExists) {
+        return res.status(400).json({ error: 'Invalid form_id. Form does not exist.' });
+      }
+
+      // Check if section1 already exists for this form
+      const existingSection1 = await this.i9UserRepository.findSection1ByFormId(form_id);
+      if (existingSection1) {
+        return res.status(400).json({ error: 'Section 1 already exists for this form.' });
       }
   
-      // Check if user already exists by email
-      const existingUser = await this.i9UserRepository.findI9UserByEmail(email);
-      if (existingUser) {
-        return res
-          .status(400)
-          .json({ error: 'User with this email already exists' });
-      }
-  
-      // Create user object with all available fields
-      const userData = {
-        first_name: first_name || '',
-        last_name: last_name || '',
-        middle_initial,
-        other_last_names,
+      // Create section1 object with all available fields
+      const section1Data = {
+        form_id,
+        first_name,
+        last_name,
         email,
         phone_number,
         address_street,
@@ -147,26 +152,28 @@ export class I9UserController {
         country_of_issuance,
         employee_signature,
         signed_date: signed_date ? new Date(signed_date) : null,
-        prepartor,
         work_start_date: work_start_date ? new Date(work_start_date) : null,
+        middle_initial,
+        other_last_names,
+        signed_by: requestingUser.sub // Using the authenticated user's ID
       };
   
-      // Create new I-9 user record
-      const newUser = await this.i9UserRepository.create(userData);
+      // Create new I-9 section1 record
+      const newSection1 = await this.i9UserRepository.createSection1(section1Data);
   
       return res.status(201).json({
         success: true,
-        message: 'I-9 user created successfully',
-        user: newUser,
+        message: 'I-9 Section 1 created successfully',
+        data: newSection1,
       });
     } catch (error) {
-      console.error('Error creating I-9 user:', error);
+      console.error('Error creating I-9 Section 1:', error);
       
       // Check for specific database errors
       if (error.code === 'P2002') {
         // Prisma unique constraint violation
         const field = error.meta?.target[0] || 'field';
-        return res.status(400).json({ error: `A user with this ${field} already exists` });
+        return res.status(400).json({ error: `A record with this ${field} already exists` });
       }
       
       return res.status(500).json({ error: 'Internal server error' });

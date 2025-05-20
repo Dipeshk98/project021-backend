@@ -8,7 +8,7 @@ export { I9userRouter };
 I9userRouter.use(authenticate);
 
 I9userRouter.post('/i9/send-email/:id', I9userController.sendI9Email);
-I9userRouter.post('/i9-users', I9userController.createI9User);
+I9userRouter.post('/i9-users/:form_id', I9userController.createI9User);
 I9userRouter.post('/i9/documents', I9userController.createI9Document);
 I9userRouter.post(
   '/i9/employer-section',
