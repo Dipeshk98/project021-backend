@@ -154,7 +154,7 @@ export class I9UserController {
         signed_date: signed_date ? new Date(signed_date) : null,
         work_start_date: work_start_date ? new Date(work_start_date) : null,
         middle_initial,
-        other_last_names,
+        other_last_names, 
         signed_by: requestingUser.sub // Using the authenticated user's ID
       };
   
