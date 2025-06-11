@@ -14,6 +14,7 @@ import { userRouter } from './routes/UserRoute';
 import { Env } from './utils/Env';
 import uploadRouter from './routes/upload';
 import { initiationMetadataRouter } from './routes/InitiationMetadataRoute';
+import { audittrailRouter } from './routes/AuditTrail';
 
 const app = express();
 // Needed to secure the Stripe webhook
@@ -42,6 +43,7 @@ app.use(I9userRouter);
 app.use(notificationRouter);
 app.use(uploadRouter);
 app.use(initiationMetadataRouter);
+app.use(audittrailRouter);
 
 // Error handler
 app.use(handler404);
