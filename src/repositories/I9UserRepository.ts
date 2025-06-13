@@ -22,6 +22,9 @@ export class I9UserRepository extends AbstractRepository<
   async findSection1ByEmail(email: string): Promise<I9Section1 | null> {
     return this.dbClient.findUnique({
       where: { email },
+      select: {
+        form_id: true
+      }
     });
   }
 
@@ -29,8 +32,16 @@ export class I9UserRepository extends AbstractRepository<
     return this.dbClient.count();
   }
   
-  async findAll(options?: { skip?: number; take?: number }): Promise<I9Section1[]> {
+  async findAll(options?: { skip?: number; take?: number }): Promise<Partial<I9Section1>[]> {
     return this.dbClient.findMany({
+      select: {
+        first_name: true,
+        last_name: true,
+        email: true,
+        work_start_date: true,
+        citizenship_status: true,
+        form_id: true
+      },
       skip: options?.skip,
       take: options?.take,
       orderBy: {

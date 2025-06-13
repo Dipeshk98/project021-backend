@@ -166,12 +166,15 @@ model I9Section2 {
   document_a_type         String?   @db.VarChar(100)
   document_a_number       String?   @db.VarChar(100)
   document_a_expiration   DateTime?
+  document_a_issuing_authority String? @db.VarChar(255)
   document_b_type         String?   @db.VarChar(100)
   document_b_number       String?   @db.VarChar(100)
   document_b_expiration   DateTime?
+  document_b_issuing_authority String? @db.VarChar(255)
   document_c_type         String?   @db.VarChar(100)
   document_c_number       String?   @db.VarChar(100)
   document_c_expiration   DateTime?
+  document_c_issuing_authority String? @db.VarChar(255)
   used_alt_procedure      Boolean?
   additional_info         String?   @db.Text
   first_day_employment    DateTime
@@ -179,6 +182,7 @@ model I9Section2 {
   employer_title          String    @db.VarChar(255)
   business_name           String    @db.VarChar(255)
   business_address        String    @db.VarChar(255)
+  signature              String?
   signed_by               String
   signed_date             DateTime
   form                    I9Forms   @relation(fields: [form_id], references: [form_id])

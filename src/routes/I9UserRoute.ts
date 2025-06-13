@@ -18,5 +18,7 @@ I9userRouter.post(
   '/i9/reverification',
   I9userController.createI9Reverification
 );
+I9userRouter.post('/i9/section2/:form_id', I9userController.createI9Section2);
 
 I9userRouter.get('/i9-users', I9userController.getAllI9Users);
+I9userRouter.get('/i9/form-id/:email', I9userController.getFormIdByEmail);

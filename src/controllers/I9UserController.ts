@@ -359,6 +359,107 @@ export class I9UserController {
     }
   };
 
+  public createI9Section2 = async (req, res) => {
+    try {
+      const requestingUser = (req as any).user;
+      console.log('Request made by:', requestingUser?.sub || requestingUser?.email || requestingUser?.['cognito:username'] || 'unknown');
+      
+      // Get form_id from URL params
+      const { form_id } = req.params;
+      
+      // Extract all possible fields from request body
+      const {
+        document_a_type,
+        document_a_number,
+        document_a_expiration,
+        document_a_issuing_authority,
+        document_b_type,
+        document_b_number,
+        document_b_expiration,
+        document_b_issuing_authority,
+        document_c_type,
+        document_c_number,
+        document_c_expiration,
+        document_c_issuing_authority,
+        used_alt_procedure,
+        additional_info,
+        first_day_employment,
+        employer_name,
+        employer_title,
+        business_name,
+        business_address,
+        signature,
+        signed_date
+      } = req.body;
+
+      // Validate required fields
+      if (!employer_name || !employer_title || !business_name || !business_address || !first_day_employment) {
+        return res.status(400).json({ 
+          error: 'employer_name, employer_title, business_name, business_address, and first_day_employment are required' 
+        });
+      }
+
+      // Check if form exists
+      const formExists = await this.i9FormRepository.findI9FormById(form_id);
+      if (!formExists) {
+        return res.status(400).json({ error: 'Invalid form_id. Form does not exist.' });
+      }
+
+      // Check if section2 already exists for this form
+      const existingSection2 = await this.i9EmployerRepository.findEmployerSectionByFormId(form_id);
+      if (existingSection2) {
+        return res.status(400).json({ error: 'Section 2 already exists for this form.' });
+      }
+
+      // Create section2 object with all available fields
+      const section2Data = {
+        form_id,
+        document_a_type,
+        document_a_number,
+        document_a_expiration: document_a_expiration ? new Date(document_a_expiration) : null,
+        document_a_issuing_authority,
+        document_b_type,
+        document_b_number,
+        document_b_expiration: document_b_expiration ? new Date(document_b_expiration) : null,
+        document_b_issuing_authority,
+        document_c_type,
+        document_c_number,
+        document_c_expiration: document_c_expiration ? new Date(document_c_expiration) : null,
+        document_c_issuing_authority,
+        used_alt_procedure,
+        additional_info,
+        first_day_employment: new Date(first_day_employment),
+        employer_name,
+        employer_title,
+        business_name,
+        business_address,
+        signature,
+        signed_date: signed_date ? new Date(signed_date) : new Date(),
+        signed_by: requestingUser.sub // Using the authenticated user's ID
+      };
+
+      // Create new I-9 section2 record
+      const newSection2 = await this.i9EmployerRepository.createEmployerSection(section2Data);
+
+      return res.status(201).json({
+        success: true,
+        message: 'I-9 Section 2 created successfully',
+        data: newSection2,
+      });
+    } catch (error) {
+      console.error('Error creating I-9 Section 2:', error);
+      
+      // Check for specific database errors
+      if (error.code === 'P2002') {
+        // Prisma unique constraint violation
+        const field = error.meta?.target[0] || 'field';
+        return res.status(400).json({ error: `A record with this ${field} already exists` });
+      }
+      
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
   public getAllI9Users = async (req, res) => {
     try {
       // Implement pagination if needed
@@ -374,10 +475,19 @@ export class I9UserController {
         skip,
         take: limit,
       });
+
+      // Map the response to combine first_name and last_name into name
+      const filteredUsers = users.map(user => ({
+        name: `${user.first_name} ${user.last_name}`.trim(),
+        email: user.email,
+        work_start_date: user.work_start_date,
+        citizenship_status: user.citizenship_status,
+        form_id: user.form_id
+      }));
   
       return res.json({
         success: true,
-        data: users,
+        data: filteredUsers,
         pagination: {
           total: totalCount,
           page,
@@ -388,6 +498,32 @@ export class I9UserController {
     } catch (error) {
       // console.error('Error fetching I-9 users:', error);
       return res.status(500).json({ error: 'Failed to fetch I-9 users' });
+    }
+  };
+
+  public getFormIdByEmail = async (req, res) => {
+    try {
+      const { email } = req.params;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const section1 = await this.i9UserRepository.findSection1ByEmail(email);
+
+      if (!section1) {
+        return res.status(404).json({ error: 'No I-9 form found for this email' });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          form_id: section1.form_id
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching form ID:', error);
+      return res.status(500).json({ error: 'Failed to fetch form ID' });
     }
   };
 }
