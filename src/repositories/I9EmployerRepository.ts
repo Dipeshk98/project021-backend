@@ -1,31 +1,31 @@
-import type { I9EmployerSection, PrismaClient } from '@prisma/client';
+import type { I9Section2, PrismaClient } from '@prisma/client';
 
 import { AbstractRepository } from './AbstractRepository';
 
 export class I9EmployerRepository extends AbstractRepository<
-  PrismaClient['i9EmployerSection'], // Use the I9EmployerSection table
-  I9EmployerSection,
+  PrismaClient['i9Section2'],
+  I9Section2,
   any
 > {
   constructor(dbClient: PrismaClient) {
-    super(dbClient.i9EmployerSection);
+    super(dbClient.i9Section2);
   }
 
-  // Fetch an employer section by form_id
+  // Fetch a section2 by form_id
   async findEmployerSectionByFormId(
     form_id: string
-  ): Promise<I9EmployerSection | null> {
+  ): Promise<I9Section2 | null> {
     return this.dbClient.findUnique({
       where: { form_id },
     });
   }
 
-  // ✅ Fix: Create an employer section **without** calling `toCreateEntity()`
+  // Create a new section2
   async createEmployerSection(
-    data: Partial<I9EmployerSection>
-  ): Promise<I9EmployerSection> {
+    data: Partial<I9Section2>
+  ): Promise<I9Section2> {
     return this.dbClient.create({
-      data, // Directly passing the object instead of calling `.toCreateEntity()`
+      data,
     });
   }
 }
