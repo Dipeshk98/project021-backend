@@ -313,3 +313,19 @@ model NotificationLog {
 
   @@map("notification_logs")
 }
+
+model Translator {
+  translator_id   String   @id @default(uuid())
+  form_id         String
+  status          String   @db.VarChar(50)
+  first_name       String? @db.VarChar(100)
+  middle_initial   String? @db.VarChar(10)
+  last_name        String? @db.VarChar(100)
+  street_address   String? @db.VarChar(255)
+  city             String? @db.VarChar(100)
+  state            String? @db.VarChar(100)
+  zip_code         String? @db.VarChar(20)
+
+
+  @@map("translators")
+}
