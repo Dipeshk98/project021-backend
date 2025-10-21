@@ -13,6 +13,8 @@ jspm_packages
 dist
 
 # Dotenv files
+.env
+.env.*
 .env*.local
 
 # Local folder

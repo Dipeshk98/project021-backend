@@ -1,0 +1,32 @@
+### Health Check
+GET http://localhost:4000/health
+
+### Get All Users
+GET http://localhost:4000/users
+
+### Get User by ID
+GET http://localhost:4000/users/f91919de-1061-70d9-8084-59533bb80aaa
+
+### Create New User
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "name": "Test User"
+}
+
+### Update User
+PUT http://localhost:4000/users/f91919de-1061-70d9-8084-59533bb80aaa
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "email": "updated@example.com"
+}
+
+### Get All Todos
+GET http://localhost:4000/todos
+
+### Get All Teams
+GET http://localhost:4000/teams

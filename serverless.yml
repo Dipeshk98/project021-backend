@@ -33,7 +33,7 @@ custom:
   serverless-offline:
     httpPort: 4000
     noPrependStageInUrl: true
-    reloadHandler: true # Set to false when running E2E testing
+    reloadHandler: false # Disable hot-reload to avoid Windows crashes
     noTimeout: true
     noAuth: ${self:custom.noAuth.${self:custom.stage}}
 
@@ -54,7 +54,7 @@ provider:
         # In serverless 2, this step was automatically done but, serverless>=3.0.0 introduces changes that significantly impacts this step.
         # FIXME: Update the allowedOrigin to matched the environment variable `FRONTEND_DOMAIN_URL`.
         - https://main.d254mjh22d7ga1.amplifyapp.com
-        - http://localhost:3000  # Add this line for local development
+        - http://localhost:3000 # Add this line for local development
       allowedHeaders: # Set the default value from Serverless framework, this workaround is needed by serverless-offline
         - Content-Type
         - X-Amz-Date
@@ -62,8 +62,8 @@ provider:
         - X-Api-Key
         - X-Amz-Security-Token
         - X-Amz-User-Agent
-        - Origin  # Add this to ensure Origin header is allowed
-        - Accept  # Add this to ensure Accept header is allowed
+        - Origin # Add this to ensure Origin header is allowed
+        - Accept # Add this to ensure Accept header is allowed
 
   iam:
     role:

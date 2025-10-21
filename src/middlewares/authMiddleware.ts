@@ -1,99 +1,122 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
-import axios from 'axios';
+import axios from "axios";
+import type { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import jwkToPem from "jwk-to-pem";
 
 // Cache the JWKS for performance
 let jwksCache = null;
 let cacheTime = null;
 
 // Configuration
-const region = 'us-west-1';
-const userPoolId = 'us-west-1_PoRjnQjbm';
-const clientId = '12b0pqhf68mftc04f1d8eu3mee';
+const region = "us-west-1";
+const userPoolId = "us-west-1_PoRjnQjbm";
+const clientId = "12b0pqhf68mftc04f1d8eu3mee";
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    console.log('-------- Auth Middleware Start --------');
-    console.log('Request path:', req.path);
-    
-    // Get the authorization header
-    const authHeader = req.headers.authorization;
-    console.log('Authorization header present:', !!authHeader);
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('Invalid authorization header format');
-      return res.status(401).json({ error: 'Missing or invalid authorization token' });
+    // Auth Middleware Start
+    // Request path and environment
+    // Authorization header present
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      // Invalid authorization header format
+      res.status(401).json({ error: "Missing or invalid authorization token" });
+      return;
     }
-    
+
     // Extract the token
-    const token = authHeader.split(' ')[1];
-    console.log('Token extracted (first 20 chars):', token.substring(0, 20) + '...');
-    
+    const token = authHeader.split(" ")[1];
+    // Token extracted
+
+    // ✨ LOCAL DEVELOPMENT BYPASS ✨
+    // If in development and token matches the local Cognito user ID, bypass JWT verification
+    if (
+      process.env.NODE_ENV === "development" &&
+      token === process.env.COGNITO_USER_ID_LOCAL
+    ) {
+      // LOCAL DEVELOPMENT MODE: Bypassing JWT verification
+      // Using local user ID
+
+      // Mock user object for local development
+      (req as any).user = {
+        sub: token,
+        client_id: clientId,
+        username: "local-dev-user",
+        "cognito:username": "local-dev-user",
+      };
+
+      // Auth Middleware End: LOCAL DEV SUCCESS
+      next();
+      return;
+    }
+
     // Decode the token (without verification) to get the kid
     const decodedToken = jwt.decode(token, { complete: true });
     if (!decodedToken) {
-      console.log('Failed to decode token');
-      return res.status(401).json({ error: 'Invalid token format' });
+      // Failed to decode token
+      res.status(401).json({ error: "Invalid token format" });
+      return;
     }
-    
-    console.log('Token decoded successfully');
-    console.log('Token kid:', decodedToken.header.kid);
-    console.log('Token iss:', decodedToken.payload.iss);
-    console.log('Token client_id:', decodedToken.payload.client_id);
-    
+
+    // Token decoded successfully
+    // Token details
+
     // Refresh the JWKS cache if needed
-    if (!jwksCache || !cacheTime || (Date.now() - cacheTime > 3600000)) {
-      console.log('Fetching JWKS from Cognito...');
+    if (!jwksCache || !cacheTime || Date.now() - cacheTime > 3600000) {
+      // Fetching JWKS from Cognito
       // Get the JWKS from Cognito
       const jwksUrl = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
-      console.log('JWKS URL:', jwksUrl);
-      
+      // JWKS URL
+
       const jwksResponse = await axios.get(jwksUrl);
       jwksCache = jwksResponse.data.keys;
       cacheTime = Date.now();
-      console.log('JWKS fetched successfully, keys count:', jwksCache.length);
-      console.log('Available kids in JWKS:', jwksCache.map(k => k.kid));
+      // JWKS fetched successfully
     } else {
-      console.log('Using cached JWKS, keys count:', jwksCache.length);
+      // Using cached JWKS
     }
-    
+
     // Find the JWK that matches the kid from the token
-    const kid = decodedToken.header.kid;
-    const jwk = jwksCache.find(key => key.kid === kid);
-    
+    const { kid } = decodedToken.header;
+    const jwk = jwksCache.find((key) => key.kid === kid);
+
     if (!jwk) {
-      console.error(`JWK for kid ${kid} not found in available keys`);
-      return res.status(401).json({ error: 'Invalid token' });
+      // JWK for kid not found
+      res.status(401).json({ error: "Invalid token" });
+      return;
     }
-    
-    console.log('Matching JWK found for kid:', kid);
-    
+
+    // Matching JWK found
+
     // Convert JWK to PEM format
     const pem = jwkToPem(jwk);
-    console.log('JWK converted to PEM format');
-    
+    // JWK converted to PEM format
+
     // Verify the token
-    jwt.verify(token, pem, { algorithms: ['RS256'] }, (err, decoded) => {
+    jwt.verify(token, pem, { algorithms: ["RS256"] }, (err, decoded) => {
       if (err) {
-        console.error('Token verification failed:', err);
-        return res.status(401).json({ error: 'Invalid token' });
+        // Token verification failed
+        res.status(401).json({ error: "Invalid token" });
+        return;
       }
-      
-      console.log('Token verified successfully');
-      console.log('User sub:', (decoded as any).sub);
-      console.log('Token scope:', (decoded as any).scope);
-      
+
+      // Token verified successfully
+      // User details
+
       // Add the user info to the request object
       (req as any).user = decoded;
-      
-      console.log('-------- Auth Middleware End: SUCCESS --------');
+
+      // Auth Middleware End: SUCCESS
       // Continue to the next middleware
       next();
     });
   } catch (error) {
-    console.error('-------- Auth Middleware End: ERROR --------');
-    console.error('Authentication error:', error);
-    return res.status(401).json({ error: 'Authentication failed' });
+    // Auth Middleware End: ERROR
+    // Authentication error
+    res.status(401).json({ error: "Authentication failed" });
   }
 };
