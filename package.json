@@ -5,7 +5,9 @@
   "scripts": {
     "dev:db": "ts-node scripts/database.ts",
     "dev:server": "cross-env NODE_ENV=development sls offline --noAuth --host 0.0.0.0",
-    "dev": "run-p dev:*",
+    "dev": "cross-env NODE_ENV=development sls offline --noAuth --host 0.0.0.0",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "tail-log": "sls logs -f app -t",
     "deploy:db": "dotenv -e .env.production -c -- ts-node --esm scripts/deployDbProd.ts",
     "deploy:app": "cross-env NODE_ENV=production sls deploy --stage prod",
