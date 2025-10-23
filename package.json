@@ -20,7 +20,7 @@
     "test": "jest",
     "test:dev": "start-server-and-test dev http://localhost:4000 'curl --head http://localhost:4000'",
     "db:push": "prisma db push",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "postinstall": "prisma generate"
   },
   "lint-staged": {
